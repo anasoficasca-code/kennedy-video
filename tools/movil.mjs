@@ -1,6 +1,6 @@
 // Captura en celular vertical: node tools/movil.mjs <dir> <frases>
 import { createRequire } from 'module';
-const require = createRequire('C:/Users/aleja/Documents/BACOHLF/package.json');
+const require = createRequire(import.meta.url);
 const puppeteer = require('puppeteer-core');
 const [out, lista = '10'] = process.argv.slice(2);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: 'new', args: ['--use-angle=d3d11', '--ignore-gpu-blocklist', '--enable-webgl'] });

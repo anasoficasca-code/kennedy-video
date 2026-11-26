@@ -1,6 +1,6 @@
 // Mide el rendimiento: node tools/rend.mjs  → intervalo medio entre cuadros y nivel de calidad
 import { createRequire } from 'module';
-const require = createRequire('C:/Users/aleja/Documents/BACOHLF/package.json');
+const require = createRequire(import.meta.url);
 const puppeteer = require('puppeteer-core');
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: 'new', args: ['--use-angle=d3d11', '--ignore-gpu-blocklist', '--enable-webgl', '--disable-frame-rate-limit'] });
 const p = await b.newPage(); await p.setViewport({ width: 1920, height: 1080 });

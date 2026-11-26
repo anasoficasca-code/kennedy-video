@@ -7,6 +7,8 @@ import { transicion } from './trans.js';
 import { actualizarCarto, avisoZoom } from './carto.js';
 import { sombraSigue, gobernador } from './realismo.js';
 import { CAPITULOS } from './guion.js';
+import * as PAG from './pagina.js';
+import './paginas/todas.js';
 import './estilo.css';
 
 const canal = new BroadcastChannel('kennedy-presentacion');
@@ -58,6 +60,8 @@ function cam(nombre, d = 2.2) {
 const uTo = (nombre, k, v, d = 1, ease = 'expo.out') => { const u = uni(nombre); if (u?.[k]) tw(u[k], { value: v, duration: D(d), ease }); };
 const X = {
   ...UI, R, D, tw, twf, gsap, W, LUG, COL_P, NOM_P, CAPAS_POT, cam, uTo,
+  /** páginas reales de las autoras: X.pagina('red', 'estado', { camara: {x,y,s} }) · X.camPag({x,y,s}) · X.sinPagina() */
+  pagina: PAG.pagina, camPag: PAG.camara, sinPagina: PAG.sinPagina, ventana: PAG.ventana, hasta: PAG.hasta,
   capa: (n, on = true, d = 0.9) => capa(n, on, D(d)),
   capas: (lista, on = true) => lista.forEach((n) => capa(n, on, D(0.9))),
   /** edificios: crecen en ola desde un origen */
@@ -110,6 +114,7 @@ function entrarCapitulo(ci) {
   const c = CAPITULOS[ci];
   reiniciarMundo();
   UI.limpiarTodo();
+  if (!c.pagina) PAG.sinPagina(true); // los capítulos con página la ponen en su primera frase
   capa('losa', true, 0); capa('edif', true, 0);
   gsap.killTweensOf(W.capas.edif.userData.u.uSube); W.capas.edif.userData.u.uSube.value = 1;
   c.base?.(X);
@@ -188,7 +193,9 @@ function cuadro() {
   W.red6?.grp && (W.red6.grp.rotation.y = Math.sin(t * 0.15) * 0.12);
   W.arco.material.opacity = 0.25 + Math.sin(t * 1.05) * 0.12; W.polvo.rotation.y = t * 0.01;
   W.camObj = camT.o; sombraSigue(W, camT.o, W.cam.position.distanceTo(camT.o)); if (W.arboles) { W.arboles.UT.uT.value = t; W.arboles.grp.visible = W.cam.position.distanceTo(camT.o) < 5200; } // los árboles solo cuando se distinguen
-  const ahora = performance.now(); if (ultimoCuadro) gob?.(ahora - ultimoCuadro); ultimoCuadro = ahora; W.r.render(W.scene, W.cam);
+  // con una página real tapando toda la pantalla el 3D no se dibuja (la GPU queda para la página)
+  const tapado = document.body.classList.contains('con-pagina') && !document.body.classList.contains('pagina-transparente');
+  const ahora = performance.now(); if (ultimoCuadro && !tapado) gob?.(ahora - ultimoCuadro); ultimoCuadro = ahora; if (!tapado) W.r.render(W.scene, W.cam);
   UI.proyectarEts(); actualizarCarto(camT.o);
   // hervor stop-motion de la capa DOM y grano que cambia cada cuadro
   if (W.stop) { document.getElementById('escena').style.transform = `translate(${(Math.random() - .5) * 2}px, ${(Math.random() - .5) * 2}px) rotate(${(Math.random() - .5) * 0.12}deg)`; grano.style.backgroundPosition = `${(Math.random() * 256) | 0}px ${(Math.random() * 256) | 0}px`; }

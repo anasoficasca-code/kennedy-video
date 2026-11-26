@@ -1,6 +1,6 @@
 // ¿Se activa la fotogrametría? node tools/foto.mjs  → segundos hasta activarse y estado de las teselas
 import { createRequire } from 'module';
-const require = createRequire('C:/Users/aleja/Documents/BACOHLF/package.json');
+const require = createRequire(import.meta.url);
 const puppeteer = require('puppeteer-core');
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: 'new', args: ['--use-angle=d3d11', '--ignore-gpu-blocklist', '--enable-webgl'] });
 const p = await b.newPage(); await p.setViewport({ width: 1600, height: 900 });

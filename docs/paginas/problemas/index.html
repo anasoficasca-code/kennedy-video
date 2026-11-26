@@ -1,0 +1,1421 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Problemáticas de Kennedy · Mapa causal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"></noscript>
+<style>
+  :root{
+    --bg:#000; --line:#252525; --line2:#383838; --fg:#f0f0f0; --mut:#8e8e8e; --dim:#5d5d5d;
+    --sans:"IBM Plex Sans","Segoe UI",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{width:100%;height:100%;background:var(--bg);color:var(--fg);font-family:var(--sans)}
+  body{overflow:hidden;user-select:none;-webkit-user-select:none}
+  svg{display:block}
+  button{font-family:inherit}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 14px;background:#0a0a0a;color:var(--fg);
+    border:1px solid var(--line2);border-radius:10px;font:500 13px var(--sans);cursor:pointer;transition:background .15s,border-color .15s,transform .15s;white-space:nowrap}
+  .btn:hover{background:#171717;border-color:#7d7d7d}
+  .btn:active{transform:scale(.97)}
+  .btn svg{width:16px;height:16px;flex:none}
+  .btn.pri{background:#f4f4f4;color:#000;border-color:#f4f4f4}.btn.pri:hover{background:#fff}
+
+  /* =========================== ESCRITORIO =========================== */
+  #stage{position:fixed;inset:0;cursor:grab;touch-action:none;background:radial-gradient(ellipse 80% 60% at 30% 50%,#0c0c10 0%,#000 70%),#000}
+  #stage::before{content:"";position:absolute;inset:0;background-image:radial-gradient(#1d1d1d 1px,transparent 1.1px);background-size:26px 26px;pointer-events:none}
+  #stage.drag{cursor:grabbing}
+  #world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+  #links{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+
+  .lane{position:absolute;border:1px dashed color-mix(in srgb,var(--c) 38%,#000);border-radius:22px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 7%,transparent),color-mix(in srgb,var(--c) 2%,transparent));
+    opacity:0;pointer-events:none;transition:left .7s cubic-bezier(.3,.8,.3,1),top .7s cubic-bezier(.3,.8,.3,1),width .7s cubic-bezier(.3,.8,.3,1),height .7s cubic-bezier(.3,.8,.3,1),opacity .5s}
+  .lane.on{opacity:1}
+  .lane .chip{position:absolute;left:22px;top:-15px;display:flex;align-items:center;gap:8px;padding:5px 12px 5px 8px;background:#000;border:1px solid color-mix(in srgb,var(--c) 55%,#000);border-radius:20px;
+    font:500 11px var(--mono);letter-spacing:1.2px;color:var(--c);text-transform:uppercase;white-space:nowrap}
+  .lane .chip svg{width:15px;height:15px}
+
+  .base{fill:none;stroke:var(--c);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:0;
+    stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1) var(--dl,0s),opacity .3s var(--dl,0s)}
+  .base.on{opacity:.9;stroke-dashoffset:0}
+  .flow{fill:none;stroke:var(--c);stroke-width:2.6;stroke-dasharray:1.5 13;stroke-linecap:round;opacity:0;transition:opacity .4s calc(var(--dl,0s) + .5s);animation:flow 1.1s linear infinite}
+  .flow.on{opacity:1}
+  @keyframes flow{to{stroke-dashoffset:-14.5}}
+  .arrow{fill:var(--c);opacity:0;transition:opacity .25s calc(var(--dl,0s) + .55s)}
+  .arrow.on{opacity:.95}
+  .trav{fill:none;stroke:#fff;stroke-width:3.6;stroke-linecap:round;stroke-dasharray:.16 1.4;stroke-dashoffset:.16;opacity:0;filter:drop-shadow(0 0 5px var(--c))}
+  .trav.go{opacity:1;animation:trav .75s cubic-bezier(.4,0,.6,1) forwards}
+  .trav.go.rev{animation-name:travr}
+  @keyframes trav{from{stroke-dashoffset:.16}to{stroke-dashoffset:-1}}
+  @keyframes travr{from{stroke-dashoffset:-1}to{stroke-dashoffset:.16}}
+  .dimL{opacity:.07!important}
+  body:not(.xall) .xl.tr:not(.sel):not(.hot){opacity:0!important}
+  body:not(.xall) .pg.x.tr:not(.lit){opacity:0!important}
+  body:not(.xall) .xh.tr{pointer-events:none}
+  .xl.fb.on{opacity:.55}
+  #xTog{margin-top:10px;width:100%;display:flex;align-items:center;justify-content:center;gap:7px;height:32px;border-radius:9px;border:1px solid var(--line2);background:#0b0b0b;color:#ddd;font:500 11.5px var(--sans);cursor:pointer}
+  #xTog svg{width:14px;height:14px}#xTog.on{background:#fff;color:#000;border-color:#fff}
+  /* partículas que viajan de la causa al efecto (siguen activas aunque la red esté completa) */
+  #pts{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
+  .pg{position:absolute;left:0;top:0;opacity:0;transition:opacity .4s calc(var(--dl,0s) + .7s)}
+  .pg.on{opacity:1}.pg.dimL,.pg.dimS{opacity:.06!important}
+  .pd{position:absolute;left:0;top:0;width:var(--sz,22px);height:var(--sz,22px);margin:calc(var(--sz,22px)/-2) 0 0 calc(var(--sz,22px)/-2);border-radius:50%;
+    background:radial-gradient(circle,#fff 0 17%,var(--c) 27%,color-mix(in srgb,var(--c) 35%,transparent) 42%,transparent 68%);offset-rotate:0deg;will-change:offset-distance;
+    animation:pdrun var(--du,2.6s) cubic-bezier(.45,0,.55,1) infinite;animation-delay:var(--de,0s);animation-play-state:paused}
+  .pd.t1{--sz:13px;opacity:.55}
+  .pg.on .pd{animation-play-state:running}
+  .pg.x .pd{animation-timing-function:linear;--sz:16px}.pg.x .pd.t1{--sz:10px}
+  @keyframes pdrun{from{offset-distance:0%}to{offset-distance:100%}}
+  /* insignia giratoria de cada retroalimentación */
+  .fbb{opacity:0;transition:opacity .5s .6s;pointer-events:none}.fbb.on{opacity:1}.fbb.dimL,.fbb.dimS{opacity:.08!important}
+  .fbb circle{fill:#000;stroke:#fff;stroke-width:1.8}
+  .fbb .spin{transform-box:fill-box;transform-origin:center;animation:fbspin 3.2s linear infinite}
+  .fbb .ring{fill:none;stroke:#fff;stroke-opacity:.5;stroke-width:1.2;transform-box:fill-box;transform-origin:center;animation:fbring 2.4s ease-out infinite}
+  @keyframes fbspin{to{transform:rotate(360deg)}}
+  @keyframes fbring{0%{transform:scale(1);stroke-opacity:.6}100%{transform:scale(2.3);stroke-opacity:0}}
+  /* ola causal: un brillo recorre las tarjetas de izquierda (causas) a derecha (fenómeno) */
+  .wv{position:absolute;inset:-1px;border-radius:inherit;border:1.5px solid var(--c);box-shadow:0 0 22px -4px var(--c),inset 0 0 18px -8px var(--c);opacity:0;will-change:opacity;pointer-events:none;animation:wave 6s ease-in-out infinite;animation-delay:var(--wd,0s)}
+  @keyframes wave{0%,70%,100%{opacity:0}78%{opacity:1}}
+
+  .halo{position:absolute;pointer-events:none;border-radius:22px;opacity:0;transition:opacity .6s}
+  .halo.on{opacity:1}
+  .halo i{position:absolute;inset:0;border-radius:inherit;border:2px solid var(--c);box-shadow:0 0 30px 4px color-mix(in srgb,var(--c) 60%,transparent);will-change:transform,opacity;animation:halo 3.2s ease-out infinite}
+  .halo i+i{animation-delay:1.6s}
+  .halo.r i{border-radius:40px;animation-duration:2.6s}
+  @keyframes halo{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.35,1.6);opacity:0}}
+  .node:not(.on) .wv{animation:none}
+  .tile svg{transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+  .node:hover .tile svg{transform:scale(1.14) rotate(-6deg)}
+  .node.on .tile{animation:tilein .6s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--dl,0s) + .25s)}
+  @keyframes tilein{from{transform:scale(.4) rotate(-25deg);opacity:0}}
+  @media (prefers-reduced-motion:reduce){.fbb .spin,.fbb .ring,.wv,.halo i,.node.on .tile{animation:none!important}.pd{display:none}}
+
+  .lane{display:none!important}
+  /* enlaces entre ramas (conexiones reales que cruzan el mapa): salen por arriba/abajo de la tarjeta, con degradado entre los colores de las dos ramas */
+  .xl{fill:none;stroke-width:2.2;stroke-dasharray:7 6;stroke-linecap:round;opacity:0;transition:opacity .5s .4s,stroke-width .2s}
+  .xl.fb{stroke-dasharray:1.5 5.5;stroke-width:2.8}
+  #tip .why{margin-top:8px;max-width:260px;font-size:11.5px;line-height:1.35;color:#bbb;white-space:normal}
+  .xl.hot,.xl.sel{animation:xflow 1.2s linear infinite}
+  .xl.on{opacity:.7}
+  .xl.sel{opacity:1!important;stroke-width:4.4;filter:drop-shadow(0 0 6px rgba(255,255,255,.45))}
+  .xl.dimS{opacity:.1!important}
+  .node.dimS{opacity:.2}
+  .rtag{position:absolute;z-index:7;display:flex;align-items:center;gap:6px;padding:4px 11px 4px 8px;border-radius:14px;background:#000;border:1px solid var(--c);color:var(--c);font:500 11px var(--mono);letter-spacing:.9px;text-transform:uppercase;white-space:nowrap;pointer-events:none;animation:rtin .7s cubic-bezier(.2,1.4,.3,1) both}
+  .rtag svg{width:13px;height:13px}
+  @keyframes rtin{from{opacity:0;transform:translateY(10px) scale(.6)}}
+  .xl.hot{opacity:1;stroke-width:4}
+  .xh{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke;cursor:help}
+  #tip{position:fixed;z-index:70;pointer-events:none;opacity:0;transform:translate(14px,14px);transition:opacity .15s;max-width:300px;padding:10px 12px;background:#0a0a0a;border:1px solid var(--line2);border-radius:12px;font:400 12.5px/1.35 var(--sans);color:#ddd}
+  #tip.show{opacity:1}
+  #tip b{display:block;font:500 10px var(--mono);letter-spacing:1.2px;color:var(--dim);text-transform:uppercase;margin-bottom:5px}
+  #tip .r{display:flex;align-items:center;gap:8px;margin-top:4px}
+  #tip .r i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--c)}
+  #tip .ar{color:#fff;font-size:15px;margin:2px 0 0 1px}
+  .ripple{position:absolute;width:60px;height:60px;border-radius:50%;border:3px solid var(--c);pointer-events:none;z-index:6;animation:rip .95s ease-out forwards}
+  @keyframes rip{from{transform:translate(-50%,-50%) scale(1);opacity:.9}to{transform:translate(-50%,-50%) scale(13);opacity:0;border-width:.5px}}
+  .glare{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .25s;background:radial-gradient(170px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.16),transparent 62%);z-index:2}
+  .node:hover .glare{opacity:1}
+  .node.on:hover{transform:translateY(-3px) scale(1.025);transition-delay:0s}
+  
+  @keyframes cp{50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 32%,transparent)}}
+  
+  @keyframes arrive{from{filter:brightness(2.2) blur(2px)}60%{filter:brightness(1.4)}to{filter:none}}
+  .node.on.ping{animation:ping .9s ease-out}
+  .xl.dimL{opacity:.06!important}
+  @keyframes xflow{to{stroke-dashoffset:-24}}
+  .xt{fill:none;stroke:#fff;stroke-width:3.6;stroke-linecap:round;stroke-dasharray:.16 1.4;stroke-dashoffset:.16;opacity:0;filter:drop-shadow(0 0 5px #fff)}
+  .xt.go{opacity:1;animation:trav .8s cubic-bezier(.4,0,.6,1) forwards}.xt.go.rev{animation-name:travr}
+
+  .node{position:absolute;display:flex;align-items:center;gap:13px;padding:0 15px 0 11px;overflow:hidden;
+    background:linear-gradient(135deg,#171717,#0a0a0a 70%);border:1px solid var(--line2);border-radius:14px;cursor:pointer;opacity:0;pointer-events:none;
+    transform:translate(var(--dx),var(--dy)) scale(.85);
+    transition:transform .65s cubic-bezier(.2,.9,.3,1) var(--dl,0s),opacity .35s var(--dl,0s),border-color .2s,box-shadow .2s}
+  .node::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
+  .node.bridge::before{background:linear-gradient(var(--c) 50%,var(--c2) 50%);width:5px}
+  .node.on{opacity:1;pointer-events:auto;transform:none}
+  .node:hover{border-color:color-mix(in srgb,var(--c) 70%,#fff);box-shadow:0 8px 28px -10px var(--c)}
+  .node.sel{border-color:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 40%,transparent)}
+  .node.dim{opacity:.16}
+  .node.ping{animation:ping .9s ease-out}
+  @keyframes ping{0%{box-shadow:0 0 0 0 var(--c)}100%{box-shadow:0 0 0 18px transparent}}
+  .wm{position:absolute;right:-8px;bottom:-14px;width:74px;height:74px;color:var(--c);opacity:.07;pointer-events:none}
+  .wm svg{width:100%;height:100%}
+  .tile{flex:none;position:relative;z-index:1;width:48px;height:48px;border:1px solid color-mix(in srgb,var(--c) 50%,#000);border-radius:12px;display:grid;place-items:center;
+    color:var(--c);background:linear-gradient(145deg,color-mix(in srgb,var(--c) 22%,#000),color-mix(in srgb,var(--c) 6%,#000))}
+  .tile svg{width:27px;height:27px}
+  .txt{position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .id{display:flex;align-items:center;gap:8px;font:500 10px var(--mono);letter-spacing:.8px;color:var(--dim)}
+  .xb{display:inline-flex;align-items:center;gap:3px;padding:1px 6px 1px 4px;border-radius:9px;border:1px solid #444;color:#ddd;background:#0b0b0b}
+  .xb svg{width:10px;height:10px}
+  .lb{font:500 13.5px/1.17 var(--sans);color:var(--fg)}
+  .cnt{position:relative;z-index:1;margin-left:auto;flex:none;display:flex;align-items:center;gap:3px;height:26px;padding:0 6px 0 9px;border-radius:13px;background:#000;border:1px solid var(--line2);font:500 11px var(--mono);color:var(--mut)}
+  .cnt svg{width:13px;height:13px;transition:transform .25s}
+  .node.open .cnt svg{transform:rotate(90deg)}
+  .node.open .cnt{color:var(--c);border-color:color-mix(in srgb,var(--c) 55%,#000)}
+
+  .node.d1{background:var(--c);border-color:var(--c);color:var(--ink)}
+  .node.d1::before{background:rgba(0,0,0,.25)}
+  .node.d1 .tile{width:62px;height:62px;border-radius:16px;color:var(--ink);border-color:color-mix(in srgb,var(--ink) 35%,transparent);background:color-mix(in srgb,var(--ink) 12%,transparent)}
+  .node.d1 .tile svg{width:36px;height:36px}
+  .node.d1 .lb{font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.15}.node.d1 .id{color:color-mix(in srgb,var(--ink) 60%,transparent)}
+  .node.d1 .wm{color:var(--ink);opacity:.12;width:110px;height:110px}
+  .node.d1 .cnt{background:#0a0a0a;border-color:#0a0a0a;color:#fff}
+  .node.d1:hover{box-shadow:0 10px 34px -8px var(--c)}
+
+  .node.d0{flex-direction:column;justify-content:center;gap:6px;text-align:center;padding:0 22px;background:var(--c);border:0;color:var(--ink);border-radius:34px}
+  .node.d0::before{display:none}
+  .node.d0 .tile{width:70px;height:70px;border-radius:20px;border:2px solid var(--ink);background:transparent;color:var(--ink)}
+  .node.d0 .tile svg{width:40px;height:40px}
+  .node.d0 .txt{align-items:center}
+  .node.d0 .lb{color:var(--ink);font-size:14px;font-weight:700}.node.d0 .id{color:color-mix(in srgb,var(--ink) 60%,transparent);letter-spacing:1.6px;justify-content:center}
+  .node.d0 .cnt{margin:2px 0 0;background:#000;border-color:#000;color:#fff;height:24px}
+  .node.d0 .wm{display:none}
+  .node.d0::after{content:"";position:absolute;inset:-1px;border-radius:34px;border:2px solid var(--c);opacity:0;animation:ring 2.4s ease-out infinite;pointer-events:none}
+  .node.d0.open::after{display:none}
+  @keyframes ring{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.25,1.4);opacity:0}}
+
+  #bar{position:fixed;left:0;right:0;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:14px 20px;background:linear-gradient(#000 55%,rgba(0,0,0,0));pointer-events:none}
+  #bar>*{pointer-events:auto}
+  #brand{display:flex;align-items:center;gap:12px;margin-right:auto;min-width:0}
+  .logo{flex:none;width:40px;height:40px;border-radius:11px;background:#f4f4f4;color:#000;display:grid;place-items:center}
+  .logo svg{width:23px;height:23px}
+  #brand h1{font:700 17px var(--sans);letter-spacing:-.1px;white-space:nowrap}
+  #brand p{font:400 10px var(--mono);letter-spacing:1.5px;color:var(--mut);margin-top:3px;text-transform:uppercase}
+  .search{position:relative;width:260px}
+  .search input{width:100%;height:38px;background:#0a0a0a;color:#fff;border:1px solid var(--line2);border-radius:10px;padding:0 12px 0 38px;font:400 14px var(--sans);outline:none;transition:border-color .2s;-webkit-user-select:text;user-select:text}
+  .search input:focus{border-color:#9a9a9a}
+  .search input::placeholder{color:#666}
+  .search>svg{position:absolute;left:12px;top:11px;width:16px;height:16px;color:#777}
+  .res{position:absolute;left:0;right:0;top:44px;background:#0a0a0a;border:1px solid var(--line2);border-radius:10px;display:none;max-height:320px;overflow:auto;z-index:30}
+  .res.show{display:block}
+  .res div{padding:10px 12px;font:400 13px/1.3 var(--sans);cursor:pointer;display:flex;gap:10px;align-items:center;border-bottom:1px solid #151515}
+  .res div:last-child{border:0}
+  .res div:hover,.res div.act{background:#171717}
+  .ri{flex:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 14%,#000)}
+  .ri svg{width:15px;height:15px}
+  .res small{font:400 10px var(--mono);color:var(--dim);margin-left:auto;flex:none}
+  #bPal{width:38px;padding:0}
+  #palpop{position:fixed;right:20px;top:64px;z-index:60;width:250px;padding:10px;background:rgba(8,8,8,.97);border:1px solid var(--line2);border-radius:16px;display:none;flex-direction:column;gap:4px}
+  #palpop.show{display:flex}
+  #palpop h5{font:500 10px var(--mono);letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;margin:4px 6px 6px}
+  .pitem{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:11px;cursor:pointer;font:500 13px var(--sans);color:#ddd;border:1px solid transparent}
+  .pitem:hover{background:#151515}.pitem.act{border-color:#fff;background:#121212}
+  .sw{display:flex}.sw i{width:20px;height:20px;border-radius:50%;margin-left:-6px;border:2px solid #080808}.sw i:first-child{margin-left:0}
+  .pitem svg{margin-left:auto;width:16px;height:16px;color:#fff}
+
+  #hint{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:15;pointer-events:none;display:flex;align-items:center;gap:10px;
+    font:500 11px var(--mono);letter-spacing:1.5px;text-transform:uppercase;color:var(--fg);padding:11px 16px;border:1px solid var(--line2);border-radius:30px;background:#050505;
+    animation:hb 2s ease-in-out infinite;transition:opacity .4s;white-space:nowrap;max-width:92vw}
+  #hint svg{width:16px;height:16px;flex:none}
+  #hint.hide{opacity:0}
+  @keyframes hb{50%{transform:translate(-50%,-6px)}}
+  #legend{position:fixed;left:16px;bottom:16px;z-index:15;display:flex;flex-direction:column;gap:2px;padding:8px;background:rgba(6,6,6,.9);border:1px solid var(--line);border-radius:14px;width:auto}
+  #legend:not(.open) h4,#legend:not(.open) .key,#legend:not(.open) #stat,#legend:not(.open) .li span,#legend:not(.open) .li b{display:none}
+  #legend.open{width:250px;padding:12px}
+  #legend .li{padding:4px}
+  .lt{display:grid;place-items:center;width:30px;height:30px;margin:0 0 4px;border-radius:9px;background:#111;border:1px solid var(--line2);color:#bbb;cursor:pointer}
+  .lt:hover{background:#1a1a1a;color:#fff}.lt svg{width:15px;height:15px}
+  #legend h4{display:flex;align-items:center;gap:7px;font:500 10px var(--mono);letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;margin:4px 4px 5px}
+  #legend h4 svg{width:13px;height:13px}#legend h4:not(:first-child){margin-top:10px}
+  .li{display:flex;align-items:center;gap:10px;padding:5px 6px;border-radius:9px;font:400 12.5px var(--sans);color:#d0d0d0;cursor:pointer;transition:background .15s}
+  .li:hover,.li.act{background:#171717}.li.act{outline:1px solid var(--c)}
+  .li i{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--c)}
+  .li i svg{width:16px;height:16px}
+  .li b{margin-left:auto;padding-left:10px;font:500 11px var(--mono);color:var(--mut)}
+  .key{display:flex;align-items:center;gap:10px;padding:3px 6px;font:400 12px var(--sans);color:#b8b8b8}
+  .key svg{flex:none;width:34px;height:14px;overflow:visible}
+  #stat{display:flex;gap:8px;margin:8px 2px 2px}
+  #stat div{flex:1;border:1px solid var(--line);border-radius:9px;padding:7px 9px;background:#0b0b0b}
+  #stat b{display:block;font:500 15px var(--mono);color:#fff}#stat span{font:400 10px var(--sans);color:var(--mut)}
+  #mini{position:fixed;right:16px;bottom:16px;z-index:15;width:170px;height:104px;background:#060606;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer}
+  #mini svg{width:100%;height:100%}
+  #mini .vp{fill:rgba(255,255,255,.07);stroke:#fff;stroke-width:1.5;vector-effect:non-scaling-stroke}
+  #zoom{position:fixed;right:16px;bottom:132px;z-index:15;display:flex;flex-direction:column;gap:6px}
+  #zoom .btn{width:38px;padding:0}
+  #insp{position:fixed;right:16px;top:70px;width:262px;max-height:calc(100vh - 230px);overflow:auto;z-index:18;padding:14px;background:#080808;border:1px solid var(--line2);border-radius:16px;
+    opacity:0;transform:translateX(12px);pointer-events:none;transition:opacity .25s,transform .25s;user-select:text;-webkit-user-select:text}
+  #insp.show{opacity:1;transform:none;pointer-events:auto}
+  #iClose,#cClose{position:absolute;right:10px;top:10px;width:32px;height:32px;border-radius:8px;background:none;border:0;color:var(--mut);cursor:pointer;display:grid;place-items:center}
+  #iClose:hover,#cClose:hover{background:#171717;color:#fff}#iClose svg,#cClose svg{width:16px;height:16px}
+
+  .ih{display:flex;align-items:center;gap:13px;padding-right:26px}
+  .ih .it{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--c)}
+  .ih .it svg{width:24px;height:24px}
+  .ih .ic{font:500 10.5px var(--mono);letter-spacing:1.2px;color:var(--mut);text-transform:uppercase}
+  .ih h2{font:700 14.5px/1.22 var(--sans);margin-top:3px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 5px;border-radius:20px;font:500 11.5px var(--sans);color:#ddd;border:1px solid color-mix(in srgb,var(--c) 50%,#000);background:color-mix(in srgb,var(--c) 10%,#000)}
+  .chip i{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--c)}.chip i svg{width:11px;height:11px}
+  .isec{display:flex;align-items:center;gap:7px;font:500 10px var(--mono);letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;margin:18px 0 9px}
+  .isec svg{width:13px;height:13px}.isec b{margin-left:auto;color:var(--mut)}
+  .ipath div{position:relative;padding:0 0 10px 22px;font:400 13px/1.3 var(--sans);color:#bcbcbc}
+  .ipath div::before{content:"";position:absolute;left:3px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--pc,var(--c))}
+  .ipath div::after{content:"";position:absolute;left:7px;top:16px;bottom:-1px;width:1px;background:var(--line2)}
+  .ipath div:last-child::after{display:none}
+  .ipath div:last-child{color:#fff;font-weight:600;padding-bottom:0}
+  .rel{display:flex;align-items:center;gap:9px;padding:5px 6px;border-radius:10px;cursor:pointer;font:400 12px/1.25 var(--sans);color:#d4d4d4;transition:background .15s}
+  .rel:hover{background:#151515}.rel .ri{width:26px;height:26px;border-radius:8px}.rel .ri svg{width:15px;height:15px}
+  .rel small{margin-left:auto;font:400 10px var(--mono);color:var(--dim);flex:none}
+  .rel.hid{opacity:.6}
+  .istats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .istats div{border:1px solid var(--line);border-radius:10px;padding:7px 8px;background:#0c0c0c}
+  .istats svg{width:15px;height:15px;color:var(--c);margin-bottom:6px}
+  .istats b{display:block;font:500 16px var(--mono);color:#fff}.istats span{font:400 10.5px var(--sans);color:var(--mut)}
+  .iact{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}.iact .btn{flex:1;padding:0 8px;height:34px;font-size:12px}
+
+  #ctx{position:fixed;left:16px;top:70px;width:310px;max-height:calc(100vh - 480px);min-height:240px;overflow:auto;z-index:19;padding:20px 20px 18px;background:#080808;border:1px solid var(--line2);border-radius:16px;
+    opacity:0;transform:translateX(-12px);pointer-events:none;transition:opacity .25s,transform .25s;user-select:text;-webkit-user-select:text}
+  #ctx.show{opacity:1;transform:none;pointer-events:auto}
+  #ctx .ch,.ctxp .ch{display:flex;align-items:center;gap:12px;padding-right:28px}
+  #ctx .ch i,.ctxp .ch i{flex:none;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:#f4f4f4;color:#000}#ctx .ch i svg,.ctxp .ch i svg{width:24px;height:24px}
+  #ctx h3,.ctxp h3{font:700 17px/1.2 var(--sans)} #ctx .sub,.ctxp .sub{font:400 10px var(--mono);letter-spacing:1.4px;color:var(--mut);text-transform:uppercase;margin-top:4px}
+  #ctx .part,.ctxp .part{margin-top:18px}
+  #ctx .part .tag,.ctxp .part .tag{display:inline-flex;align-items:center;gap:6px;font:500 10px var(--mono);letter-spacing:1.4px;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+  #ctx .part .tag svg,.ctxp .part .tag svg{width:13px;height:13px}
+  #ctx p,.ctxp p{font:400 13.5px/1.6 var(--sans);color:#d2d2d2;margin-bottom:10px}
+  #ctx a,.ctxp a{color:#fff;font-weight:600;border-bottom:2px solid var(--c,#fff);cursor:pointer;padding-bottom:1px;transition:background .15s}
+  #ctx a:hover{background:color-mix(in srgb,var(--c,#fff) 25%,transparent)}
+  #ctx .note,.ctxp .note{font:400 11.5px var(--sans);color:var(--mut);border-top:1px solid var(--line);padding-top:12px;margin-top:6px;display:flex;gap:8px;align-items:center}
+  #ctx .note svg,.ctxp .note svg{flex:none;width:14px;height:14px}
+
+  @media (max-width:1180px) and (min-width:901px){
+    #brand p{display:none} .search{width:200px} #mini{display:none} #zoom{bottom:20px} #legend{width:auto;padding:8px} #legend .li span,#legend h4,#legend .key,#legend b,#stat{display:none}
+    #insp{width:240px} #ctx{width:280px}
+  }
+
+  /* cursor propio con el color de la paleta (cambia al color de la variable bajo el puntero) */
+  #cur,#cur2{display:none;position:fixed;left:0;top:0;pointer-events:none;z-index:100;border-radius:50%;opacity:0;transition:opacity .25s}
+  #cur{width:8px;height:8px;background:var(--cc)}
+  #cur2{width:34px;height:34px;border:2px solid var(--cc);box-shadow:0 0 18px color-mix(in srgb,var(--cc) 50%,transparent);transition:width .25s,height .25s,background .25s,opacity .25s}
+  body.cur-hover #cur2{width:58px;height:58px;background:color-mix(in srgb,var(--cc) 14%,transparent)}
+  body.cur-down #cur2{width:22px;height:22px}
+  @media (pointer:fine){ html,body,body *{cursor:none!important} #cur,#cur2{display:block} body.hist-open *{cursor:auto!important} body.hist-open #cur,body.hist-open #cur2{display:none!important} }
+  /* evolución histórica (página incrustada) */
+  #hist{position:fixed;inset:0;z-index:95;background:#000;display:none;flex-direction:column}
+  #hist.show{display:flex;animation:hin .6s cubic-bezier(.2,.9,.3,1)}
+  @keyframes hin{from{opacity:0;transform:scale(.97)}}
+  .hbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:#050505}
+  .hti{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+  .hti i{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--hc,#d9755f);color:#0a0a0a}.hti i svg{width:19px;height:19px}
+  .hti b{display:block;font:700 14px var(--sans)}.hti span{font:400 10px var(--mono);letter-spacing:1px;color:var(--mut);text-transform:uppercase}
+  #hframe{flex:1;width:100%;border:0;background:#000}
+  /* constelación del inicio */
+  #ghost{position:absolute;left:0;top:0;overflow:visible;pointer-events:none;transition:opacity 1.4s}
+  #ghost.off{opacity:0}
+  #ghost line{stroke:#fff;stroke-opacity:.17;stroke-width:1.8}
+  #ghost circle{opacity:.8}
+  body.lite .flow,body.lite .xl{animation:none}
+  body.hp-open .flow,body.hp-open .xl,body.hp-open .node.d0::after{animation:none}
+  @keyframes gtw{50%{opacity:.35}}
+
+  /* página limpia: sin panel de contexto, sin módulo derecho, sin leyenda, minimapa ni botones de zoom */
+  #ctx,#bCtx,#mCtx,#insp,#mini,#zoom,#legend{display:none!important}
+  /* Secuencia a pantalla completa: palabra → escena (diagrama causal animado + planos y animaciones) */
+  #sq{position:fixed;inset:0;z-index:50;display:none;background:radial-gradient(ellipse 70% 55% at 50% 45%,#0b0b10 0%,#000 75%);color:var(--fg);overflow:hidden}
+  #sq::before{content:"";position:absolute;inset:0;background-image:radial-gradient(#1f1f1f 1px,transparent 1.1px);background-size:26px 26px;pointer-events:none}
+  body.sq-open #sq{display:block} body.sq-open #desk,body.sq-open #mob{display:none}
+  .sq-top{position:absolute;left:0;right:0;top:0;z-index:3;display:flex;align-items:center;gap:12px;padding:14px 20px;pointer-events:none}
+  .sq-top .logo{width:40px;height:40px;border-radius:11px;background:#f4f4f4;color:#000;display:grid;place-items:center}.sq-top .logo svg{width:22px;height:22px}
+  .sq-top b{display:block;font:700 17px var(--sans)}.sq-top span{font:400 10px var(--mono);letter-spacing:1.5px;color:var(--mut);text-transform:uppercase}
+  .sq-x{margin-left:auto;pointer-events:auto;width:38px;height:38px;border-radius:10px;border:1px solid var(--line2);background:#0a0a0a;color:var(--fg);cursor:pointer;display:grid;place-items:center}.sq-x svg{width:17px;height:17px}.sq-x:hover{background:#171717}
+  .sq-word{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;opacity:0;pointer-events:none;transition:opacity .5s;cursor:pointer;padding:0 20px;text-align:center}
+  .sq-word.show{opacity:1;pointer-events:auto}
+  .sq-word .w{font:300 clamp(28px,6.2vw,92px)/1.1 var(--mono);letter-spacing:.1em;color:#f2f2f2;text-shadow:0 0 28px color-mix(in srgb,var(--c) 45%,transparent);word-break:break-word}
+  .sq-word .w span{display:inline-block;opacity:0;animation:wch .7s calc(var(--k)*55ms + .1s) cubic-bezier(.2,.9,.3,1) forwards}
+  @keyframes wch{from{opacity:0;transform:translateY(14px);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
+  .sq-word small{font:400 11px var(--mono);letter-spacing:2px;color:var(--mut);animation:gtw 2.4s 1.4s infinite}
+  .sq-scene{position:absolute;left:0;right:0;top:70px;bottom:88px;display:flex;gap:24px;padding:6px 28px 0;opacity:0;pointer-events:none;transition:opacity .6s}
+  .sq-scene.show{opacity:1;pointer-events:auto}
+  .sq-txt{flex:none;width:min(400px,36vw);overflow:auto;padding-right:6px;scrollbar-width:thin;user-select:text;-webkit-user-select:text}
+  .sq-txt .kk{display:block;font:500 10.5px var(--mono);letter-spacing:1.8px;color:var(--c);text-transform:uppercase;margin-bottom:8px}
+  .sq-txt h2{font:700 clamp(20px,2.1vw,28px)/1.15 var(--sans);margin-bottom:14px;border-left:4px solid var(--c);padding-left:12px}
+  .sq-txt p{font:400 14px/1.65 var(--sans);color:#d6d6d6;margin-bottom:9px;opacity:0;transform:translateY(8px);animation:sqin .7s calc(.4s + var(--k)*1.2s) ease forwards}
+  .sq-scene.show .nchips div,.sq-scene.show .nind,.sq-scene.show .nv{opacity:0;animation:sqin .7s 1.2s ease forwards}
+  .sq-scene.show .nchips div{animation-delay:calc(1.6s + var(--k)*.7s)}
+  @keyframes sqin{to{opacity:1;transform:none}}
+  .nchips{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+  .nchips div{display:flex;gap:10px;align-items:flex-start;font:400 13px/1.4 var(--sans);color:#d0d0d0;padding:9px 11px;border:1px solid var(--line2);border-left:3px solid var(--c);border-radius:10px;background:#0d0d0d}
+  .nchips b{font:600 11px var(--mono);color:var(--c);flex:none;padding-top:2px}
+  .nind{margin-top:12px;padding:11px 13px;border:1px solid var(--line2);border-radius:12px;background:#0d0d0d}
+  .nind h6{display:flex;align-items:center;gap:7px;font:500 10px var(--mono);letter-spacing:1.3px;color:var(--mut);text-transform:uppercase;margin-bottom:7px}.nind h6 svg{width:13px;height:13px}
+  .nind strong{display:block;font:600 13.5px/1.3 var(--sans);color:#fff;margin-bottom:7px}
+  .nind span{display:inline-block;margin:0 5px 5px 0;padding:3px 9px;border-radius:20px;border:1px solid var(--line2);font:400 11.5px var(--sans);color:#bdbdbd}
+  .nind em{display:block;font:400 12px var(--sans);color:var(--mut);font-style:normal;margin-top:2px}
+  .nv{display:inline-flex;gap:7px;align-items:center;margin-top:14px;height:38px;padding:0 14px;border-radius:10px;border:1px solid var(--line2);background:#f4f4f4;color:#000;font:600 12.5px var(--sans);cursor:pointer}.nv svg{width:15px;height:15px}
+  .sq-dia{flex:1;min-width:0;display:flex;align-items:center;justify-content:center}
+  .sq-scene.hasp{flex-direction:column;gap:10px;margin-right:700px}.sq-scene.hasp .sq-txt{width:auto;flex:none;max-height:46%}.sq-scene.hasp .sq-dia{flex:1;min-height:0}
+  .sq-dia{overflow:hidden}.sq-dia>svg{flex:1;min-width:0;min-height:0;width:100%;height:100%;overflow:visible}
+  .dn{opacity:0;animation:dnin .7s var(--d) cubic-bezier(.2,1.1,.3,1) forwards;transform-box:fill-box;transform-origin:center}
+  @keyframes dnin{from{opacity:0;transform:translateY(10px) scale(.92)}to{opacity:1;transform:none}}
+  .de{fill:none;stroke-width:2.4;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;opacity:.85;animation:ddraw 1s calc(var(--d) + .35s) ease forwards}
+  @keyframes ddraw{to{stroke-dashoffset:0}}
+  .dp{fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:butt;stroke-dasharray:.07 1.4;stroke-dashoffset:.07;opacity:0;animation:dpul 3.2s var(--d) linear infinite}
+  @keyframes dpul{0%{stroke-dashoffset:.07;opacity:0}8%{opacity:.9}88%{opacity:.9}100%{stroke-dashoffset:-1;opacity:0}}
+  .dsel{animation:dring 2.4s 1.2s ease-in-out infinite}
+  @keyframes dring{0%,100%{opacity:.15}50%{opacity:.85}}
+  .sq-foot{position:absolute;left:0;bottom:0;z-index:70;display:flex;align-items:center;gap:18px;padding:0 24px 22px;width:min(760px,100%);flex-wrap:wrap}
+  .sq-ctl{display:flex;gap:8px}.sq-ctl .btn{height:40px}.sq-ctl .btn:disabled{opacity:.35;pointer-events:none}
+  .sq-dots{display:flex;gap:4px;align-items:center}
+  .sq-dots button{width:8px;height:14px;border:0;border-radius:2px;background:#333;cursor:pointer;padding:0}.sq-dots button.on{background:#8e8e8e}.sq-dots button.cur{background:#fff;height:20px}
+  .sq-lab{font:400 11px var(--mono);letter-spacing:1.6px;color:var(--mut);text-transform:uppercase}
+  .sq-bar{position:absolute;left:24px;right:24px;bottom:12px;height:2px;background:transparent}
+  .sq-bar i{display:block;height:100%;width:0;background:var(--c)}.sq-bar i.run{animation:narp var(--d,20s) linear forwards}
+  @keyframes narp{to{width:100%}}
+  @media (max-width:900px){
+    .sq-top{padding:calc(10px + env(safe-area-inset-top)) 14px 8px}.sq-top span{display:none}
+    .sq-scene{flex-direction:column;top:calc(62px + env(safe-area-inset-top));bottom:116px;padding:0 14px;gap:8px}
+    .sq-dia{flex:none;height:40vh;order:-1}.sq-txt{width:auto;flex:1;min-height:0}.sq-scene.hasp{margin-right:0;flex-direction:column}.sq-scene.hasp .sq-txt{max-height:none}
+    .sq-txt p{font-size:13.5px}
+    .sq-foot{padding:0 14px calc(14px + env(safe-area-inset-bottom));gap:10px}.sq-ctl{width:100%}.sq-ctl .btn{flex:1}.sq-dots{order:3;flex:1}.sq-lab{order:4}
+    .sq-bar{left:14px;right:14px}
+    #pl,#pp,#hp{z-index:80}
+    body.sq-open #pl,body.sq-open #pp,body.sq-open #hp{top:auto!important;bottom:calc(112px + env(safe-area-inset-bottom))!important;max-height:calc(100vh - 190px);overflow:auto}
+    .sq-txt{display:flex;flex-direction:column}.sq-txt .kk,.sq-txt h2{order:-2}.sq-txt .nv{order:-1;align-self:flex-start;margin:0 0 12px}
+    .sq-txt>*{flex-shrink:0}
+    .sq-dots{gap:3px}.sq-dots button{width:6px}.sq-lab{flex:none;max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;letter-spacing:1.2px}
+    /* árbol: menos sangría por nivel para que las fichas profundas no queden angostas */
+    .mki{margin-left:5px;padding-left:7px}.mki>.mn>.mc::after{left:-7px;width:7px}
+    .mki .mki .mki .mki{margin-left:2px;padding-left:5px}.mki .mki .mki .mki>.mn>.mc::after{left:-5px;width:5px}
+    .mki .mki .mc{gap:9px;padding:9px 8px 9px 12px}.mki .mki .mt{width:38px;height:38px;border-radius:11px}.mki .mki .mt svg{width:21px;height:21px}
+    .mki .mki .mi{width:30px;height:30px}.mki .mki .mcnt{padding:0 4px 0 8px}
+    .sq-lab{display:none}.sq-foot{gap:8px}.sq-scene{bottom:calc(92px + env(safe-area-inset-bottom))}
+    body.sq-open #hp .hv{height:min(30vh,240px)!important}
+  }
+  /* celular horizontal: diagrama a la izquierda, texto a la derecha, controles en una sola fila */
+  @media (max-width:900px) and (max-height:520px){
+    .sq-scene{flex-direction:row;top:calc(54px + env(safe-area-inset-top));bottom:64px;gap:14px}
+    .sq-dia{order:0;flex:1;height:auto}.sq-txt{flex:1.1;order:1}
+    .sq-top .logo{width:34px;height:34px}.sq-top b{font-size:15px}.sq-x{width:34px;height:34px}
+    .sq-foot{padding:0 14px 10px;flex-wrap:nowrap;align-items:center}.sq-ctl{width:auto}.sq-ctl .btn{flex:none;height:36px}.sq-dots{order:0;flex:1}
+    .sq-word .w{font-size:clamp(24px,8vh,48px)}
+    body.sq-open #pl,body.sq-open #pp,body.sq-open #hp{bottom:60px!important;max-height:calc(100vh - 66px);left:auto!important;right:8px;width:min(70vw,520px)!important}
+    body.sq-open #hp .hv{height:min(36vh,150px)!important}
+  }
+  body.sq-open #hp{left:auto!important;right:20px;top:70px!important;width:min(640px,calc(100vw - 40px));z-index:62}body.sq-open #hp::after{display:none}body.sq-open .hv{height:min(46vh,420px)!important}
+  /* panel pequeño de evolución histórica, pegado sobre la tarjeta de Higiene estatal */
+  #hp{position:fixed;z-index:60;width:min(900px,calc(100vw - 40px));max-width:calc(100vw - 24px);padding:12px 12px 10px;background:rgba(10,10,10,.97);border:1px solid color-mix(in srgb,var(--c,#d9755f) 55%,#000);border-radius:16px;
+    box-shadow:0 18px 50px -12px rgba(0,0,0,.85);opacity:0;transform:translateY(10px) scale(.95);pointer-events:none;transition:opacity .35s,transform .5s cubic-bezier(.2,1.25,.3,1);user-select:text;-webkit-user-select:text}
+  #hp.show{opacity:1;transform:none;pointer-events:auto}
+  #hp::after{content:"";position:absolute;left:calc(var(--ax,50%) - 7px);bottom:-8px;width:14px;height:14px;background:#0a0a0a;border-right:1px solid color-mix(in srgb,var(--c,#d9755f) 55%,#000);border-bottom:1px solid color-mix(in srgb,var(--c,#d9755f) 55%,#000);transform:rotate(45deg)}
+  #hp.below::after{bottom:auto;top:-8px;border:0;border-left:1px solid color-mix(in srgb,var(--c,#d9755f) 55%,#000);border-top:1px solid color-mix(in srgb,var(--c,#d9755f) 55%,#000)}
+  .hh{display:flex;align-items:center;gap:9px}
+  .hi{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--c);color:var(--ink,#0a0a0a)}.hi svg{width:17px;height:17px}
+  .hh b{display:block;font:700 13px var(--sans)}.hh span{font:400 9.5px var(--mono);letter-spacing:1px;color:var(--mut);text-transform:uppercase}
+  .hx{margin-left:auto;width:28px;height:28px;border-radius:8px;border:0;background:none;color:var(--mut);cursor:pointer;display:grid;place-items:center}.hx:hover{background:#171717;color:#fff}.hx svg{width:15px;height:15px}
+  .htl{display:flex;align-items:center;gap:6px;margin:12px 2px 10px}
+  .hd{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 10px;border-radius:12px;border:1px solid var(--line2);background:#0c0c0c;color:#aaa;cursor:pointer;transition:all .25s;min-width:92px}
+  .hd b{font:600 15px var(--mono)}.hd small{font:400 10px var(--sans)}
+  .hd.on{background:var(--c);border-color:var(--c);color:var(--ink,#0a0a0a);transform:translateY(-2px);box-shadow:0 8px 20px -8px var(--c)}
+  .hln{flex:1;height:2px;background:linear-gradient(90deg,var(--c),var(--line2));position:relative;border-radius:2px}
+  .hln em{position:absolute;left:50%;top:-18px;transform:translateX(-50%);font:500 9.5px var(--mono);color:var(--mut);font-style:normal;white-space:nowrap}
+  .hb{animation:hswap .5s cubic-bezier(.2,.9,.3,1)}
+  @keyframes hswap{from{opacity:0;transform:translateX(14px)}}
+  .hd1{font:600 12.5px var(--sans);color:#fff;margin:2px 2px 6px}.hd1 small{display:block;font:400 10px var(--mono);color:var(--mut);letter-spacing:.6px;margin-bottom:3px;text-transform:uppercase}
+  .hnote{font:400 11.5px/1.4 var(--sans);color:#cfcfcf;margin:0 2px 8px}
+  .hc{display:flex;align-items:flex-start;gap:9px;padding:6px 4px}
+  .hci{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 14%,#000);border:1px solid color-mix(in srgb,var(--c) 40%,#000)}.hci svg{width:15px;height:15px}
+  .hc b{display:block;font:600 12.5px var(--mono);color:#fff;margin-bottom:1px}.hc p{font:400 11.5px/1.35 var(--sans);color:#bdbdbd}
+  .hv{position:relative;height:min(46vh,430px);border-radius:12px;overflow:hidden;background:#000;border:1px solid var(--line2);margin-top:2px}
+  #hf{width:100%;height:100%;border:0;display:block;background:#000}
+  .hload{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;background:#050505;font:500 11px var(--mono);letter-spacing:1px;color:var(--mut);text-transform:uppercase;transition:opacity .6s;pointer-events:none}
+  .hload svg{width:18px;height:18px;animation:hspin 1.4s linear infinite}.hload.off{opacity:0}
+  #hImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:opacity .45s;background:#050505}#hf{display:none}#hp.d3 #hf{display:block}#hp.d3 #hImg{display:none}
+  .hrow{display:flex;align-items:center;gap:14px;margin:6px 2px 0;padding-top:8px;border-top:1px solid var(--line)}.hrow .hl{margin:0;padding:0;border:0}.hb3{background:none;cursor:pointer;color:#fff!important}
+  @keyframes hspin{to{transform:rotate(360deg)}}
+  .hcap{font:400 11.5px/1.4 var(--sans);color:#d2d2d2;margin:8px 2px 0;min-height:32px}.hcap b{color:#fff;font-weight:600}
+  body.cur-off #cur,body.cur-off #cur2{opacity:0!important}
+  .hl{display:flex;align-items:center;gap:6px;margin:6px 2px 0;padding-top:8px;border-top:1px solid var(--line);font:500 11px var(--sans);color:#aaa;text-decoration:none}.hl:hover{color:#fff}.hl svg{width:13px;height:13px}
+  @media (max-width:900px){ #hp{left:8px!important;right:8px;top:auto!important;bottom:calc(78px + env(safe-area-inset-bottom));width:auto;max-width:none} #hp::after{display:none} .hv{height:38vh} }
+
+  /* plano animado de Kennedy (PDF) — tarjeta blanca con el plano en negro */
+  #pl{position:fixed;z-index:62;right:20px;top:70px;background:#fff;color:#111;border-radius:18px;padding:10px 12px 12px;box-shadow:0 24px 70px -18px rgba(0,0,0,.9);display:none}
+  #pl.show{display:block;animation:plin .55s cubic-bezier(.2,1.15,.3,1)}
+  #pl{background:#080808;color:#eee;border:1px solid #2a2a2a;box-shadow:0 24px 70px -18px rgba(0,0,0,.95)}#pl .pl-h i{background:#f4f4f4;color:#000}#pl .pl-h b{color:#fff}#pl .pl-h span{color:#8a8a8a}#pl .pl-h button{background:#161616;border-color:#333;color:#ddd}#pl .pl-h button:hover{background:#f4f4f4;color:#000;border-color:#f4f4f4}
+  @keyframes plin{from{opacity:0;transform:translateY(14px) scale(.96)}}
+  .pl-h{display:flex;align-items:center;gap:9px;padding:2px 2px 10px}
+  .pl-h i{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#111;color:#fff}.pl-h i svg{width:17px;height:17px}
+  .pl-h b{display:block;font:700 13.5px var(--sans);color:#111}.pl-h span{font:400 9.5px var(--mono);letter-spacing:.9px;color:#777;text-transform:uppercase}
+  .pl-h .sp{margin-left:auto;display:flex;gap:6px}
+  .pl-h button{width:30px;height:30px;border-radius:9px;border:1px solid #ddd;background:#f6f6f6;color:#333;cursor:pointer;display:grid;place-items:center}.pl-h button:hover{background:#111;color:#fff;border-color:#111}.pl-h button svg{width:15px;height:15px}
+  .pl-stage{position:relative;overflow:hidden;border-radius:12px;background:#000}
+  .pl-stage img{position:absolute;inset:0;width:100%;height:100%;display:block;animation:plfade 1s ease both}
+  @keyframes plfade{from{opacity:0}}
+  .pl-stage svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .pl-dots{animation:plfade 1.1s .5s both}
+  .pl-d{fill:#ffb55a;animation:pltw 2.4s ease-in-out infinite}
+  @keyframes pltw{0%,100%{opacity:.2}50%{opacity:1}}
+  .pl-line{fill:none;stroke:#ffdcae;stroke-width:1.8;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;opacity:.38;animation:pldraw 2.2s cubic-bezier(.4,0,.2,1) both}
+  @keyframes pldraw{to{stroke-dashoffset:0}}
+  .pl-p circle:first-child{fill:rgba(255,178,90,.28)}.pl-p circle:last-child{fill:#ffe2b8}
+  .pl-ring{fill:none;stroke:#ffb25a;stroke-width:2;transform-box:fill-box;transform-origin:center;animation:plring 2.6s ease-out infinite;opacity:0}
+  @keyframes plring{0%{transform:scale(.3);opacity:.9}100%{transform:scale(5);opacity:0}}
+  .pl-core{animation:plfade .8s 2.4s both}
+  .pl-labels{position:absolute;inset:0;pointer-events:none}
+  .pl-lb{position:absolute;padding:3px 7px 3px 6px;border-left:2px solid #ffb25a;background:rgba(8,8,8,.78);color:#f4efe6;font:500 10px/1.25 var(--mono);letter-spacing:.7px;text-transform:uppercase;white-space:nowrap;animation:pllb .7s cubic-bezier(.2,1.3,.3,1) both}
+  .pl-lb.city{font:700 13px/1.1 var(--mono);letter-spacing:1px;border-left-color:#fff}
+  .pl-lb.reg{letter-spacing:3px;font-size:9.5px;border-left-color:#8c8c8c;color:#cfcfcf}
+  .pl-lb.wet{border-left-color:#6fb1d8;color:#cfe8f7}
+  .pl-lb.poi{font:700 12.5px/1.1 var(--mono);color:#fff;border-left-color:#ffb25a;background:rgba(40,20,0,.82)}
+  @keyframes pllb{from{opacity:0;transform:translateY(8px) scale(.85)}}
+  @media (max-width:900px){ #pl{right:auto;top:auto;bottom:calc(78px + env(safe-area-inset-bottom))} }
+
+  /* =========================== MÓVIL =========================== */
+  #mob{display:none}
+  @media (max-width:900px){
+    #desk{display:none}
+    html,body{overflow:auto;height:auto;min-height:100%}
+    body{overflow-x:hidden;user-select:auto;-webkit-user-select:auto}
+    #mob{display:block;min-height:100vh;background:radial-gradient(ellipse 120% 40% at 50% 0%,#14141c 0%,#000 70%),#000;padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+    #palpop{right:12px;top:calc(60px + env(safe-area-inset-top))}
+  }
+  #mh{position:sticky;top:0;z-index:30;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 14px 10px}
+  #mh .row{display:flex;align-items:center;gap:10px}
+  #mh .logo{width:38px;height:38px;border-radius:10px}
+  #mh h1{font:700 16px/1.1 var(--sans)}
+  #mh p{font:400 9.5px var(--mono);letter-spacing:1.2px;color:var(--mut);text-transform:uppercase;margin-top:3px}
+  #mh .sp{margin-left:auto;display:flex;gap:8px}
+  #mh .btn{width:40px;height:40px;padding:0;border-radius:11px}
+  #msw{display:none;margin-top:10px}#msw.show{display:block}
+  #msw .search{width:100%}
+  #chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+  #chips::-webkit-scrollbar{display:none}
+  .chipb{flex:none;display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:30px;border:1px solid color-mix(in srgb,var(--c) 45%,#000);background:color-mix(in srgb,var(--c) 10%,#000);color:#e6e6e6;font:500 12px var(--sans)}
+  .chipb i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--c)}.chipb i svg{width:14px;height:14px}
+  #mlist{padding:18px 14px 0}
+  #mhint{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:11px 14px;border:1px dashed var(--line2);border-radius:12px;font:400 12.5px/1.35 var(--sans);color:#cfcfcf;transition:opacity .4s,max-height .4s;max-height:110px;overflow:hidden}
+  #mhint svg{flex:none;width:20px;height:20px;color:#fff;animation:mp 1.6s ease-in-out infinite}
+  @keyframes mp{50%{transform:translateY(-4px)}}
+  #mhint.hide{opacity:0;max-height:0;padding-top:0;padding-bottom:0;margin:0;border-width:0}
+  .mroot{position:relative;display:flex;align-items:center;gap:14px;padding:16px;border-radius:22px;background:var(--c);color:var(--ink);cursor:pointer;overflow:hidden}
+  .mroot .mt{flex:none;width:64px;height:64px;border-radius:18px;border:2px solid var(--ink);display:grid;place-items:center;color:var(--ink);background:transparent}
+  .mroot .mt svg{width:36px;height:36px}
+  .mroot .mid{font:500 10px var(--mono);letter-spacing:1.5px;opacity:.65}
+  .mroot .ml{display:block;font:700 18px/1.15 var(--sans);margin-top:3px;color:var(--ink)}
+  .mroot .mr{margin-left:auto}
+  .mn{--c:#fff;position:relative}
+  .mc{position:relative;display:flex;align-items:center;gap:12px;margin-top:10px;padding:10px 10px 10px 14px;min-height:68px;
+    background:linear-gradient(135deg,#171717,#0a0a0a 70%);border:1px solid var(--line2);border-radius:16px;cursor:pointer;transition:border-color .2s}
+  .mc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c);border-radius:16px 0 0 16px}
+  .mn.bridge>.mc::before{background:linear-gradient(var(--c) 50%,var(--c2) 50%)}
+  .mc:active{transform:scale(.985)}
+  .mn.sel>.mc{border-color:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 40%,transparent)}
+  .mn.ping>.mc{animation:mping .9s ease-out}
+  @keyframes mping{0%{box-shadow:0 0 0 0 var(--c)}100%{box-shadow:0 0 0 16px transparent}}
+  .mt{flex:none;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;color:var(--c);border:1px solid color-mix(in srgb,var(--c) 50%,#000);
+    background:linear-gradient(145deg,color-mix(in srgb,var(--c) 22%,#000),color-mix(in srgb,var(--c) 6%,#000))}
+  .mt svg{width:26px;height:26px}
+  .mx{min-width:0;display:flex;flex-direction:column;gap:3px}
+  .mid{display:flex;align-items:center;gap:8px;font:500 10px var(--mono);letter-spacing:.8px;color:var(--dim)}
+  .ml{font:500 14px/1.22 var(--sans);color:var(--fg)}
+  .mr{margin-left:auto;flex:none;display:flex;align-items:center;gap:6px}
+  .mcnt{display:flex;align-items:center;gap:2px;height:28px;padding:0 6px 0 10px;border-radius:14px;background:#000;border:1px solid var(--line2);font:500 12px var(--mono);color:var(--mut)}
+  .mcnt svg{width:14px;height:14px;transition:transform .25s}
+  .mn.open>.mc .mcnt svg{transform:rotate(90deg)}
+  .mn.open>.mc .mcnt{color:var(--c);border-color:color-mix(in srgb,var(--c) 55%,#000)}
+  .xchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+  .xchip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 8px;border-radius:12px;border:1px solid color-mix(in srgb,var(--c) 55%,#000);background:color-mix(in srgb,var(--c) 12%,#000);color:#e2e2e2;font:500 11.5px/1.2 var(--sans);cursor:pointer}
+  .xchip b{font:600 13px var(--mono);color:var(--c)}
+  .md1>.mc .xchip{background:rgba(0,0,0,.22);border-color:rgba(0,0,0,.4);color:var(--ink)}.md1>.mc .xchip b{color:var(--ink)}
+  .mi{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line2);background:#0a0a0a;color:var(--mut);display:grid;place-items:center;cursor:pointer}
+  .mi svg{width:16px;height:16px}
+  .md1>.mc{background:var(--c);border-color:var(--c);min-height:84px;color:var(--ink)}
+  .md1>.mc::before{background:rgba(0,0,0,.25)}
+  .md1>.mc .mt{width:58px;height:58px;border-radius:16px;color:var(--ink);background:color-mix(in srgb,var(--ink) 12%,transparent);border-color:color-mix(in srgb,var(--ink) 35%,transparent)}
+  .md1>.mc .mt svg{width:32px;height:32px}
+  .md1>.mc .ml{font-size:15.5px;font-weight:700;color:var(--ink)}.md1>.mc .mid{color:color-mix(in srgb,var(--ink) 60%,transparent)}
+  .md1>.mc .mcnt{background:#0a0a0a;border-color:#0a0a0a;color:#fff}
+  .md1>.mc .mi{background:rgba(0,0,0,.18);border-color:rgba(0,0,0,.35);color:var(--ink)}
+  .mk{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.3,.8,.3,1)}
+  .mn.open>.mk{grid-template-rows:1fr}
+  .mki{overflow:hidden;min-height:0;margin-left:8px;padding-left:9px;border-left:2px solid color-mix(in srgb,var(--c) 55%,#000);opacity:0;transition:opacity .35s}
+  .mn.open>.mk>.mki{opacity:1}
+  .mki>.mn>.mc::after{content:"";position:absolute;left:-9px;top:50%;width:9px;height:2px;background:color-mix(in srgb,var(--c) 55%,#000)}
+  #mbar{position:fixed;left:0;right:0;bottom:0;z-index:35;display:flex;gap:6px;padding:10px 10px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(rgba(0,0,0,0),#000 40%)}
+  #mbar .btn{flex:1;flex-direction:column;gap:3px;height:54px;border-radius:14px;font-size:10.5px;padding:0 2px}
+  #mbar .btn svg{width:19px;height:19px}
+  #sheetbg{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .3s}
+  #sheetbg.show{opacity:1;pointer-events:auto}
+  #sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;max-height:82vh;overflow:auto;padding:22px 18px calc(22px + env(safe-area-inset-bottom));background:#0a0a0a;border-top:1px solid var(--line2);border-radius:24px 24px 0 0;
+    transform:translateY(105%);transition:transform .38s cubic-bezier(.3,.9,.3,1);user-select:text;-webkit-user-select:text}
+  #sheet.show{transform:none}
+  #sheet::before{content:"";display:block;width:42px;height:4px;border-radius:2px;background:#333;margin:-10px auto 16px}
+  #sheet .btn{height:46px;border-radius:13px}
+  @media (min-width:901px){ #sheet,#sheetbg{display:none} }
+</style>
+</head>
+<body>
+
+<!-- ======================= ESCRITORIO ======================= -->
+<div id="desk">
+  <div id="stage"><div id="world"><svg id="links" width="1" height="1"><defs><marker id="xa" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1.5L11 6L1 10.5z" fill="context-stroke"/></marker></defs></svg></div></div>
+  <div id="tip"></div>
+  <div id="bar">
+    <div id="brand"><div class="logo" id="logo"></div><div><h1>Problemáticas de Kennedy</h1><p>Modelamiento dinámico · mapa causal</p></div></div>
+    <div class="search" id="dsearch"></div>
+    <button class="btn" id="bPal" aria-label="Paleta de colores"></button>
+    <button class="btn" id="bCtx"></button>
+    <button class="btn pri" id="bNar"></button>
+    <button class="btn" id="bProp"></button>
+    <button class="btn" id="bAll"></button>
+    <button class="btn" id="bReset"></button>
+  </div>
+  <div id="hint"></div>
+  <div id="legend"></div>
+  <div id="zoom"><button class="btn" id="bIn"></button><button class="btn" id="bOut"></button><button class="btn" id="bFit"></button></div>
+  <div id="mini"><svg id="miniSvg"></svg></div>
+  <div id="insp"><button id="iClose" aria-label="Cerrar"></button><div id="ibody"></div></div>
+  <div id="ctx"><button id="cClose" aria-label="Cerrar"></button><div id="cbody"></div></div>
+</div>
+<div id="palpop"></div>
+
+<!-- ======================= MÓVIL ======================= -->
+<div id="mob">
+  <div id="mh">
+    <div class="row"><div class="logo" id="mlogo"></div><div><h1>Problemáticas de Kennedy</h1><p>Modelamiento dinámico</p></div>
+      <div class="sp"><button class="btn" id="mPal" aria-label="Paleta"></button><button class="btn" id="mS" aria-label="Buscar"></button><button class="btn pri" id="mP" aria-label="Relato"></button></div></div>
+    <div id="msw"><div class="search" id="msearch"></div></div>
+    <div id="chips"></div>
+  </div>
+  <div id="mlist"><div id="mhint"></div></div>
+  <div id="mbar"><button class="btn" id="mCtx"></button><button class="btn" id="mAll"></button><button class="btn" id="mReset"></button></div>
+  <div id="sheetbg"></div><div id="sheet"></div>
+</div>
+
+<div id="cur"></div><div id="cur2"></div>
+<div id="hp"></div>
+<div id="pl"></div>
+<script src="lib/icons.js"></script>
+<script src="lib/d3-lite.js"></script>
+<script>
+/* =====================================================================
+   DATOS: 56 variables · relaciones causa → efecto, transversales y retroalimentaciones (lectura de izquierda a derecha)
+   ===================================================================== */
+const PALS = {
+  mineral:  { name:"Mineral",  c1:"#d9755f", c2:"#cdae67", c3:"#6fb1a7", root:"#ebe5d9" },
+  mono:     { name:"Monocromo",c1:"#f4f4f4", c2:"#a8a8a8", c3:"#6d6d6d", root:"#ffffff" },
+  oceano:   { name:"Océano",   c1:"#7aa2f7", c2:"#9ece6a", c3:"#bb9af7", root:"#e6ecff" },
+  carmesi:  { name:"Carmesí",  c1:"#e5484d", c2:"#f2f2f2", c3:"#8f8f8f", root:"#ff6a6f" },
+  bosque:   { name:"Bosque",   c1:"#8fbf7f", c2:"#d6c39a", c3:"#5aa6a0", root:"#e9efe0" }
+};
+let PK="mineral"; try{ PK=localStorage.getItem("pal")||"mineral"; }catch(e){}
+const P = PALS[PK]||PALS.mineral;
+const G = {
+  1:{ name:"Hiperconcentración del mercado mayorista", short:"Mercado mayorista",      color:P.c1, icon:"Store" },
+  2:{ name:"Saturación de los residuos",               short:"Saturación de residuos", color:P.c2, icon:"Trash2" },
+  3:{ name:"Degradación del soporte ecológico",        short:"Soporte ecológico",      color:P.c3, icon:"Globe" }
+};
+const ND = [
+ ["root","La Fragmentación Territorial","","Puzzle",0],
+ ["may","Hiperconcentración del mercado mayorista","","Store",1],
+ ["res","Saturación de los residuos","","Trash2",2],
+ ["eco","Degradación de la capacidad de soporte ecológico","","Globe",3],
+ ["hig","Modelo de higiene estatal y salubridad pública","Higiene estatal y salubridad pública","SprayCan",1],
+ ["epi","Crisis epidémicas, brotes de enfermedades infecciosas","Crisis epidémicas y brotes infecciosos","Biohazard",1],
+ ["dep","Dependencia alimentaria","","ShoppingBasket",1],
+ ["perd","Pérdida de producción local","","Sprout",1],
+ ["crec","Crecimiento demográfico acelerado","","Users",1],
+ ["desc","Descomposición acelerada de alimentos al aire libre","Alimentos que se descomponen al aire libre","Apple",1],
+ ["infra","Carencia de infraestructura tecnológica","","Cpu",1],
+ ["ind","Industrialización tardía del país","","Factory",1],
+ ["mono","La monoexportación cafetera","","Coffee",1],
+ ["exp","Expulsaron violentamente a millones de campesinos de sus tierras rurales","Expulsión violenta de campesinos","Tractor",1],
+ ["mod","Modelo económico: más rentable transformar la tierra rural en suelo urbano","Más rentable volver urbana la tierra rural","Banknote",1],
+ ["trans","Sobrecarga de la red de transporte","","Bus",1],
+ ["desp","Desplazamientos masivos acumulados en franjas horarias específicas del día","Desplazamientos masivos por franjas horarias","Footprints",1],
+ ["cult","Por factores culturales e institucionales estandarizados","Factores culturales e institucionales","Landmark",1],
+ ["sinc","Modelo de sincronización industrial y horarios rígidos","Sincronización industrial y horarios rígidos","Settings",1],
+ ["conc","La concentración espacial de origen y destino","Concentración espacial de origen y destino","MapPin",1],
+ ["dens","La densificación residencial en altura","Densificación residencial en altura","Building2",1],
+ ["esp","Especulación del suelo","","TrendingUp",1],
+ ["esc","Escasez de suelo","","Layers",1],
+ ["clust","Clusters laborales","","Briefcase",1],
+ ["monoc","Proceso histórico de expansión monocéntrica de Bogotá","Expansión monocéntrica de Bogotá","Target",1],
+ ["econag","Economías de aglomeración","","Network",1],
+ ["san","Presión sobre los sistemas de saneamiento","","Gauge",2],
+ ["aguasres","Generación de aguas residuales","","Droplet",2],
+ ["cargas","Cargas contaminantes en aguas superficiales","","FlaskConical",2],
+ // nuevas ramificaciones de la Saturación de los residuos (causas y niveles de profundidad)
+ ["rsol","Generación masiva de residuos orgánicos en la central de abastos","Generación masiva de residuos orgánicos","Recycle",2],
+ ["desperd","Pérdida y desperdicio de alimentos en la cadena mayorista","Pérdida y desperdicio de alimentos","PackageX",2],
+ ["empaq","Manipulación a granel, sin cadena de frío ni empaques adecuados","Manipulación sin cadena de frío","Snowflake",2],
+ ["vinf","Ventas informales y acumulación de desechos en los andenes","Ventas informales y desechos en andenes","ShoppingCart",2],
+ ["infor","Informalidad laboral y economía de rebusque","","HandCoins",2],
+ ["empl","Déficit de empleo formal cercano a la vivienda","Déficit de empleo formal cercano","BriefcaseBusiness",2],
+ ["alc","Red de alcantarillado combinado de capacidad insuficiente","Alcantarillado combinado insuficiente","Waves",2],
+ ["recol","Recolección y disposición final centralizadas e insuficientes","Recolección y disposición insuficientes","Truck",2],
+ ["sep","Baja separación en la fuente y escaso aprovechamiento de residuos","Baja separación en la fuente","Recycle",2],
+ ["calagua","Deterioro de la calidad de agua","","Droplets",3],
+ ["aire","Deterioro de la calidad del aire","","Wind",3],
+ ["no2","Emisiones de NO₂ y CO","","Car",3],
+ ["biodiv","Pérdida de la biodiversidad","","Bird",3],
+ ["hab","Falta de disponibilidad de hábitats naturales","Faltan hábitats naturales","TreePine",3],
+ ["lluvia","Vulnerabilidad frente a eventos de lluvia","","CloudRain",3],
+ ["plan","Desarrollo urbano orientado a la demanda del mercado y no a la descentralización territorial","Desarrollo urbano orientado al mercado","PencilRuler",3],
+ ["supcons","Transformación en superficies construidas","","Construction",3],
+ ["suelo","Alteración de las condiciones del suelo","","Mountain",3],
+ ["imperm","Impermeabilización del suelo","","BrickWall",3],
+ ["frag","Fragmentación ecológica y de la cobertura vegetal","","Scissors",3],
+ ["perdveg","Pérdida de la cobertura vegetal","","Leaf",3],
+ // las tres ramificaciones del Desarrollo urbano orientado al mercado
+ ["rent","Rentabilidad del suelo por encima de su función ecológica","Rentabilidad del suelo sobre lo ecológico","Coins",3],
+ ["plusv","Captura privada de la valorización del suelo","","PiggyBank",3],
+ ["eep","Débil integración de la Estructura Ecológica Principal en el ordenamiento territorial","Estructura Ecológica Principal desarticulada","Trees",3],
+ ["gest","Gestión institucional fragmentada entre sectores y escalas","Gestión institucional fragmentada","Split",3],
+ ["dsuelo","Demanda de suelo para vivienda y logística","","Warehouse",3],
+ ["bodeg","Expansión de bodegas y corredores logísticos alrededor de Corabastos","Expansión de bodegas y corredores logísticos","Container",3]
+];
+// Todas las relaciones van de CAUSA → EFECTO. "d" = causal · "f" = retroalimentación (cierra un ciclo causal)
+// El árbol se lee de izquierda (causas profundas) a derecha (consecuencias): cada hijo es causa de su padre.
+const TREE = {
+ root:["may","res","eco"],
+ may:["hig","dep","conc"], hig:["epi"], epi:["desc"], desc:["infra"], infra:["ind"], ind:["mono"],
+ dep:["perd"], perd:["mod"], mod:["crec"], crec:["exp"],
+ conc:["clust","dens"], clust:["econag"], econag:["monoc"], dens:["esp"], esp:["esc"],
+ res:["rsol","vinf","san"], rsol:["desperd"], desperd:["empaq"],
+ vinf:["infor"], infor:["empl"],
+ san:["aguasres","alc","recol"], recol:["sep"],
+ eco:["aire","calagua","lluvia","biodiv"],
+ aire:["no2"], no2:["trans"], trans:["desp"], desp:["sinc"], sinc:["cult"],
+ calagua:["cargas"],
+ lluvia:["imperm","suelo"], imperm:["supcons"],
+ biodiv:["hab"], hab:["frag","perdveg"], frag:["plan"], plan:["rent","eep","dsuelo"],
+ rent:["plusv"], eep:["gest"], dsuelo:["bodeg"]
+};
+const ED = [
+ // relaciones del árbol (causa → efecto = hijo → padre)
+ ...Object.entries(TREE).flatMap(([p,ks])=>ks.map(k=>[k,p,"d"])),
+ // relaciones transversales (entre ramas y dentro de una misma rama)
+ ["may","trans","d"],["dep","trans","d"],["conc","trans","d"],["cult","desp","d"],
+ ["may","rsol","d"],["may","vinf","d"],["may","bodeg","d"],["desc","rsol","d"],["desc","san","d"],["infra","empaq","d"],
+ ["exp","infor","d"],["monoc","empl","d"],["dens","aguasres","d"],
+ ["aguasres","cargas","d"],["aguasres","calagua","d"],["san","cargas","d"],["res","cargas","d"],["alc","lluvia","d"],["lluvia","san","d"],
+ ["plan","supcons","d"],["plan","conc","d"],["plan","dens","d"],["esp","rent","d"],["crec","dsuelo","d"],
+ ["supcons","suelo","d"],["supcons","frag","d"],["frag","perdveg","d"],
+ // retroalimentaciones (cierran ciclos causales)
+ ["res","san","f"],       // la saturación de residuos vuelve a presionar el saneamiento
+ ["may","perd","f"],      // la central única desplaza los circuitos de producción local
+ ["esp","esc","f"],       // la especulación retiene suelo y agrava su escasez
+ ["conc","dsuelo","f"],   // la concentración aumenta la demanda de suelo que el mercado urbaniza
+ ["eco","lluvia","f"],    // un soporte ecológico degradado regula peor el agua de lluvia
+ ["root","gest","f"]      // un territorio fragmentado se gestiona de forma fragmentada
+];
+// por qué existe cada retroalimentación (se muestra al pasar el cursor)
+const FBWHY = {
+ "res>san":"La saturación de residuos vuelve a presionar el saneamiento, que a su vez la agrava.",
+ "may>perd":"La central única desplaza los circuitos de producción local, reforzando la dependencia que la sostiene.",
+ "esp>esc":"La especulación retiene suelo vacante y agrava la escasez que la alimenta.",
+ "conc>dsuelo":"La concentración de origen y destino eleva la demanda de suelo que el desarrollo de mercado vuelve a concentrar.",
+ "eco>lluvia":"Un soporte ecológico degradado regula peor el agua de lluvia, y cada inundación lo degrada más.",
+ "root>gest":"Un territorio fragmentado se gestiona por partes, lo que debilita la Estructura Ecológica y profundiza la fragmentación."
+};
+
+/* ============ utilidades ============ */
+const $ = s => document.querySelector(s);
+function icon(name, sw=1.7){
+  const d = lucide.icons[name]; if(!d) return "";
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${d[2].map(([t,a])=>`<${t} ${Object.entries(a).map(([k,v])=>`${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+}
+const ink = c => { const n=parseInt(c.slice(1),16), l=(.299*(n>>16)+.587*(n>>8&255)+.114*(n&255))/255; return l>.58?"#0a0a0a":"#ffffff"; };
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const isMobile = () => matchMedia("(max-width:900px)").matches;
+
+/* ============ red real → jerarquía (árbol) + enlaces entre ramas ============ */
+const gn = ND.map((d,i)=>({ id:i, key:d[0], t:d[1], s:d[2]||d[1], i:d[3], g:d[4], nei:[], inn:[], out:[], und:[], groups:[d[4]] }));
+const K = Object.fromEntries(gn.map(n=>[n.key,n]));
+const edges = ED.map((d,i)=>({ id:i, a:K[d[0]], b:K[d[1]], dir:d[2]==="d"||d[2]==="f", fb:d[2]==="f" }));
+edges.forEach(e=>{
+  e.cross = !!(e.a.g && e.b.g && e.a.g!==e.b.g);
+  e.a.nei.push({n:e.b,e}); e.b.nei.push({n:e.a,e});
+  if(e.dir){ e.a.out.push({n:e.b,e}); e.b.inn.push({n:e.a,e}); } else { e.a.und.push({n:e.b,e}); e.b.und.push({n:e.a,e}); }
+  if(e.cross){ if(!e.a.groups.includes(e.b.g)) e.a.groups.push(e.b.g); if(!e.b.groups.includes(e.a.g)) e.b.groups.push(e.a.g); }
+});
+// árbol causal explícito: cada hijo es una causa de su padre (se dibuja a su izquierda)
+const kidsOf={}; gn.forEach(n=>kidsOf[n.key]=(TREE[n.key]||[]).slice());
+const mk = k => ({ key:k, t:K[k].t, s:K[k].s, i:K[k].i, c:kidsOf[k].map(mk) });
+const DATA = mk("root"); DATA.c.forEach((h,i)=>{ h.color=G[i+1].color; });
+
+/* ============ árbol: numeración y posiciones ============ */
+const COLX=[-125,250,650,1006,1362,1718,2074,2430], WID=[250,310,292,292,292,292,292,292], HEI=[170,92,70,70,70,70,70,70], PITCH=84, GAP=1.15;
+const all=[]; let leaf=0;
+function prep(n,parent,depth,code,color){
+  n.parent=parent; n.depth=depth; n.code=code; n.color=n.color||color||P.root; n.kids=n.c||[]; n.open=false; n.vis=depth===0; n.id=all.length; all.push(n);
+  n.kids.forEach((k,i)=>prep(k,n,depth+1,code?code+"."+(i+1):String(i+1),n.color));
+  if(!n.kids.length){ n.row=leaf++; } else n.row=n.kids.reduce((s,k)=>s+k.row,0)/n.kids.length;
+  if(depth===1) leaf+=GAP;
+}
+prep(DATA,null,0,"",P.root);
+DATA.color=P.root;
+const KK=Object.fromEntries(all.map(n=>[n.key,n]));
+all.forEach(n=>{ n.x=COLX[n.depth]; n.w=WID[n.depth]; n.h=HEI[n.depth]; n.y=(n.row-DATA.row)*PITCH; n.desc=0; n.gr=K[n.key]; n.groups=K[n.key].groups; n.bridge=n.groups.filter(g=>g>0).length>1; });
+all.forEach(n=>{ for(let p=n.parent;p;p=p.parent) p.desc++; });
+const branches=DATA.kids;
+const descendants=n=>{ const o=[]; (function r(m){ m.kids.forEach(k=>{ o.push(k); r(k); }); })(n); return o; };
+// aristas del árbol vs. enlaces entre ramas
+const treeEdge=new Map(); const treeSet=new Set();
+all.forEach(n=>{ if(!n.parent) return; const e=edges.find(e=>(e.a.key===n.key&&e.b.key===n.parent.key)||(e.b.key===n.key&&e.a.key===n.parent.key)); if(e){ treeEdge.set(n.key,e); treeSet.add(e.id); } });
+const xedges=edges.filter(e=>!treeSet.has(e.id)).map(e=>({ e, s:KK[e.a.key], t:KK[e.b.key], dir:e.dir }));
+all.forEach(n=>{ n.xs=xedges.filter(x=>x.s===n||x.t===n); });
+
+/* ============ iconos de la interfaz ============ */
+const sch=(id,rid)=>icon("Search",2)+`<input id="${id}" placeholder="Buscar variable…" autocomplete="off"><div class="res" id="${rid}"></div>`;
+$("#logo").innerHTML=icon("Network",1.9); $("#mlogo").innerHTML=icon("Network",1.9);
+$("#bNar").innerHTML=icon("Play",2)+"Relato"; $("#bProp").innerHTML=icon("Route",2)+"Propagar"; $("#bAll").innerHTML=icon("ListTree",2)+"Expandir todo"; $("#bReset").innerHTML=icon("RotateCcw",2)+"Reiniciar";
+$("#bIn").innerHTML=icon("Plus",2.2); $("#bOut").innerHTML=icon("Minus",2.2); $("#bFit").innerHTML=icon("Maximize",2);
+$("#iClose").innerHTML=icon("X",2); $("#cClose").innerHTML=icon("X",2);
+$("#hint").innerHTML=icon("MousePointerClick",2)+"Haz clic en la Fragmentación Territorial para ver la red";
+$("#bCtx").innerHTML=icon("BookOpen",2)+"Contexto"; $("#bPal").innerHTML=icon("Palette",2); $("#mPal").innerHTML=icon("Palette",2);
+$("#mS").innerHTML=icon("Search",2); $("#mP").innerHTML=icon("Play",2.2);
+$("#mAll").innerHTML=icon("ListTree",2)+"Expandir todo"; $("#mReset").innerHTML=icon("RotateCcw",2)+"Reiniciar"; $("#mCtx").innerHTML=icon("BookOpen",2)+"Contexto";
+$("#mhint").innerHTML=icon("Hand",2)+"<span>Toca la tarjeta clara para desplegar el sistema. Cada tarjeta con número se abre. El símbolo ⇄ indica que esa variable conecta con otra rama.</span>";
+$("#dsearch").innerHTML=sch("q","res"); $("#msearch").innerHTML=sch("mq","mres");
+
+/* =====================================================================
+   ESTADO ÚNICO: n.open es la fuente de verdad; refresh() sincroniza las dos vistas
+   ===================================================================== */
+let sel=null, introStage=(isMobile()||location.hash)?2:0;   // 0: solo el fenómeno · 1: red de puntos sin nombre · 2: los 3 problemas y todo lo demás
+function recompute(){ all.forEach(n=>{ n.vis = n.depth===0 || (n.parent.vis && n.parent.open); }); }
+function closeDesc(n){ descendants(n).forEach(d=>d.open=false); }
+function refresh(origin){
+  const prev=all.map(n=>n.vis); recompute();
+  all.forEach((n,i)=>{
+    const was=prev[i];
+    if(n.vis&&!was){ const dl = origin ? (n.depth-origin.depth-1)*.12 + n.parent.kids.indexOf(n)*.05 : n.depth*.1;
+      n.el.style.setProperty("--dl",dl+"s"); if(n.base) [n.base,n.flow,n.arrow].forEach(x=>x&&x.style.setProperty("--dl",dl+"s")); }
+    else if(!n.vis&&was){ n.el.style.setProperty("--dl","0s"); if(n.base) [n.base,n.flow,n.arrow].forEach(x=>x&&x.style.setProperty("--dl","0s")); }
+    n.el.classList.toggle("on",n.vis); n.el.classList.toggle("open",n.open); if(n.halo) n.halo.classList.toggle("on",n.vis);
+    if(n.base) [n.base,n.flow,n.arrow].forEach(x=>x&&x.classList.toggle("on",n.vis));
+    n.mel.classList.toggle("open",n.open);
+  });
+  let vx=0; xedges.forEach(x=>{ const on=x.s.vis&&x.t.vis; if(on) vx++; [x.p,x.pt,x.fbb].forEach(el=>el&&el.classList.toggle("on",on)); });
+  const el=$("#sX"); if(el) el.textContent=vx+"/"+xedges.length; const sn=$("#sN"); if(sn) sn.textContent=all.filter(n=>n.vis).length+"/"+all.length;
+  updateLanes(); drawMini(); renderInsp(); applySelFocus(); const gh=$("#ghost"); if(gh) gh.classList.toggle("off",!(introStage===1&&!DATA.open)); document.body.classList.toggle("lite",all.filter(n=>n.vis&&n.base).length>6);
+}
+function toggle(n){
+  if(!n.kids.length){ ping(n); if(!isMobile()) focusOn(n); return; }
+  if(n.open){ closeDesc(n); n.open=false; } else n.open=true;
+  hideHints(); refresh(n);
+  if(isMobile()){ if(n.open) setTimeout(()=>n.kids[0].mel.scrollIntoView({block:"nearest",behavior:"smooth"}),420); }
+  else focusOn(n);
+}
+function hideHints(){ $("#hint").classList.add("hide"); $("#mhint").classList.add("hide"); }
+function expandAll(){ introStage=2; all.forEach(n=>{ if(n.kids.length) n.open=true; }); hideHints(); refresh(null); if(!isMobile()) fit(); }
+function openSub(n){ (function r(m){ if(m.kids.length){ m.open=true; m.kids.forEach(r); } })(n); hideHints(); refresh(n); if(!isMobile()) reveal([n,...descendants(n)]); }
+function reset(){ closeDesc(DATA); DATA.open=false; sel=null; clearRelTags(); introStage=isMobile()?2:0; if(!isMobile()) $("#hint").innerHTML=icon("MousePointerClick",2)+"Haz clic en la Fragmentación Territorial para ver la red"; all.forEach(n=>{ n.el.classList.remove("sel"); n.mel.classList.remove("sel"); }); closeInsp(); $("#hint").classList.remove("hide"); $("#mhint").classList.remove("hide"); refresh(null); if(isMobile()) scrollTo({top:0,behavior:"smooth"}); else home(); }
+
+/* ============ ESCRITORIO: nodos, conectores del árbol, enlaces entre ramas, carriles ============ */
+const stage=$("#stage"), world=$("#world"), NS="http://www.w3.org/2000/svg", LK=$("#links");
+const lanes=branches.map((b,i)=>{ const d=document.createElement("div"); d.className="lane"; d.style.setProperty("--c",b.color);
+  d.innerHTML=`<div class="chip">${icon(G[i+1].icon)}<span>${b.t.length>40?b.t.slice(0,38)+"…":b.t}</span></div>`; world.insertBefore(d,LK); return d; });
+function updateLanes(){
+  branches.forEach((b,i)=>{
+    const v=[b,...descendants(b)].filter(n=>n.vis);
+    if(!b.open||v.length<2){ lanes[i].classList.remove("on"); return; }
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; v.forEach(n=>{ x0=Math.min(x0,n.x); x1=Math.max(x1,n.x+n.w); y0=Math.min(y0,n.y-n.h/2); y1=Math.max(y1,n.y+n.h/2); });
+    const L=lanes[i]; L.style.left=(x0-22)+"px"; L.style.top=(y0-40)+"px"; L.style.width=(x1-x0+44)+"px"; L.style.height=(y1-y0+66)+"px"; L.classList.add("on");
+  });
+}
+const PTS=document.createElement("div"); PTS.id="pts"; world.insertBefore(PTS,LK.nextSibling);
+function mkDot(d,c,x){ const g=document.createElement("span"); g.className="pg"+(x?" x":""); g.style.setProperty("--c",c);
+  const du=x?3.2+Math.random()*1.4:2+Math.random()*.8, de=-Math.random()*du;
+  g.innerHTML=["","t1"].map((t,k)=>`<i class="pd ${t}" style="offset-path:path('${d}');--du:${du.toFixed(2)}s;--de:${(de-k*.09).toFixed(2)}s"></i>`).join("");
+  PTS.appendChild(g); return g; }
+all.forEach(n=>{
+  const e=document.createElement("div");
+  e.className=`node d${Math.min(n.depth,2)}${n.bridge?" bridge":""}${n.kids.length?" has":""}`; e.style.setProperty("--c",n.color); e.style.setProperty("--ink",ink(n.color));
+  if(n.bridge){ const o=n.groups.filter(g=>g>0&&G[g].color!==n.color)[0]; e.style.setProperty("--c2",o?G[o].color:n.color); }
+  e.style.width=n.w+"px"; e.style.height=n.h+"px"; e.style.left=n.x+"px"; e.style.top=(n.y-n.h/2)+"px";
+  const p=n.parent||n; e.style.setProperty("--dx",(n.parent?p.x+p.w-n.x:0)+"px"); e.style.setProperty("--dy",(p.y-n.y)+"px");
+  const xb=n.xs.length?`<span class="xb" title="Conexiones con otras ramas">${icon("ArrowLeftRight",2.4)}${n.xs.length}</span>`:"";
+  e.style.setProperty("--wd",((7-n.depth)*.32).toFixed(2)+"s");
+  e.innerHTML=`<div class="wv"></div><div class="glare"></div><div class="wm">${icon(n.i,1.2)}</div><div class="tile">${icon(n.i)}</div><div class="txt"><span class="id">${n.depth===0?"FENÓMENO CENTRAL":"VAR "+n.code}${xb}${n.key==="hig"?`<span class="xb" title="Abre la evolución histórica">${icon("History",2.2)}historia</span>`:""}</span><span class="lb">${n.depth===0?n.t:n.s}</span></div>${n.kids.length?`<div class="cnt"><span>${n.kids.length}</span>${icon("ChevronRight",2.4)}</div>`:""}`;
+  e.title=n.t; n.el=e; world.appendChild(e);
+  if(n.depth===0) e.classList.add("on");
+  e.addEventListener("click",ev=>{ ev.stopPropagation(); if(moved) return;
+    if(n===DATA&&introStage===0&&!isMobile()){ introStage=1; ripple(n); select(n); $("#hint").innerHTML=icon("MousePointerClick",2)+"Haz clic otra vez en la Fragmentación Territorial para ver los 3 problemas"; refresh(null); zoomTo(all,2400); return; }
+    if(n===DATA&&introStage===1) introStage=2;
+    if(n.key==="may") setTimeout(()=>{ try{ preloadHist(); }catch(e){} },1500);
+    const hk=(n.key==="hig"||n.key==="dens")?n.key:null, wasH=!!hk&&hpOpen&&hpMode===hk; if(!inHig(n)) closeHist(); if(n.key!=="dep") closePlano(); popClick(n); ripple(n); select(n); toggle(n); setTimeout(()=>pulseFrom(n),n.open?520:120); if(hk){ if(wasH) closeHist(); else setTimeout(()=>openHist(hk),300); }
+    if(n.key==="dep"){ if(plOpen) closePlano(); else setTimeout(openPlano,300); } });
+  e.addEventListener("mouseenter",()=>focusLine(n)); e.addEventListener("mouseleave",()=>focusLine(null));
+  e.addEventListener("mousemove",ev=>{ const r=e.getBoundingClientRect(); e.style.setProperty("--mx",((ev.clientX-r.left)/T.k)+"px"); e.style.setProperty("--my",((ev.clientY-r.top)/T.k)+"px"); });
+  if(n.parent){
+    const te=treeEdge.get(n.key), kc=p.kids.length, ic=p.kids.indexOf(n);
+    const spread=Math.min(p.h-26,20*(kc-1)), py=p.y+(kc>1?(ic/(kc-1)-.5)*spread:0), px=p.x+p.w, cx=n.x, cy=n.y;
+    const srcIsChild=!!te&&te.dir&&te.a.key===n.key, hasArrow=!!te&&te.dir, kk=Math.max(46,(cx-px)*.5);
+    const d = srcIsChild ? `M${cx} ${cy}C${cx-kk} ${cy} ${px+kk} ${py} ${px+2} ${py}` : `M${px} ${py}C${px+kk} ${py} ${cx-kk} ${cy} ${cx-2} ${cy}`;
+    const mkp=(cls,pl)=>{ const el=document.createElementNS(NS,"path"); el.setAttribute("class",cls); el.setAttribute("d",d); if(pl) el.setAttribute("pathLength","1"); el.style.setProperty("--c",n.color); LK.appendChild(el); return el; };
+    n.base=mkp("base",true); n.flow=mkp("flow",false); n.trav=mkp("trav",true);
+    n.base.id="tp"+n.id;
+    n.arrow=mkDot(d,n.color,false);
+    if(hasArrow) n.base.setAttribute("marker-end","url(#xa)"); else n.flow.style.display="none";
+    n.srcIsChild=srcIsChild;
+  }});
+all.filter(n=>n.depth<=1).forEach(n=>{ const hl=document.createElement("div"); hl.className="halo"+(n.depth?"":" r"); hl.style.setProperty("--c",n.color);
+  Object.assign(hl.style,{left:n.x+"px",top:(n.y-n.h/2)+"px",width:n.w+"px",height:n.h+"px"}); hl.innerHTML="<i></i><i></i>"; PTS.appendChild(hl); n.halo=hl; });
+// enlaces entre ramas: curvas punteadas con flecha entre tarjetas de distintas ramas
+xedges.forEach((x,ix)=>{
+  const a=x.s, b=x.t, ia=a.xs.indexOf(x), ib=b.xs.indexOf(x);
+  const fx=(n,i)=>n.x+n.w*(.26+.48*((i+.5)/n.xs.length)), sx=fx(a,ia), tx=fx(b,ib), same=Math.abs(b.y-a.y)<=1, down=b.y>a.y+1;
+  let sy,ty,d;
+  if(same){ sy=a.y-a.h/2; ty=b.y-b.h/2; const k=90+Math.abs(tx-sx)*.12; d=`M${sx} ${sy}C${sx} ${sy-k} ${tx} ${ty-k} ${tx} ${ty-2}`; }
+  else if(down){ sy=a.y+a.h/2; ty=b.y-b.h/2; const k=Math.max(50,(ty-sy)*.45); d=`M${sx} ${sy}C${sx} ${sy+k} ${tx} ${ty-k} ${tx} ${ty-2}`; }
+  else { sy=a.y-a.h/2; ty=b.y+b.h/2; const k=Math.max(50,(sy-ty)*.45); d=`M${sx} ${sy}C${sx} ${sy-k} ${tx} ${ty+k} ${tx} ${ty+2}`; }
+  const gid="xg"+ix, c1=a.color, c2=b.color===a.color?"#ffffff":b.color;
+  LK.querySelector("defs").insertAdjacentHTML("beforeend",`<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${sx}" y1="${sy}" x2="${tx}" y2="${ty}"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>`);
+  const p=document.createElementNS(NS,"path"); p.setAttribute("class","xl"+(x.e.fb?" fb":"")); p.setAttribute("d",d); p.setAttribute("stroke",`url(#${gid})`); if(x.dir) p.setAttribute("marker-end","url(#xa)"); LK.appendChild(p); x.p=p;
+  const t=document.createElementNS(NS,"path"); t.setAttribute("class","xt"); t.setAttribute("d",d); t.setAttribute("pathLength","1"); LK.appendChild(t); x.tr=t;
+  p.id="xp"+ix;
+  x.pt=mkDot(d,"#fff",true);
+  if(!x.e.fb){ p.classList.add("tr"); x.pt.classList.add("tr"); }
+  if(x.e.fb){ const L=p.getTotalLength(), m=p.getPointAtLength(L/2), g=document.createElementNS(NS,"g"); g.setAttribute("class","fbb"); g.setAttribute("transform",`translate(${m.x-11} ${m.y-11})`);
+    const ic=(lucide.icons.Repeat||[0,0,[]])[2].map(([t,a])=>`<${t} ${Object.entries(a).map(([k,v])=>`${k}="${v}"`).join(" ")}/>`).join("");
+    g.innerHTML=`<circle class="ring" cx="11" cy="11" r="11"/><circle cx="11" cy="11" r="11"/><g class="spin"><svg x="4" y="4" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${ic}</svg></g>`; LK.appendChild(g); x.fbb=g; }
+  const hp=document.createElementNS(NS,"path"); hp.setAttribute("class","xh"+(x.e.fb?"":" tr")); hp.setAttribute("d",d); LK.appendChild(hp); x.h=hp;
+  hp.addEventListener("mouseenter",ev=>xHover(x,ev)); hp.addEventListener("mousemove",ev=>xHover(x,ev)); hp.addEventListener("mouseleave",()=>xHover(null));
+});function lineageTree(n){ const s=new Set(); for(let p=n;p;p=p.parent) s.add(p); (function dn(m){ m.kids.forEach(k=>{ if(k.vis){ s.add(k); dn(k); } }); })(n); return s; }
+function focusLine(n){
+  if(!n){ all.forEach(m=>{ m.el.classList.remove("dim"); if(m.base) [m.base,m.flow,m.arrow].forEach(x=>x&&x.classList.remove("dimL")); }); xedges.forEach(x=>{ x.p.classList.remove("dimL","hot"); x.pt.classList.toggle("lit",x.p.classList.contains("sel")); [x.pt,x.fbb].forEach(el=>el&&el.classList.remove("dimL")); }); return; }
+  const lt=lineageTree(n), s=new Set(lt); n.xs.forEach(x=>{ s.add(x.s); s.add(x.t); });
+  all.forEach(m=>{ m.el.classList.toggle("dim",!s.has(m)&&m.vis); if(m.base){ const dm=!(lt.has(m)&&lt.has(m.parent)); [m.base,m.flow,m.arrow].forEach(x=>x&&x.classList.toggle("dimL",dm)); } });
+  xedges.forEach(x=>{ const mine=x.s===n||x.t===n; x.p.classList.toggle("hot",mine); x.p.classList.toggle("dimL",!mine); x.pt.classList.toggle("lit",mine||x.p.classList.contains("sel")); [x.pt,x.fbb].forEach(el=>el&&el.classList.toggle("dimL",!mine)); });
+}
+
+/* ============ MÓVIL: lista vertical desplegable ============ */
+(function buildMob(){
+  const list=$("#mlist");
+  const mkm=n=>{
+    const d=document.createElement("div"); d.style.setProperty("--c",n.color); d.style.setProperty("--ink",ink(n.color));
+    if(n.bridge){ const o=n.groups.filter(g=>g>0&&G[g].color!==n.color)[0]; d.style.setProperty("--c2",o?G[o].color:n.color); }
+    const xb=n.xs.length?`<span class="xb">${icon("ArrowLeftRight",2.4)}${n.xs.length}</span>`:"";
+    if(n.depth===0){
+      d.className="mn mroot"; d.innerHTML=`<div class="mt">${icon(n.i,1.7)}</div><div><span class="mid">FENÓMENO CENTRAL</span><span class="ml">${n.t}</span></div><div class="mr"><span class="mcnt" style="background:#000;border-color:#000;color:#fff"><span>${n.kids.length}</span>${icon("ChevronRight",2.4)}</span></div>`;
+      d.addEventListener("click",()=>{ select(n); toggle(n); }); n.mel=d; list.appendChild(d); n.kids.forEach(k=>list.appendChild(mkm(k))); return d;
+    }
+    d.className=`mn md${Math.min(n.depth,2)}${n.bridge?" bridge":""}`;
+    // conexiones con otras ramas, escritas con su sentido: → este nodo causa, ← este nodo recibe, — sin dirección
+    const xch=n.xs.length?`<div class="xchips">${n.xs.map(x=>{ const o=x.s===n?x.t:x.s, sym=!x.dir?"—":(x.s===n?"→":"←"); return `<span class="xchip" data-k="${o.key}" style="--c:${o.color}"><b>${sym}</b>${o.s}</span>`; }).join("")}</div>`:"";
+    d.innerHTML=`<div class="mc"><div class="mt">${icon(n.i)}</div><div class="mx"><span class="mid">VAR ${n.code}${xb}</span><span class="ml">${n.t}</span>${xch}</div><div class="mr">${n.kids.length?`<span class="mcnt"><span>${n.kids.length}</span>${icon("ChevronRight",2.4)}</span>`:""}<button class="mi" aria-label="Detalles">${icon("Info",2)}</button></div></div>${n.kids.length?`<div class="mk"><div class="mki"></div></div>`:""}`;
+    n.mel=d;
+    d.querySelector(".mc").addEventListener("click",()=>{ select(n); if(n.kids.length) toggle(n); else openSheet(n); popClick(n); if(n.key==="hig"||n.key==="dens") setTimeout(()=>openHist(n.key),800); if(n.key==="dep") setTimeout(openPlano,600); });
+    d.querySelector(".mi").addEventListener("click",ev=>{ ev.stopPropagation(); select(n); openSheet(n); });
+    d.querySelectorAll(".xchip").forEach(c=>c.addEventListener("click",ev=>{ ev.stopPropagation(); goNode(KK[c.dataset.k]); }));
+    if(n.kids.length){ const box=d.querySelector(".mki"); n.kids.forEach(k=>box.appendChild(mkm(k))); }
+    return d;
+  };
+  mkm(DATA);
+  $("#chips").innerHTML=branches.map((b,i)=>`<button class="chipb" data-i="${b.id}" style="--c:${b.color}"><i style="color:${ink(b.color)}">${icon(G[i+1].icon,2)}</i>${G[i+1].short}</button>`).join("");
+  $("#chips").querySelectorAll(".chipb").forEach(c=>c.addEventListener("click",()=>{ const b=all[+c.dataset.i]; DATA.open=true; b.open=true; hideHints(); refresh(b); setTimeout(()=>b.mel.scrollIntoView({block:"start",behavior:"smooth"}),120); }));
+})();
+$("#mS").onclick=()=>{ $("#msw").classList.toggle("show"); if($("#msw").classList.contains("show")) $("#mq").focus(); };
+$("#mAll").onclick=expandAll; $("#mReset").onclick=reset; $("#mP").onclick=()=>sqOpen();
+
+/* ============ Inspector (escritorio) y hoja (móvil) ============ */
+function relRow(o){ const m=KK[o.n.key]; return `<div class="rel${m.vis?"":" hid"}" data-k="${m.key}" style="--c:${m.color}"><span class="ri">${icon(m.i)}</span><span>${m.s}</span><small>${m.vis?"":"oculta"}</small></div>`; }
+function inspHTML(n){
+  const gr=n.gr, trail=[]; for(let p=n;p;p=p.parent) trail.unshift(p);
+  const chips=n.groups.filter(g=>g>0).map(g=>`<span class="chip" style="--c:${G[g].color}"><i style="color:${ink(G[g].color)}">${icon(G[g].icon,2.4)}</i>${G[g].short}</span>`).join("");
+  const sec=(ic,t,arr)=>arr.length?`<div class="isec">${icon(ic,2)}${t}<b>${arr.length}</b></div>${arr.map(relRow).join("")}`:"";
+  const xl=n.xs.map(x=>({n:(x.s===n?x.t:x.s).gr}));
+  return `<div class="ih" style="--c:${n.color}"><div class="it" style="color:${ink(n.color)}">${icon(n.i,1.8)}</div><div><div class="ic">${n.depth===0?"Fenómeno central":"Variable "+n.code}</div><h2>${n.t}</h2></div></div>
+  ${n.depth===0?"":`<div class="chips">${chips}</div>`}
+  ${n.bridge?`<div class="isec" style="margin-top:14px">${icon("Link2",2)}Variable compartida entre problemas</div>`:""}
+  <div class="isec">${icon("Route",2)}Ruta desde el fenómeno</div>
+  <div class="ipath" style="--c:${n.color}">${trail.map(p=>`<div style="--pc:${p.depth===0?P.root:p.color}">${p.s}</div>`).join("")}</div>
+  ${sec("ArrowDownToLine","Causas directas (←)",gr.inn)}${sec("ArrowUpFromLine","Efectos directos (→)",gr.out)}${sec("Link","Relaciones sin dirección",gr.und)}
+  ${xl.length?sec("ArrowLeftRight","Conecta con otras ramas",xl):""}
+  
+  <div class="isec">${icon("Gauge",2)}Indicadores</div>
+  <div class="istats" style="--c:${n.color}"><div>${icon("Layers",2)}<b>${n.depth}</b><span>Nivel</span></div><div>${icon("GitBranch",2)}<b>${n.kids.length}</b><span>Directas</span></div><div>${icon("Network",2)}<b>${gr.nei.length}</b><span>Conexiones</span></div></div>
+  <div class="iact"><button class="btn pri" data-a="prop">${icon("Play",2)}Propagar</button>${n.key==="hig"?`<button class="btn" data-a="hist">${icon("History",2)}Evolución histórica</button>`:""}${n.kids.length?`<button class="btn" data-a="branch">${icon("ListTree",2)}Abrir rama</button>`:""}</div>`;
+}
+function bindAct(root){
+  root.querySelectorAll(".rel").forEach(r=>r.onclick=()=>{ if(isMobile()) closeSheet(); goNode(KK[r.dataset.k]); });
+  root.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{ if(!sel) return; if(b.dataset.a==="prop") runProp(sel); else if(b.dataset.a==="hist") openHist(); else openSub(sel); if(isMobile()) closeSheet(); });
+}
+function renderInsp(){
+  return;   // el módulo de la derecha ya no existe en escritorio (en celular se usa la hoja inferior)
+  const box=$("#insp"); if(!sel){ box.classList.remove("show"); return; }
+  $("#ibody").innerHTML=inspHTML(sel); bindAct($("#ibody")); box.classList.add("show");
+}
+function select(n){ sel=n; all.forEach(m=>{ m.el.classList.toggle("sel",m===n); m.mel.classList.toggle("sel",m===n); }); clearRelTags(); renderInsp(); applySelFocus(); }
+function closeInsp(){ $("#insp").classList.remove("show"); }
+$("#iClose").onclick=()=>{ sel=null; all.forEach(m=>{ m.el.classList.remove("sel"); m.mel.classList.remove("sel"); }); closeInsp(); clearRelTags(); applySelFocus(); };
+stage.addEventListener("click",()=>{ if(!moved){ $("#iClose").onclick(); closeHist(); } });
+function openSheet(n){ $("#sheet").innerHTML=inspHTML(n); bindAct($("#sheet")); $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); }
+function closeSheet(){ $("#sheet").classList.remove("show"); $("#sheetbg").classList.remove("show"); }
+$("#sheetbg").onclick=closeSheet;
+function goNode(n){
+  introStage=2; hideHints(); for(let p=n.parent;p;p=p.parent) p.open=true; select(n); refresh(null);
+  if(isMobile()) setTimeout(()=>{ n.mel.scrollIntoView({block:"center",behavior:"smooth"}); ping(n); },450);
+  else setTimeout(()=>{ focusOn(n); ping(n); },480);
+}
+
+/* ============ Propagación a lo largo de las flechas reales (árbol y enlaces entre ramas) ============ */
+let timers=[];
+function ping(n){ [n.el,n.mel].forEach(e=>{ e.classList.remove("ping"); void e.offsetWidth; e.classList.add("ping"); }); }
+function stepAnim(k1,k2){ // conector que une dos variables y si el pulso va en contra de la flecha dibujada
+  const a=KK[k1], b=KK[k2];
+  const child = a.parent===b ? a : b.parent===a ? b : null;
+  if(child && child.trav){ const src=child.srcIsChild?child:child.parent; return {el:child.trav, flip:(a!==src)}; }
+  const x=xedges.find(x=>(x.s===a&&x.t===b)||(x.s===b&&x.t===a)); if(x) return {el:x.tr, flip:(a!==x.s)};
+  return null;
+}
+/* ---- efectos al hacer clic ---- */
+function ripple(n){ if(isMobile()) return; const r=document.createElement("div"); r.className="ripple"; r.style.left=(n.x+n.w/2)+"px"; r.style.top=n.y+"px"; r.style.setProperty("--c",n.color); world.appendChild(r); setTimeout(()=>r.remove(),1000); }
+function pulseFrom(n){ if(isMobile()) return;
+  const hit=(el,flip)=>{ el.classList.remove("go","rev"); void el.getBoundingClientRect(); el.classList.add("go"); if(flip) el.classList.add("rev"); setTimeout(()=>el.classList.remove("go","rev"),1100); };
+  n.kids.forEach(k=>{ if(k.vis&&k.trav){ const src=k.srcIsChild?k:n; hit(k.trav,src!==n); } });
+  if(n.parent&&n.trav&&n.vis){ const src=n.srcIsChild?n:n.parent; hit(n.trav,src!==n); }
+  n.xs.forEach(x=>{ if(x.s.vis&&x.t.vis) hit(x.tr,x.s!==n); });
+}
+function xHover(x,ev){
+  const tip=$("#tip");
+  if(!x){ tip.classList.remove("show"); focusLine(null); return; }
+  const s=x.s, t=x.t;
+  all.forEach(m=>m.el.classList.toggle("dim",m!==s&&m!==t&&m.vis));
+  xedges.forEach(o=>{ o.p.classList.toggle("hot",o===x); o.p.classList.toggle("dimL",o!==x); });
+  all.forEach(m=>{ if(m.base) [m.base,m.flow].forEach(el=>el.classList.add("dimL")); });
+  const why=x.e.fb?FBWHY[s.key+">"+t.key]:"";
+  tip.innerHTML=`<b>${x.e.fb?"Retroalimentación · cierra un ciclo":(x.dir?"Causa → efecto":"Relación sin dirección")+" · "+(s.color===t.color?"transversal":"entre ramas")}</b><div class="r" style="--c:${s.color}"><i></i>${s.s}</div><div class="ar">${x.dir?"↓":"—"}</div><div class="r" style="--c:${t.color}"><i></i>${t.s}</div>${why?`<div class="why">${why}</div>`:""}`;
+  tip.style.left=ev.clientX+"px"; tip.style.top=ev.clientY+"px"; tip.classList.add("show");
+}
+function propagate(start){
+  timers.forEach(clearTimeout); timers=[]; all.forEach(n=>{ n.el.classList.remove("ping"); n.mel.classList.remove("ping"); });
+  const up=start===DATA;   // el fenómeno no tiene efectos aguas abajo: se recorre hacia sus causas y se anima de izquierda a derecha
+  const seen=new Set([start.key]), levels=[]; let front=[start];
+  while(front.length){
+    const nxt=[], step=[];
+    front.forEach(n=>{ const g=n.gr; const take=o=>{ const m=KK[o.n.key]; if(m.vis&&!seen.has(m.key)){ seen.add(m.key); nxt.push(m); step.push(up?{a:m,b:n}:{a:n,b:m}); } }; (up?g.inn:g.out).forEach(take); g.und.forEach(take); });
+    if(step.length) levels.push(step); front=nxt;
+  }
+  if(up) levels.reverse();
+  const first=up?[...new Set((levels[0]||[]).map(s=>s.a))]:[start]; first.forEach(ping);
+  levels.forEach((step,lv)=>{ const d=lv*900;
+    timers.push(setTimeout(()=>step.forEach(s=>{ const an=stepAnim(s.a.key,s.b.key); if(an&&!isMobile()){ an.el.classList.remove("go","rev"); void an.el.getBoundingClientRect(); an.el.classList.add("go"); if(an.flip) an.el.classList.add("rev"); } }),d));
+    timers.push(setTimeout(()=>step.forEach(s=>ping(s.b)),d+(isMobile()?0:700))); });
+}
+function runProp(n){ const start=n||sel||DATA; introStage=2; if(!DATA.open){ DATA.open=true; hideHints(); refresh(DATA); if(!isMobile()) reveal([DATA,...DATA.kids]); setTimeout(()=>propagate(DATA),950); } else propagate(start); }
+$("#bProp").onclick=()=>runProp();
+let lastAct=Date.now(); ["pointerdown","wheel","keydown"].forEach(ev=>addEventListener(ev,()=>{ lastAct=Date.now(); },{passive:true}));
+setInterval(()=>{ if(document.hidden||!DATA.open||SQ.on||hpOpen||isMobile()||matchMedia("(prefers-reduced-motion:reduce)").matches) return; if(Date.now()-lastAct<9000) return; propagate(DATA); },13000);
+
+/* ============ Evolución histórica: panel pequeño sobre Higiene estatal (solo 1900 y 1972) ============ */
+const HURL="https://anasoficasca-code.github.io/humedalburro/problematicas.html";   // enlace "ver la página completa"
+const HEMB="https://anasoficasca-code.github.io/problemaskennedy/axo.html";          // la misma axonometría, en versión ligera (axo.html)
+const HMODES={
+ hig:{ title:"Evolución histórica · axonometría", sub:"Del territorio al mercado mayorista", em:"72 años",
+   tl:[{y:1900,b:"1900",s:"Antes de Kennedy"},{y:1972,b:"1972",s:"Corabastos"}],
+   era:{1900:1972,1972:1988},   // época real de la axonometría que se muestra detrás de cada botón
+   cap:{ 1900:`<b>1900 · Antes de Kennedy</b> — solo el predio: el terreno donde luego se levantaría Corabastos, junto a la laguna El Tintal.`,
+         1972:`<b>20 de julio de 1972 · Se inaugura Corabastos</b> — ya construido, con su predio de unos 420.000 m².` } },
+ dens:{ title:"Ciudad Techo · origen de Kennedy", sub:"De la periferia al crecimiento en altura", em:"", start:1,
+   tl:[{y:1956,b:"1956",s:"Aeropuerto de Techo"},{y:1961,b:"1961",s:"Ciudad Techo"},{y:2024,b:"Hoy",s:"En altura"}],
+   era:{1956:1956,1961:1972,2024:2024},
+   cap:{ 1956:`<b>1956 · Antiguo Aeropuerto de Techo</b> — la pista y las vías sobre los terrenos donde después se levantaría Ciudad Techo.`,
+         1961:`<b>1961 · Nace Ciudad Techo</b> — el origen de Kennedy: se masifica la vivienda en la periferia mientras la oferta laboral se centraliza. <small>(Vista de 1972, ya construida.)</small>`,
+         2024:`<b>Hoy · densificación residencial en altura</b> — la huella construida actual de Kennedy: la vivienda se concentra donde ya no queda suelo.` } }
+};
+let CAP=HMODES.hig.cap, HF_ERA=HMODES.hig.era, hpMode="hig";let hpOpen=false, hpYear=1900, hpBuilt=false;
+// misma página del proyecto (mismo dominio): se oculta su interfaz y queda solo la vista axonométrica 3D
+const HF_CSS=`.hud-title,.ep,.controls-bar,.tools-panel,.left-poly-panel,.tf,.tree-info,#marcadoresMapa,#marcasCierre,.status-overlay,#eraBadge{display:none!important}
+html,body{background:#050505!important;overflow:hidden!important}
+html,body,canvas{cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28'><circle cx='14' cy='14' r='10' fill='none' stroke='%23d9755f' stroke-width='2'/><circle cx='14' cy='14' r='3' fill='%23d9755f'/></svg>") 14 14,crosshair!important}`;
+function hfInject(){ try{ const d=$("#hf").contentDocument; if(!d||!d.head) return false; if(!d.getElementById("kn-style")){ const s=d.createElement("style"); s.id="kn-style"; s.textContent=HF_CSS; d.head.appendChild(s); } return true; }catch(e){ return false; } }
+function hfYear(y){ try{ const b=$("#hf").contentDocument.querySelector('.year-btn[data-year="'+HF_ERA[y]+'"]'); if(b){ b.click(); return true; } }catch(e){} return false; }
+function hfReady(){ try{ const s=$("#hf").contentWindow.__estadoHistorico&&$("#hf").contentWindow.__estadoHistorico(); return !!s&&s.anio===HF_ERA[hpYear]&&s.edificiosTotales>0; }catch(e){ return false; } }
+let hfPoll=0;
+function hfWait(){   // muestra "cargando" solo hasta que los edificios ya están construidos
+  clearInterval(hfPoll); const hl=document.querySelector("#hp .hload"); if(!hl) return; if(hfReady()){ hl.classList.add("off"); return; } hl.classList.remove("off");
+  let n=0; hfPoll=setInterval(()=>{ n++; if(hfReady()){ clearInterval(hfPoll); hl.classList.add("off"); return; } if(n%8===0) hfYear(hpYear); if(n>300){ clearInterval(hfPoll); hl.classList.add("off"); } },300);
+}
+function hfGate(){ try{ const w=$("#hf").contentWindow; if(!w||w.__gate) return; w.__gate=1; w.__held=[]; w.__paused=!hpOpen; const raf=w.requestAnimationFrame.bind(w); w.requestAnimationFrame=cb=>raf(t=>{ if(w.__paused) w.__held.push(cb); else cb(t); }); }catch(e){} }
+function hfPause(){ try{ const w=$("#hf").contentWindow; if(w&&w.__gate) w.__paused=true; }catch(e){} }
+function hfResume(){ try{ const w=$("#hf").contentWindow; if(w&&w.__gate){ w.__paused=false; const q=w.__held.splice(0); q.forEach(cb=>w.requestAnimationFrame(cb)); } }catch(e){} }
+function hpBuild(){
+  if(hpBuilt) return; hpBuilt=true; const hp=$("#hp");
+  hp.innerHTML=`<div class="hh"><i class="hi">${icon("History",2)}</i><div><b id="hTitle"></b><span id="hSub"></span></div><button class="hx" aria-label="Cerrar">${icon("X",2.2)}</button></div>
+   <div class="htl" id="htl"></div>
+   <div class="hv"><img id="hImg" alt="Axonometría del territorio" decoding="async"><iframe id="hf" title="Axonometría del territorio" allow="fullscreen"></iframe><div class="hload off">${icon("Box",2)}Cargando axonometría…</div></div>
+   <div class="hcap" id="hcap"></div>
+   <div class="hrow"><button class="hl hb3" id="h3d">${icon("Box",2)}Explorar en 3D</button><a class="hl" href="${HURL}" target="_blank" rel="noopener">${icon("ExternalLink",2)}Ver la página completa</a></div>`;
+  hp.querySelector(".hx").onclick=closeHist;
+  $("#h3d").onclick=hp3d;
+  const hf=$("#hf"); hf.addEventListener("mouseenter",()=>document.body.classList.add("cur-off")); hf.addEventListener("mouseleave",()=>document.body.classList.remove("cur-off"));
+  hf.addEventListener("load",()=>{ hfInject(); hfGate(); hfYear(hpYear); hfWait(); setTimeout(()=>{ hfInject(); hfGate(); },300); });
+  hpSetMode(hpMode);
+}
+function hpSetMode(m){
+  const M=HMODES[m], n=KK[m==="dens"?"dens":"hig"], hp=$("#hp"); hpMode=m; CAP=M.cap; HF_ERA=M.era;
+  hp.style.setProperty("--c",n.color); hp.style.setProperty("--ink",ink(n.color));
+  $("#hTitle").textContent=M.title; $("#hSub").textContent=M.sub;
+  $("#htl").innerHTML=M.tl.map((x,k)=>`<button class="hd${k?"":" on"}" data-y="${x.y}"><b>${x.b}</b><small>${x.s}</small></button>`).join(`<span class="hln">${M.em?`<em>${M.em}</em>`:""}</span>`);
+  hp.querySelectorAll(".hd").forEach(b=>b.onclick=()=>hpSetYear(+b.dataset.y)); hpSetYear(M.tl[M.start||0].y);
+}
+function hpSetYear(y){ hpYear=y; const hp=$("#hp"); hp.querySelectorAll(".hd").forEach(b=>b.classList.toggle("on",+b.dataset.y===y)); $("#hcap").innerHTML=CAP[y];
+  const im=$("#hImg"), src="assets/axo/"+HF_ERA[y]+".jpg"; if(im&&!im.src.endsWith(src)){ im.style.opacity=0; im.onload=()=>{ im.style.opacity=1; }; im.src=src; }
+  if(hp.classList.contains("d3")){ hfYear(y); hfWait(); } }
+function hp3d(){ const hp=$("#hp"), hf=$("#hf"); if(hp.classList.contains("d3")){ hp.classList.remove("d3"); hfPause(); $("#h3d").lastChild.textContent="Explorar en 3D"; return; }
+  hp.classList.add("d3"); $("#h3d").lastChild.textContent="Volver a la imagen"; if(!hf.dataset.l){ hf.dataset.l="1"; hf.src=HEMB; } hfResume(); hfYear(hpYear); hfWait(); }
+function preloadHist(){ hpBuild(); [1956,1972,1988,2024].forEach(e=>{ const i=new Image(); i.src="assets/axo/"+e+".jpg"; }); }
+function placeHP(){
+  if(!hpOpen||isMobile()) return;
+  const hp=$("#hp"), hv=hp.querySelector(".hv"), r=KK[hpMode].el.getBoundingClientRect();
+  const chrome=hp.offsetHeight-hv.offsetHeight, avail=r.top-18-74-chrome;
+  hv.style.height=Math.max(220,Math.min(560,avail))+"px";                 // la axonometría ocupa todo el espacio libre de arriba
+  const pw=hp.offsetWidth, ph=hp.offsetHeight; let left=r.left+r.width/2-pw/2; left=Math.max(12,Math.min(innerWidth-pw-12,left));
+  let top=r.top-ph-18, below=false; if(top<64){ top=r.bottom+18; below=true; }
+  hp.style.left=left+"px"; hp.style.top=top+"px"; hp.classList.toggle("below",below); hp.style.setProperty("--ax",Math.max(24,Math.min(pw-24,r.left+r.width/2-left))+"px");
+}
+function inHig(n){ for(let p=n;p;p=p.parent) if(p===KK.hig) return true; return false; }
+function frameHigRow(){ // toda la fila de Higiene estatal (hasta Monoexportación) queda ABAJO y completa
+  const n=KK[hpMode], ds=hpMode==="hig"?[n,...descendants(n)]:[n], x0=Math.min(...ds.map(d=>d.x)), x1=Math.max(...ds.map(d=>d.x+d.w));
+  const L=padL(), k=Math.max(.3,Math.min((W-L-30)/(x1-x0),1)), tx=L+(W-L-30-(x1-x0)*k)/2-x0*k, ty=(H-92)-n.y*k;
+  goto(d3.zoomIdentity.translate(tx,ty).scale(k),1400);
+}
+function openHist(mode){
+  mode=mode||"hig"; if(window.POPS) POPS.close(); preloadHist(); hpSetMode(mode); hpOpen=true; document.body.classList.add("hp-open"); $("#hp").classList.add("show"); hfResume();
+  if(!isMobile()) frameHigRow();
+  placeHP(); requestAnimationFrame(placeHP); setTimeout(placeHP,700); setTimeout(placeHP,1500);
+}
+function closeHist(){ hpOpen=false; hfPause(); document.body.classList.remove("hp-open","cur-off"); const h=$("#hp"); h.classList.remove("show"); if(h.classList.contains("d3")){ h.classList.remove("d3"); const b=$("#h3d"); if(b) b.lastChild.textContent="Explorar en 3D"; } }
+addEventListener("keydown",e=>{ if(e.key==="Escape") closeHist(); });
+
+/* ============ Contexto (narrativa de la exposición) ============ */
+const lk=(k,t)=>`<a data-k="${k}" style="--c:${KK[k].color}">${t}</a>`;
+/* ============ RELATO: el texto de la exposición, paso a paso, dirigiendo el mapa ============
+   show: variables que deben quedar visibles · deep: abre todo el subárbol · foc: encuadre de cámara · sel: variable resaltada
+   prop: arranca la propagación de flechas · panel: animación existente que se abre (plano · hist · pop:clave)
+   chips: ideas del diagrama causal · ind: indicadores territoriales que se citan en ese tramo */
+const STEPS=[
+ { w:"FRAGMENTACIÓN", t:"La fragmentación territorial", ic:"Puzzle", g:0, net:["root","may","res","eco"], sel:"root", prop:["may","res","eco"],
+   x:"En la localidad de Kennedy hemos identificado una problemática central: la fragmentación territorial. Este fenómeno no es aislado; está profundamente alimentado por varios problemas clave del territorio." },
+ { w:"HIPERCONCENTRACIÓN", t:"Hiperconcentración del mercado mayorista", ic:"Store", g:1, net:["root","may","hig","dep","trans"], sel:"may", prop:["hig","dep"],
+   x:"Empezando por la hiperconcentración del mercado mayorista, cuyos síntomas visibles son una serie de dinámicas sanitarias y operativas que responden a un modelo histórico de higiene estatal y salubridad pública." },
+ { w:"DEPENDENCIA", t:"Dependencia alimentaria", ic:"ShoppingBasket", g:1, net:["dep","may","trans","perd"], sel:"dep", prop:["perd"], panel:"plano",
+   x:"El diagrama causal de este problema muestra cómo la dependencia de Bogotá del abastecimiento externo, que supera el 99%, concentra masivamente los viajes hacia Corabastos, atrayendo comercio informal, tráfico de carga, congestión vehicular, acumulación de residuos e impermeabilización del suelo." },
+ { w:"1972", t:"1972: nace Corabastos", ic:"History", g:1, net:["mono","ind","infra","desc","epi","hig","may"], sel:"hig", prop:["mono"], panel:"hist",
+   x:"Para entender el origen de este modelo, debemos devolvernos a 1972, cuando se inaugura la central de Corabastos para responder a las crisis epidémicas provocadas por la descomposición de alimentos en la antigua Plaza España. La falta de tecnología para conservar alimentos obedecía a una infraestructura deficiente por la industrialización tardía del país, cuya causa de fondo fue la monoexportación cafetera: un modelo centrado en el café sin diversificar la producción ni planificar el abastecimiento." },
+ { w:"RAÍCES", t:"Por qué Bogotá depende de afuera", ic:"Sprout", g:1, net:["exp","crec","mod","perd","dep"], sel:"perd", prop:["exp"], panel:"pop:exp",
+   x:"Adicionalmente, esta concentración se sostiene porque Bogotá mantiene una profunda dependencia alimentaria, derivada de la pérdida de producción agrícola local cuando resultó más rentable transformar la tierra rural en suelo urbano, proceso acelerado por la expulsión violenta de campesinos." },
+ { w:"SATURACIÓN", t:"Concentración comercial y logística", ic:"Gauge", g:1, net:["may","dep","trans","no2"], sel:"may", prop:["dep"],
+   x:"Para medir cómo esta concentración satura el entorno, evaluamos los mapas multitemporales de 2020 y 2026 del indicador de Concentración Comercial y Logística. Al comparar ambos periodos, se evidencia una clara expansión y densificación de los núcleos comerciales desde Corabastos hacia los corredores residenciales colindantes." },
+ { w:"MOVILIDAD", t:"Sobrecarga de transporte", ic:"Bus", g:1, net:["cult","sinc","desp","trans"], sel:"trans", prop:["cult"], panel:"pop:trans",
+   x:"Todo esto conecta directamente con la sobrecarga de transporte en Kennedy por desplazamientos masivos en franjas horarias específicas. Estos flujos responden a un modelo de sincronización industrial que fijó la jornada a primera hora para aprovechar la luz solar, un hábito cultural que prioriza la presencialidad estricta y el control del tiempo sobre la flexibilidad." },
+ { w:"EMPLEO", t:"Clústeres de empleo", ic:"Briefcase", g:1, net:["trans","conc","clust","monoc","econag"], sel:"clust", prop:["monoc"], panel:"pop:clust",
+   x:"Sumado a esto, existe una alta concentración espacial de clústeres de empleo debido a la expansión monocéntrica de Bogotá, donde el origen de Kennedy desde Ciudad Techo en 1961 masificó la función residencial en la periferia mientras la oferta laboral se centralizaba. Este fenómeno fue impulsado por economías de aglomeración que concentran empresas para reducir costos, obligando a viajes pendulares que sobrecargan las vías." },
+ { w:"VIVIENDA", t:"Densificación y especulación", ic:"Building2", g:1, net:["conc","dens","esp","esc","plan"], sel:"dens", prop:["esc","plan"], panel:"hist:dens",
+   x:"Asimismo, la densificación en altura y la especulación inmobiliaria concentran la residencia. Finalmente, esto es alimentado por un desarrollo urbano orientado al mercado y no a la descentralización, donde la infraestructura construida incentiva más clústeres y cierra un ciclo que fragmenta a Kennedy." },
+ { w:"RESIDUOS", t:"Saturación de los residuos", ic:"Trash2", g:2, net:["desc","rsol","vinf","aguasres","san","res","cargas"], sel:"res", prop:["desc","vinf","aguasres"],
+   x:"Por otro lado, la saturación de residuos desencadena fragmentación territorial. En los andenes, la acumulación de desechos se intensifica por ventas informales y su descomposición colapsa el saneamiento local, incrementando aguas residuales y cargas contaminantes. Al desplegarlo, el problema se abre en tres ramificaciones, cada una con sus propias causas: la generación masiva de residuos orgánicos, las ventas informales en los andenes y la presión sobre los sistemas de saneamiento, que a su vez se retroalimenta con la saturación." },
+ { w:"AGUA", t:"Del desecho al humedal", ic:"Droplets", g:2, net:["aguasres","san","cargas","calagua","eco"], sel:"calagua", prop:["aguasres"],
+   x:"El diagrama causal de este problema sintetiza esta degradación en tres niveles: generación masiva de desechos, colapso de la red de alcantarillado e impacto hídrico por escorrentía, donde los niveles de DBO5, nitrógeno y fósforo superan la capacidad de los humedales.",
+   chips:["Generación masiva de desechos","Colapso de la red de alcantarillado","Impacto hídrico por escorrentía · DBO5, nitrógeno y fósforo"] },
+ { w:"SOPORTE ECOLÓGICO", t:"Soporte ecológico", ic:"Globe", g:3, net:["rent","eep","dsuelo","plan","supcons","frag","perdveg","hab"], sel:"plan", prop:["rent","eep","dsuelo"],
+   x:"Esto conecta con la degradación del soporte ecológico. Al analizar los mapas multitemporales de 2020 y 2026, observamos la desaparición de corredores ecológicos que conectaban la trama urbana con el humedal, debido a un desarrollo urbano orientado al mercado que prioriza la rentabilidad del suelo sobre la ecología, impulsando la pavimentación masiva. Este desarrollo se sostiene en tres causas —la rentabilidad del suelo, una Estructura Ecológica Principal desarticulada del ordenamiento y la demanda de suelo para vivienda y logística— y es una de las causas directas de la fragmentación ecológica y de la cobertura vegetal." },
+ { w:"CALOR", t:"Islas de calor", ic:"Mountain", g:3, net:["supcons","suelo","imperm","lluvia","eco"], sel:"imperm", prop:["supcons"],
+   x:"Como consecuencia, el indicador de Islas de Calor muestra para 2026 una expansión drástica de la mancha térmica al perder la capacidad de enfriamiento por evapotranspiración." },
+ { w:"AIRE", t:"Calidad del aire", ic:"Wind", g:3, net:["trans","no2","aire","eco"], sel:"aire", prop:["trans"],
+   x:"Por último, la actividad industrial y vehicular deteriora la calidad del aire; el indicador de Presión sobre el Aire demuestra cómo la acumulación de dióxido de nitrógeno, monóxido de carbono y metano supera la capacidad de dispersión del ecosistema." },
+ { w:"METABOLISMO", t:"Saturación del metabolismo territorial", ic:"Droplet", g:3, net:["imperm","lluvia","calagua","aire","biodiv","eco"], sel:"eco", prop:["imperm","calagua","aire","biodiv"],
+   x:"El diagrama causal de la saturación del metabolismo territorial sintetiza cómo este desborde impacta la cuenca del Humedal El Burro en tres capas.",
+   chips:["Pérdida de regulación hídrica por impermeabilización","Colapso de sumideros ambientales por escorrentía e islas de calor","Deterioro ecológico acumulado: menor resiliencia y mayor vulnerabilidad ambiental"] },
+ { w:"RESPUESTA", t:"La respuesta social", ic:"Users", g:0, net:["root","may","res","eco"], sel:"root", prop:["may","res","eco"],
+   x:"Sin embargo, para contrarrestar esta fragmentación, evaluamos el potencial de respuesta social mediante el indicador de Organizaciones Comunitarias, que mide la presencia de juntas de acción comunal y cooperativas vinculadas a huertas urbanas y equipamientos. A esto se suma el indicador de Densidad del Conocimiento, que identifica la concentración de capacidades educativas e innovación para transformar el entorno." },
+ { w:"CONCLUSIÓN", t:"La causa raíz", ic:"Puzzle", g:0, net:["may","dep","trans","no2","aire","eco"], sel:"may", prop:["may"],
+   x:"Al cruzar las capas de análisis, la conclusión fundamental a la que llegamos es que la fragmentación de Kennedy no es una suma de fallas aisladas, sino la consecuencia de una hiperconcentración histórica en Corabastos que opera como la causa raíz del colapso del metabolismo territorial. La dependencia del abastecimiento externo genera un flujo de carga que no solo satura la red vial, sino que desencadena un efecto dominó: acumula residuos, degrada la red hídrica e impermeabiliza el suelo, anulando la capacidad natural de autorregulación del entorno y aislando al Humedal El Burro de sus corredores ecológicos. Por lo tanto, concluimos que resolver esta crisis mediante parches de infraestructura desconectados es inviable; recuperar el territorio exige abordar la causa matriz reequilibrando los flujos de abastecimiento y restaurando la estructura socioecológica de la localidad desde un metabolismo territorial integrado." }
+];
+const CTX=`<div class="ch"><i>${icon("BookOpen",1.8)}</i><div><h3>El problema en palabras</h3><div class="sub">Relato de la exposición</div></div></div>`+
+ STEPS.map(s=>`<div class="part"><div class="tag">${icon(s.ic,2)}${s.t}</div><p>${s.x}</p></div>`).join("");
+$("#cbody").innerHTML=CTX;
+function toggleCtx(force){
+  if(isMobile()){ $("#sheet").innerHTML=`<div class="ctxp">${CTX}</div>`; $("#sheet").querySelectorAll("a[data-k]").forEach(a=>a.onclick=()=>{ closeSheet(); goNode(KK[a.dataset.k]); }); $("#sheet").classList.add("show"); $("#sheetbg").classList.add("show"); return; }
+  const c=$("#ctx"); c.classList.toggle("show",force===undefined?!c.classList.contains("show"):force);
+}
+$("#bCtx").onclick=()=>toggleCtx(); $("#mCtx").onclick=()=>toggleCtx(); $("#cClose").onclick=()=>toggleCtx(false);
+$("#cbody").querySelectorAll("a[data-k]").forEach(a=>a.onclick=()=>goNode(KK[a.dataset.k]));
+
+/* ============ Secuencia a pantalla completa (ligera): palabra → escena animada con diagrama causal ============ */
+const SQ={ i:-1, on:false, play:true, tm:0, subs:[], built:false };
+const sqC=s=>s.g?G[s.g].color:P.root;
+function sqWrap(t,max){ const w=t.split(" "), L=[]; let c=""; w.forEach(x=>{ if((c+" "+x).trim().length>max&&c){ L.push(c); c=x; } else c=(c+" "+x).trim(); }); if(c) L.push(c); if(L.length>3){ L.length=3; L[2]=L[2].replace(/.{0,2}$/,"…"); } return L; }
+/* diagrama causal: solo las variables de la escena, con las flechas reales del tablero */
+function sqDiagram(s){
+  const V=isMobile(), keys=s.net, set=new Set(keys), es=ED.filter(e=>set.has(e[0])&&set.has(e[1])), lay={}; keys.forEach(k=>lay[k]=0);
+  // se detectan las flechas de retorno (ciclos) para que no desordenen las columnas
+  const back=new Set(), seen={}, onst={}; const dfs=a=>{ seen[a]=1; onst[a]=1; es.forEach((e,i)=>{ if(e[0]!==a) return; if(onst[e[1]]) back.add(i); else if(!seen[e[1]]) dfs(e[1]); }); onst[a]=0; };
+  keys.forEach(k=>{ if(!seen[k]) dfs(k); });
+  for(let it=0;it<keys.length;it++){ let ch=false; es.forEach(([a,b],i)=>{ if(!back.has(i)&&lay[b]<=lay[a]&&lay[a]+1<keys.length){ lay[b]=lay[a]+1; ch=true; } }); if(!ch) break; }
+  const cols=[]; keys.forEach(k=>{ (cols[lay[k]]=cols[lay[k]]||[]).push(k); });
+  const NC=cols.filter(Boolean).length, rows=Math.max(...cols.filter(Boolean).map(c=>c.length));
+  const tall=V&&rows===1&&NC>3, N3=V&&rows>=3, NW=tall?200:V?(N3?118:158):184, NH=tall?48:V?(N3?62:60):66, CW=V?(N3?128:170):222, RH=tall?62:V?88:92, FS=V?(N3?11:11.5):12.5, WR=tall?26:V?(N3?12:15):19;
+  const pos={}; let ci=0; cols.forEach(c=>{ if(!c) return; c.forEach((k,r)=>{ const o=(rows-c.length)/2+r; pos[k]=V?{x:o*CW+10,y:ci*RH+14,c:ci}:{x:ci*CW+10,y:o*RH+14,c:ci}; }); ci++; });
+  const hasBack=!V&&es.some(([a,b])=>pos[b].c<=pos[a].c), TOP=hasBack?46:0; if(TOP) keys.forEach(k=>pos[k].y+=TOP);
+  const Wd=V?(rows-1)*CW+NW+20:(NC-1)*CW+NW+20, Hd=(V?(NC-1)*RH+NH+28:(rows-1)*RH+NH+28)+TOP;
+  const col=k=>{ const g=K[k].g; return g?G[g].color:P.root; }, uc=[...new Set(keys.map(col))], mid=c=>uc.indexOf(c);
+  const dist={}, q=[]; (s.prop||[]).forEach(k=>{ if(set.has(k)){ dist[k]=0; q.push(k); } });
+  while(q.length){ const a=q.shift(); es.forEach(([x,y])=>{ if(x===a&&dist[y]==null){ dist[y]=dist[a]+1; q.push(y); } }); }
+  let defs="", eh="", ph="", nh="";
+  uc.forEach((c,i)=>{ defs+=`<marker id="sqm${i}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1L9 5L0 9z" fill="${c}"/></marker>`; });
+  es.forEach(([a,b,t])=>{ const A=pos[a], B=pos[b], fw=B.c>A.c, c=col(a); let d;
+    if(V){
+      if(fw){ const x1=A.x+NW/2, y1=A.y+NH, x2=B.x+NW/2, y2=B.y-3, k=Math.max(30,(y2-y1)*.5); d=`M${x1} ${y1}C${x1} ${y1+k} ${x2} ${y2-k} ${x2} ${y2}`; }
+      else if(B.c===A.c){ const r=B.x>A.x, x1=r?A.x+NW:A.x, x2=r?B.x-3:B.x+NW+3, y=A.y+NH/2; d=`M${x1} ${y}L${x2} ${y}`; }
+      else { const x1=A.x, y1=A.y+NH/2, x2=B.x, y2=B.y+NH/2; d=`M${x1} ${y1}C${x1-60} ${y1} ${x2-60} ${y2} ${x2-3} ${y2}`; }
+    } else if(fw){ const x1=A.x+NW, y1=A.y+NH/2, x2=B.x, y2=B.y+NH/2, k=Math.max(40,(x2-x1)*.5); d=`M${x1} ${y1}C${x1+k} ${y1} ${x2-k} ${y2} ${x2-3} ${y2}`; }
+    else { const x1=A.x+NW/2, y1=A.y, x2=B.x+NW/2, y2=B.y, up=Math.min(y1,y2)-36; d=`M${x1} ${y1}C${x1} ${up} ${x2} ${up} ${x2} ${y2-3}`; }
+    eh+=`<path class="de" pathLength="1" d="${d}" stroke="${c}" ${t==="d"?`marker-end="url(#sqm${mid(c)})"`:""} style="--d:${(.5+A.c*.45).toFixed(2)}s"/>`;
+    if(dist[a]!=null) ph+=`<path class="dp" pathLength="1" d="${d}" style="--d:${(2.6+dist[a]*.8).toFixed(2)}s"/>`;
+  });
+  keys.forEach(k=>{ const p=pos[k], c=col(k), n=KK[k], root=k==="root", dl=(p.c*.45).toFixed(2), lines=sqWrap(root?n.t:n.s,WR), sel=k===s.sel;
+    const IS=N3?19:24, ic=icon(n.i,1.9).replace("<svg ",`<svg x="${N3?7:V?8:12}" y="${NH/2-IS/2}" width="${IS}" height="${IS}" `);
+    nh+=`<g transform="translate(${p.x} ${p.y})"><g class="dn" style="--d:${dl}s"><rect width="${NW}" height="${NH}" rx="14" fill="${root?P.root:"#0c0c0c"}" stroke="${c}" stroke-width="${sel?3:1.6}"/>${sel?`<rect class="dsel" width="${NW}" height="${NH}" rx="14" fill="none" stroke="${c}" stroke-width="3"/>`:""}<g style="color:${root?"#000":c}">${ic}</g>`+
+      lines.map((l,i)=>`<text x="${N3?31:V?38:48}" y="${NH/2+4+(i-(lines.length-1)/2)*(FS+2.5)}" font-size="${FS}" font-weight="600" fill="${root?"#111":"#eee"}"${N3&&l.length>WR+1?` textLength="${NW-31-7}" lengthAdjust="spacingAndGlyphs"`:""}>${l}</text>`).join("")+`</g></g>`; });
+  return `<svg viewBox="0 0 ${Wd} ${Hd}" preserveAspectRatio="xMidYMid meet"><defs>${defs}</defs>${eh}${ph}${nh}</svg>`;
+}function sqBuild(){
+  if(SQ.built) return; SQ.built=true; const el=document.createElement("div"); el.id="sq";
+  el.innerHTML=`<div class="sq-top"><div class="logo">${icon("Network",1.9)}</div><div><b>Problemáticas de Kennedy</b><span>Modelamiento dinámico · el problema en secuencia</span></div><button class="sq-x" id="sqX" aria-label="Cerrar secuencia">${icon("X",2.2)}</button></div>
+   <div class="sq-word" id="sqW"></div><div class="sq-scene" id="sqS"></div>
+   <div class="sq-foot"><div class="sq-ctl"><button class="btn" id="sqP" aria-label="Anterior"><span style="display:inline-flex;transform:rotate(180deg)">${icon("ChevronRight",2.4)}</span></button><button class="btn" id="sqPl"></button><button class="btn pri" id="sqN"></button></div><div class="sq-dots" id="sqD"></div><div class="sq-lab" id="sqL"></div><div class="sq-bar"><i id="sqB"></i></div></div>`;
+  document.body.appendChild(el);
+  $("#sqX").onclick=sqClose; $("#sqP").onclick=()=>sqGo(SQ.i-1); $("#sqN").onclick=()=>sqGo(SQ.i===STEPS.length-1?0:SQ.i+1);
+  $("#sqPl").onclick=()=>{ SQ.play=!SQ.play; sqSched(); sqFoot(); };
+  $("#sqW").onclick=()=>{ if(SQ.ph==="w") sqScene(); };
+}
+function sqClear(){ clearTimeout(SQ.tm); SQ.subs.forEach(clearTimeout); SQ.subs=[]; try{ closePlano(); closeHist(); if(window.POPS) POPS.close(); }catch(e){} popPad=0; }
+const sqAt=(f,ms)=>SQ.subs.push(setTimeout(f,ms));
+function sqFoot(){
+  const s=STEPS[SQ.i], last=SQ.i===STEPS.length-1;
+  $("#sqPl").innerHTML=icon(SQ.play?"Pause":"Play",2)+`<span class="sq-t">${SQ.play?"Pausar":"Seguir"}</span>`; $("#sqP").disabled=!SQ.i;
+  $("#sqN").innerHTML=`<span class="sq-t">${last?"Reiniciar":"Continuar"}</span>`+icon(last?"RotateCcw":"ChevronRight",2.4);
+  $("#sqD").innerHTML=STEPS.map((x,k)=>`<button data-i="${k}" aria-label="Paso ${k+1}" class="${k<SQ.i?"on":""}${k===SQ.i?" cur":""}"></button>`).join("");
+  $("#sqD").querySelectorAll("button").forEach(b=>b.onclick=()=>sqGo(+b.dataset.i));
+  $("#sqL").textContent=String(SQ.i+1).padStart(2,"0")+" · "+s.w;
+}
+function sqSched(){
+  clearTimeout(SQ.tm); const bar=$("#sqB"), s=STEPS[SQ.i]; bar.className=""; void bar.offsetWidth;
+  if(SQ.ph!=="s"||!SQ.play||SQ.i>=STEPS.length-1) return;
+  const ms=9000+s.x.split(/\s+/).length*420; bar.style.setProperty("--d",ms+"ms"); bar.className="run"; SQ.tm=setTimeout(()=>sqGo(SQ.i+1),ms);
+}
+function sqGo(i){
+  sqBuild(); i=Math.max(0,Math.min(STEPS.length-1,i)); const s=STEPS[i]; sqClear(); closeSheet(); SQ.i=i; SQ.on=true; SQ.ph="w";
+  document.body.classList.add("sq-open"); const c=sqC(s), sq=$("#sq"); sq.style.setProperty("--c",c); sq.style.setProperty("--ink",ink(c));
+  $("#sqS").classList.remove("show","hasp"); $("#sqS").innerHTML="";
+  const W=$("#sqW"); W.classList.add("show"); W.innerHTML=`<div class="w">${[...s.w].map((ch,k)=>`<span style="--k:${k}">${ch===" "?"&nbsp;":ch}</span>`).join("")}</div><small>HAZ CLIC EN LA PALABRA PARA CONTINUAR</small>`;
+  sqFoot(); sqSched(); sqAt(sqScene,2300);
+}
+function sqScene(){
+  const s=STEPS[SQ.i]; if(SQ.ph==="s") return; SQ.ph="s"; clearTimeout(SQ.tm); const mob=isMobile(), hasP=!!s.panel;
+  $("#sqW").classList.remove("show");
+  const sents=s.x.split(/(?<=\.)\s+/), chips=s.chips?`<div class="nchips">${s.chips.map((t,k)=>`<div style="--k:${k}"><b>0${k+1}</b><span>${t}</span></div>`).join("")}</div>`:"";
+  const ind=(s.ind||[]).map(d=>`<div class="nind"><h6>${icon("Gauge",2)}Indicador</h6><strong>${d.n}</strong>${d.c.map(x=>`<span>${x}</span>`).join("")}<em>${d.v}</em></div>`).join("");
+  const isH=hasP&&s.panel.startsWith("hist"), pv=hasP?`<button class="nv" id="sqV">${icon("Play",2)}${s.panel==="hist"?"Ver axonometría 1900 → 1972":s.panel==="hist:dens"?"Ver Ciudad Techo en la axonometría":"Ver animación"}</button>`:"";
+  const S=$("#sqS"); S.innerHTML=`<div class="sq-txt"><span class="kk">${String(SQ.i+1).padStart(2,"0")} · ${s.w}</span><h2>${s.t}</h2>${sents.map((t,k)=>`<p style="--k:${k}">${t}</p>`).join("")}${chips}${ind}${pv}</div><div class="sq-dia">${sqDiagram(s)}</div>`;
+  S.classList.toggle("hasp",hasP&&!mob); void S.offsetWidth; S.classList.add("show");
+  $("#sqS").style.marginRight=""; const v=$("#sqV"); if(v) v.onclick=()=>{ SQ.play=false; clearTimeout(SQ.tm); sqFoot(); $("#sqB").className=""; sqPanel(s); };
+  if(hasP&&!mob&&(true)) sqAt(()=>sqPanel(s),900);
+  if([2,3,6,7].includes(SQ.i)) sqAt(()=>{ try{ preloadHist(); }catch(e){} },SQ.i===2||SQ.i===6?5000:300);
+  sqSched();
+}
+function sqFitP(){ if(isMobile()) return; const p=["#pl","#pp","#hp"].map(x=>$(x)).find(e=>e&&e.offsetWidth&&getComputedStyle(e).display!=="none"&&e.classList.contains("show")); if(p) $("#sqS").style.marginRight=(p.offsetWidth+44)+"px"; }
+function sqPanel(s){ const p=s.panel; if(p==="plano") openPlano(); else if(p.startsWith("hist")){ const m=p==="hist:dens"?"dens":"hig"; openHist(m); HMODES[m].tl.slice((HMODES[m].start||0)+1).forEach((x,k)=>sqAt(()=>hpSetYear(x.y),5500+k*5500)); } else popClick(KK[p.slice(4)]); [150,500,1200,2200].forEach(ms=>sqAt(sqFitP,ms)); }
+function sqClose(){ SQ.on=false; sqClear(); document.body.classList.remove("sq-open"); }
+function sqOpen(){ SQ.play=true; closeInsp(); sqGo(0); }
+$("#bNar").onclick=sqOpen;
+addEventListener("keydown",e=>{ if(!SQ.on) return; if(e.key==="ArrowRight") sqGo(SQ.i+1); else if(e.key==="ArrowLeft") sqGo(SQ.i-1); else if(e.key===" "){ e.preventDefault(); $("#sqPl").click(); } else if(e.key==="Enter"&&SQ.ph==="w") sqScene(); else if(e.key==="Escape"&&!hpOpen&&!plOpen) sqClose(); });
+
+/* ============ Paleta ============ */
+$("#palpop").innerHTML=`<h5>Paleta de colores</h5>`+Object.entries(PALS).map(([k,p])=>`<div class="pitem${k===PK?" act":""}" data-k="${k}"><span class="sw"><i style="background:${p.c1}"></i><i style="background:${p.c2}"></i><i style="background:${p.c3}"></i><i style="background:${p.root}"></i></span>${p.name}${k===PK?icon("Check",2.4):""}</div>`).join("");
+const palToggle=e=>{ e.stopPropagation(); $("#palpop").classList.toggle("show"); }; $("#bPal").onclick=palToggle; $("#mPal").onclick=palToggle;
+$("#palpop").querySelectorAll(".pitem").forEach(el=>el.onclick=()=>{ try{ localStorage.setItem("pal",el.dataset.k); }catch(e){} location.reload(); });
+document.addEventListener("click",e=>{ if(!e.target.closest("#palpop")) $("#palpop").classList.remove("show"); });
+
+/* ============ Cámara (d3.zoom) ============ */
+const DUR=900; let W=innerWidth, H=innerHeight, T=d3.zoomIdentity, moved=false, startT=T;
+const zoom=d3.zoom().scaleExtent([.12,2.5]).clickDistance(5)
+  .on("start",()=>{ moved=false; })
+  .on("zoom",e=>{ T=e.transform; world.style.transform=`translate(${T.x}px,${T.y}px) scale(${T.k})`; if(e.sourceEvent&&e.sourceEvent.type!=="wheel"&&Math.hypot(T.x-startT.x,T.y-startT.y)>4){ moved=true; stage.classList.add("drag"); } updateVP(); placeHP(); })
+  .on("end",()=>{ stage.classList.remove("drag"); setTimeout(()=>moved=false,0); });
+d3.select(stage).call(zoom).on("dblclick.zoom",null).on("pointerdown.t",()=>{ startT=T; });
+const sSel=()=>d3.select(stage);
+function goto(t,ms=DUR){ sSel().transition().duration(ms).ease(d3.easeCubicInOut).call(zoom.transform,t); }
+const rootT=()=>{ if(introStage===0&&!isMobile()) return d3.zoomIdentity.translate(W/2,H/2).scale(1.1); const b=bbox(all), pad={l:padL(),r:60,t:100,b:90}, k=Math.min((W-pad.l-pad.r)/(b.x1-b.x0+80),(H-pad.t-pad.b)/(b.y1-b.y0+80),1);
+  return d3.zoomIdentity.translate(pad.l+(W-pad.l-pad.r-(b.x1-b.x0)*k)/2-b.x0*k,pad.t+(H-pad.t-pad.b-(b.y1-b.y0)*k)/2-b.y0*k).scale(k); };
+function home(){ goto(rootT()); }
+function bbox(ns){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; ns.forEach(n=>{ x0=Math.min(x0,n.x); x1=Math.max(x1,n.x+n.w); y0=Math.min(y0,n.y-n.h/2); y1=Math.max(y1,n.y+n.h/2); }); return {x0,y0,x1,y1}; }
+const padL=()=>$("#ctx").classList.contains("show")&&W>900?350:70;
+let popPad=0;          // ancho que ocupan los paneles visuales de la derecha (para que la cámara no esconda tarjetas debajo)
+const padR=()=>70+popPad;
+function fit(ns){ const v=ns||all.filter(n=>n.vis), b=bbox(v), pad={l:padL(),r:padR(),t:110,b:100};
+  const k=Math.min((W-pad.l-pad.r)/(b.x1-b.x0+60),(H-pad.t-pad.b)/(b.y1-b.y0+80),1.15);
+  goto(d3.zoomIdentity.translate(pad.l+(W-pad.l-pad.r-(b.x1-b.x0)*k)/2-b.x0*k,pad.t+(H-pad.t-pad.b-(b.y1-b.y0)*k)/2-b.y0*k).scale(k)); }
+function reveal(ns){ const b=bbox(ns), pad={l:padL(),r:padR(),t:110,b:110};
+  let k=T.k; const need=Math.min((W-pad.l-pad.r)/(b.x1-b.x0+40),(H-pad.t-pad.b)/(b.y1-b.y0+60)); if(need<k) k=Math.max(.25,need);
+  let tx=T.x, ty=T.y; const L=b.x0*k+tx, R=b.x1*k+tx, Tp=b.y0*k+ty, B=b.y1*k+ty;
+  if(L<pad.l) tx+=pad.l-L; else if(R>W-pad.r) tx-=R-(W-pad.r); if(Tp<pad.t) ty+=pad.t-Tp; else if(B>H-pad.b) ty-=B-(H-pad.b);
+  if(k!==T.k||tx!==T.x||ty!==T.y) goto(d3.zoomIdentity.translate(tx,ty).scale(k),750); }
+/* zoom lento y suave hacia lo que se toca (y hacia sus relaciones entre ramas) */
+function zoomTo(ns,ms=1600){
+  const b=bbox(ns), pad={l:padL(),r:padR(),t:100,b:90};
+  const k=Math.max(.3,Math.min((W-pad.l-pad.r)/(b.x1-b.x0+140),(H-pad.t-pad.b)/(b.y1-b.y0+140),1.3));
+  goto(d3.zoomIdentity.translate(pad.l+(W-pad.l-pad.r-(b.x1-b.x0)*k)/2-b.x0*k,pad.t+(H-pad.t-pad.b-(b.y1-b.y0)*k)/2-b.y0*k).scale(k),ms);
+}
+function clearRelTags(){ document.querySelectorAll(".rtag").forEach(t=>t.remove()); }
+function showRelTags(n){
+  clearRelTags();
+  n.xs.forEach(x=>{ const o=x.s===n?x.t:x.s; if(!(x.s.vis&&x.t.vis)) return;
+    const txt=!x.dir?"relacionada":(x.s===n?"efecto de esta":"causa de esta"), ic=!x.dir?"Link":(x.s===n?"ArrowDownToLine":"ArrowUpFromLine");
+    const t=document.createElement("div"); t.className="rtag"; t.style.setProperty("--c",o.color); t.style.left=o.x+"px"; t.style.top=(o.y-o.h/2-32)+"px"; t.innerHTML=icon(ic,2.2)+txt; world.appendChild(t); });
+}
+function applySelFocus(){
+  const n=sel; all.forEach(m=>m.el.classList.remove("dimS")); xedges.forEach(x=>{ x.p.classList.remove("sel","dimS"); x.pt.classList.remove("lit"); [x.pt,x.fbb].forEach(el=>el&&el.classList.remove("dimS")); });
+  if(!n||!n.xs.length||isMobile()) return;
+  const xv=n.xs.filter(x=>x.s.vis&&x.t.vis); if(!xv.length) return;
+  const keep=new Set([n,n.parent,...n.kids,...n.xs.map(x=>x.s===n?x.t:x.s)]);
+  all.forEach(m=>{ if(m.vis&&!keep.has(m)) m.el.classList.add("dimS"); });
+  xedges.forEach(x=>{ const mine=xv.includes(x); x.p.classList.toggle("sel",mine); x.pt.classList.toggle("lit",mine); x.p.classList.toggle("dimS",!mine); [x.pt,x.fbb].forEach(el=>el&&el.classList.toggle("dimS",!mine)); });
+}
+function focusOn(n){
+  if(isMobile()) return;
+  if(hpOpen&&((hpMode==="hig"&&inHig(n))||(hpMode==="dens"&&n===KK.dens))) return;            // con la axonometría abierta la cámara no se mueve: la fila de Higiene se queda abajo
+  if((n.key==="hig"||n.key==="dens")&&!hpOpen) return;       // Higiene se encuadra sola con su panel
+  let changed=false; if(n.depth>0) n.xs.forEach(x=>{ const o=x.s===n?x.t:x.s; if(!o.vis){ for(let p=o.parent;p;p=p.parent){ if(!p.open){ p.open=true; changed=true; } } } });
+  if(changed) refresh(n);
+  const partners=n.xs.map(x=>x.s===n?x.t:x.s).filter(o=>o.vis);
+  zoomTo([n,...(n.open?n.kids:[]),...(n.parent?[n.parent]:[]),...partners]);
+  applySelFocus(); showRelTags(n);
+}
+$("#bIn").onclick=()=>sSel().transition().duration(300).call(zoom.scaleBy,1.35); $("#bOut").onclick=()=>sSel().transition().duration(300).call(zoom.scaleBy,1/1.35);
+$("#bFit").onclick=()=>fit(); $("#bAll").onclick=expandAll; $("#bReset").onclick=reset;
+addEventListener("resize",()=>{ W=innerWidth; H=innerHeight; updateVP(); });
+
+/* ============ Minimapa ============ */
+const ms=d3.select("#miniSvg"), full=bbox(all), FW=full.x1-full.x0+80, FH=full.y1-full.y0+80;
+ms.attr("viewBox",`${full.x0-40} ${full.y0-40} ${FW} ${FH}`).attr("preserveAspectRatio","xMidYMid meet");
+const mg=ms.append("g"), mvp=ms.append("rect").attr("class","vp");
+function drawMini(){ return; mg.selectAll("rect").data(all.filter(n=>n.vis),d=>d.id).join(e=>e.append("rect").attr("rx",10),u=>u,x=>x.remove())
+  .attr("x",d=>d.x).attr("y",d=>d.y-d.h/2+12).attr("width",d=>d.w).attr("height",d=>d.h-24).attr("fill",d=>d.depth===0?P.root:d.color).attr("opacity",d=>d.depth===0?1:.85); }
+function updateVP(){ return; mvp.attr("x",-T.x/T.k).attr("y",-T.y/T.k).attr("width",W/T.k).attr("height",H/T.k); }
+$("#mini").addEventListener("click",e=>{ const r=$("#miniSvg").getBoundingClientRect(), s=Math.min(r.width/FW,r.height/FH), ox=(r.width-FW*s)/2, oy=(r.height-FH*s)/2;
+  const wx=(e.clientX-r.left-ox)/s+full.x0-40, wy=(e.clientY-r.top-oy)/s+full.y0-40; goto(d3.zoomIdentity.translate(W/2-wx*T.k,H/2-wy*T.k).scale(T.k),600); });
+
+/* ============ Leyenda ============ */
+$("#legend").innerHTML=`<h4>${icon("Layers",2)}Ramas del sistema</h4>`+branches.map((b,i)=>`<div class="li" data-i="${b.id}" style="--c:${b.color}"><i style="color:${ink(b.color)}">${icon(G[i+1].icon,2)}</i><span>${G[i+1].name.length>30?G[i+1].short:G[i+1].name}</span><b>${b.desc+1}</b></div>`).join("")+
+  `<h4>${icon("Network",2)}Cómo leer el mapa</h4>
+   <div class="key"><svg viewBox="0 0 34 14"><path d="M1 7H27" stroke="${G[1].color}" stroke-width="2.4" stroke-linecap="round"/><path d="M25 2L33 7L25 12z" fill="${G[1].color}"/></svg>Causa → efecto</div>
+   <div class="key"><svg viewBox="0 0 34 14"><path d="M1 7C9 13 19 1 27 7" stroke="#fff" stroke-width="2.4" stroke-dasharray="1.5 4" fill="none" stroke-linecap="round"/><path d="M25 2L33 7L25 12z" fill="#fff"/></svg>Retroalimentación</div>
+   <div class="key" style="opacity:.8"><svg viewBox="0 0 34 14"><path d="M1 7H25" stroke="#9a9a9a" stroke-width="1.6"/><path d="M29 2L33 7L29 12" stroke="#9a9a9a" stroke-width="1.6" fill="none"/></svg>Se abre hacia las causas →</div>
+   <div class="key"><svg viewBox="0 0 34 14"><path d="M1 7C9 1 19 13 27 7" stroke="#fff" stroke-width="2" stroke-dasharray="4 4" fill="none" stroke-linecap="round"/><path d="M25 2L33 7L25 12z" fill="#fff"/></svg>Relación transversal (pasa el cursor sobre una variable)</div>
+   <div class="key"><svg viewBox="0 0 34 14"><rect x="9" y="1" width="6" height="12" rx="2" fill="${G[1].color}"/><rect x="15" y="1" width="6" height="12" rx="2" fill="${G[3].color}"/></svg>Variable compartida</div>
+   <button id="xTog">${icon("ArrowLeftRight",2)}<span>Ver todas las relaciones transversales</span></button>
+   <div id="stat"><div><b id="sN">1/56</b><span>Variables</span></div><div><b id="sX">0/${xedges.length}</b><span>Transversales y ciclos</span></div></div>`;
+$("#xTog").onclick=e=>{ e.stopPropagation(); const on=document.body.classList.toggle("xall"); $("#xTog").classList.toggle("on",on); $("#xTog span").textContent=on?"Ocultar relaciones transversales":"Ver todas las relaciones transversales"; };
+$("#legend").insertAdjacentHTML("afterbegin",`<button class="lt" aria-label="Leyenda" title="Ver / ocultar leyenda">${icon("Info",2)}</button>`);
+$("#legend .lt").onclick=()=>$("#legend").classList.toggle("open");
+$("#legend").querySelectorAll(".li").forEach(l=>l.addEventListener("click",()=>{ const b=all[+l.dataset.i]; DATA.open=true; b.open=true; hideHints(); refresh(b); reveal([DATA,b,...b.kids]); select(b); }));
+
+/* ============ Buscador (escritorio y móvil) ============ */
+function wireSearch(inp,resBox){
+  let hits=[], act=-1;
+  const run=()=>{ const t=norm(inp.value.trim()); hits=t?all.filter(n=>n.depth>0&&(norm(n.t).includes(t)||norm(n.s).includes(t))).slice(0,7):[]; act=-1; resBox.innerHTML="";
+    hits.forEach(n=>{ const d=document.createElement("div"); d.style.setProperty("--c",n.color); d.innerHTML=`<span class="ri">${icon(n.i)}</span><span>${n.s}</span><small>${n.code}</small>`; d.onmousedown=d.ontouchstart=e=>{ e.preventDefault(); pick(n); }; resBox.appendChild(d); });
+    resBox.classList.toggle("show",hits.length>0); };
+  const pick=n=>{ inp.value=""; resBox.classList.remove("show"); inp.blur(); $("#msw").classList.remove("show"); goNode(n); };
+  inp.addEventListener("input",run);
+  inp.addEventListener("keydown",e=>{ if(e.key==="ArrowDown"||e.key==="ArrowUp"){ e.preventDefault(); if(!hits.length) return; act=(act+(e.key==="ArrowDown"?1:-1)+hits.length)%hits.length; [...resBox.children].forEach((c,i)=>c.classList.toggle("act",i===act)); }
+    else if(e.key==="Enter"&&hits.length) pick(hits[Math.max(0,act)]); else if(e.key==="Escape"){ inp.value=""; run(); inp.blur(); } });
+  inp.addEventListener("blur",()=>setTimeout(()=>resBox.classList.remove("show"),180));
+}
+wireSearch($("#q"),$("#res")); wireSearch($("#mq"),$("#mres"));
+
+/* Precarga en segundo plano (solo escritorio, sin ahorro de datos): primero DESCARGA los archivos y los guarda en caché;
+   luego prepara la axonometría con el dibujo en pausa. Todo ocurre mientras se habla en el inicio, antes de llegar a Higiene estatal. */
+addEventListener("load",()=>setTimeout(()=>{ const go=async()=>{
+  const B="https://anasoficasca-code.github.io/humedalburro/";
+  ["https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js","https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js",B+"assets/vendor/polygon-clipping.umd.min.js?v=1",B+"modulo-08-3d.js?v=280","assets/pops.js","assets/bogota-data.js","assets/plano-kennedy.jpg"]
+    .forEach(u=>{ const l=document.createElement("link"); l.rel="prefetch"; l.href=u; document.head.appendChild(l); });
+  if(isMobile()||(navigator.connection&&(navigator.connection.saveData||/2g/.test(navigator.connection.effectiveType||"")))) return;
+  const W=[["assets/lite/buildings.json"],[B+"assets/kennedy_trees_real.json"],[B+"assets/kennedy_manzanas.json"],[B+"assets/kennedy_parques.json"],[B+"assets/kennedy_water_bodies.json"],[B+"assets/arbol_real4.png"],[B+"assets/textura_pasto_pastel.jpg"],[B+"assets/textura_via.jpg"],[B+"assets/textura_agua_clara.jpg"],[B+"assets/textura_agua_clara_relieve.jpg"],[B+"assets/pato.png"]];
+  for(const [u] of W){ try{ const r=await fetch(u,{cache:"force-cache",priority:"low"}); await r.arrayBuffer(); }catch(e){} }
+  try{ preloadHist(); }catch(e){}
+  };
+  if("requestIdleCallback" in window) requestIdleCallback(go,{timeout:6000}); else go(); },2500));
+
+/* ============ Plano animado (PDF de Kennedy) al tocar Dependencia alimentaria ============ */
+const PL={w:912,h:1157,T:[525,725],src:"assets/plano-kennedy.jpg"};   // T = punto de Corabastos, movido hacia "Humedal La Vaca"
+const PL_PATHS=[
+  "M120 92C210 110 300 230 340 320S450 480 475 570S515 640 527 680Q530 700 525 722",
+  "M240 215C300 270 400 380 455 470S495 600 520 660Q528 700 525 722",
+  "M420 345C440 380 465 420 470 480S505 600 522 660Q528 700 525 722",
+  "M735 195C690 250 640 330 612 400S590 470 595 520C600 580 640 620 610 650C580 672 545 700 527 722",
+  "M175 845C270 830 330 790 420 750S500 715 523 722"];
+const PL_DOTS=[[140,100,85,55,34],[255,235,70,55,26],[420,300,65,50,26],[745,165,60,70,30],[110,850,80,55,28]];
+const PL_LABELS=[   // texto del PDF · posición (px del plano) · tipo
+  ["A ZIPAQUIRÁ<br>UBATÉ",209,53,"reg"],["SABANA<br>OCCIDENTE",115,161,"reg"],["A FACATATIVÁ<br>LA MESA",65,354,"reg"],["CUNDINAMARCA",402,87,"reg"],
+  ["SABANA<br>CENTRO",435,299,"reg"],["SABANA<br>CENTRO",640,170,"reg"],["A TUNJA<br>BOYACÁ",803,72,"reg"],["BOGOTÁ",652,524,"city"],
+  ["Humedal<br>El Burro",551,588,"wet"],["Humedal<br>La Vaca",450,756,"wet"],["Corabastos",552,698,"poi"],["AEROPUERTO<br>EL DORADO",742,598,"reg"]];
+let plOpen=false;
+function plRand(seed){ return ()=>{ seed=(seed*16807)%2147483647; return (seed-1)/2147483646; }; }
+function plBuild(){
+  const rnd=plRand(11); let dots="", parts="", lines="", lbs="", k=0;
+  PL_DOTS.forEach(([cx,cy,rx,ry,n])=>{ for(let i=0;i<n;i++){ const a=rnd()*6.283, r=Math.sqrt(rnd()); dots+=`<circle class="pl-d" cx="${(cx+Math.cos(a)*r*rx).toFixed(1)}" cy="${(cy+Math.sin(a)*r*ry).toFixed(1)}" r="${(1.4+rnd()*1.1).toFixed(1)}" style="animation-delay:${(-rnd()*2.4).toFixed(2)}s"/>`; } });
+  PL_PATHS.forEach((d,i)=>{ lines+=`<path id="plp${i}" class="pl-line" pathLength="1" d="${d}" style="animation-delay:${(.9+i*.25).toFixed(2)}s"/>`;
+    for(let j=0;j<7;j++){ const dur=(5.2+i*.5).toFixed(1); parts+=`<g class="pl-p"><circle r="6.5"/><circle r="2.5"/><animateMotion dur="${dur}s" begin="${(2.4+j*(dur/7)).toFixed(2)}s" repeatCount="indefinite"><mpath href="#plp${i}"/></animateMotion></g>`; } });
+  PL_LABELS.forEach(([t,x,y,c],i)=>{ lbs+=`<div class="pl-lb ${c}" style="left:${(x/PL.w*100).toFixed(2)}%;top:${(y/PL.h*100).toFixed(2)}%;animation-delay:${(1.1+i*.22).toFixed(2)}s">${t}</div>`; });
+  const [tx,ty]=PL.T;
+  $("#pl").innerHTML=`<div class="pl-h"><i>${icon("MapPin",2)}</i><div><b>Plano de Kennedy</b><span>Dependencia alimentaria · el abasto llega a Corabastos</span></div><div class="sp"><button id="plR" aria-label="Repetir animación" title="Repetir animación">${icon("RotateCcw",2)}</button><button id="plX" aria-label="Cerrar">${icon("X",2.2)}</button></div></div>
+   <div class="pl-stage" id="plS"><img alt="Plano de Kennedy y la Sabana" src="${PL.src}">
+   <svg viewBox="0 0 ${PL.w} ${PL.h}" preserveAspectRatio="none"><g class="pl-dots">${dots}</g>${lines}${parts}
+     <g transform="translate(${tx} ${ty})"><circle class="pl-ring" r="10"/><circle class="pl-ring" r="10" style="animation-delay:.9s"/><circle class="pl-ring" r="10" style="animation-delay:1.8s"/><g class="pl-core"><circle r="13" fill="rgba(255,178,90,.35)"/><circle r="7" fill="#ffb25a" stroke="#fff" stroke-width="2.2"/></g></g></svg>
+   <div class="pl-labels">${lbs}</div></div>`;
+  $("#plX").onclick=closePlano; $("#plR").onclick=plBuild; plSize();
+}
+function plSize(){
+  const pl=$("#pl"), st=$("#plS"); if(!st) return; const mob=isMobile(), ratio=PL.h/PL.w;
+  let ih=Math.min(innerHeight-(mob?160:96),mob?680:880)-70, iw=ih/ratio;
+  if(mob){ iw=Math.min(iw,innerWidth-34); ih=iw*ratio; pl.style.left=((innerWidth-(iw+24))/2)+"px"; pl.style.right="auto"; } else { pl.style.left="auto"; }
+  pl.style.width=(iw+24)+"px"; st.style.height=ih+"px";
+}
+function openPlano(){ if(typeof closeHist==="function") closeHist(); plOpen=true; plBuild(); $("#pl").classList.add("show"); }
+function closePlano(){ plOpen=false; const pl=$("#pl"); pl.classList.remove("show"); pl.innerHTML=""; }
+addEventListener("resize",plSize); addEventListener("keydown",e=>{ if(e.key==="Escape") closePlano(); });
+
+/* ============ Paneles visuales por tarjeta (assets/pops.js, se carga solo al necesitarlo) ============ */
+const POPKEYS={exp:1,crec:1,mod:1,perd:1,trans:1,desp:1,sinc:1,cult:1,clust:1};
+let popsLoading=false;
+function loadPops(cb){ if(popsLoading) return; popsLoading=true; const s=document.createElement("script"); s.src="assets/pops.js"; s.onload=()=>{ popsLoading=false; cb(); }; document.head.appendChild(s); }
+function popClick(n){ if(window.POPS){ POPS.click(n.key); return; } if(POPKEYS[n.key]) loadPops(()=>POPS.click(n.key)); }
+
+/* ============ Cursor propio (solo con mouse) ============ */
+if(matchMedia("(pointer:fine)").matches){
+  const cur=$("#cur"), cur2=$("#cur2"), root=document.documentElement; let tx=-100,ty=-100,x=-100,y=-100,shown=false;
+  root.style.setProperty("--cc",P.c1);
+  addEventListener("mousemove",e=>{ tx=e.clientX; ty=e.clientY; if(!shown){ shown=true; x=tx; y=ty; cur.style.opacity=cur2.style.opacity=1; }
+    cur.style.transform=`translate(${tx}px,${ty}px) translate(-50%,-50%)`;
+    const t=e.target, hov=t.closest&&t.closest(".node,.btn,button,a,.li,.pitem,.rel,.xh,.res div,.lt,.xchip,.pitem"), nd=t.closest&&t.closest(".node");
+    document.body.classList.toggle("cur-hover",!!hov);
+    root.style.setProperty("--cc", nd? (nd.style.getPropertyValue("--c")||P.c1) : P.c1); });
+  addEventListener("mousedown",()=>document.body.classList.add("cur-down")); addEventListener("mouseup",()=>document.body.classList.remove("cur-down"));
+  document.addEventListener("mouseleave",()=>{ cur.style.opacity=cur2.style.opacity=0; shown=false; });
+  let running=false; const loop=()=>{ x+=(tx-x)*.22; y+=(ty-y)*.22; cur2.style.transform=`translate(${x}px,${y}px) translate(-50%,-50%)`; if(Math.abs(tx-x)>.3||Math.abs(ty-y)>.3) requestAnimationFrame(loop); else running=false; };
+  addEventListener("mousemove",()=>{ if(!running){ running=true; requestAnimationFrame(loop); } });
+}
+
+/* ============ Inicio ============ */
+/* constelación fantasma: toda la red como silueta tenue mientras no se ha abierto nada */
+(function(){ const g=document.createElementNS(NS,"svg"); g.id="ghost"; g.setAttribute("width","1"); g.setAttribute("height","1"); let s="";
+  edges.forEach(e=>{ const a=KK[e.a.key], b=KK[e.b.key]; s+=`<line x1="${a.x+a.w/2}" y1="${a.y}" x2="${b.x+b.w/2}" y2="${b.y}"/>`; });
+  all.forEach((n,i)=>{ if(n.depth===0) return; s+=`<circle cx="${n.x+n.w/2}" cy="${n.y}" r="${n.depth===1?16:9}" fill="${n.color}" opacity=".85" style="animation-delay:${(-i*.37).toFixed(2)}s"/>`; });
+  g.innerHTML=s; world.insertBefore(g,LK); })();
+
+d3.select(stage).call(zoom.transform,rootT());
+refresh(null); updateVP();
+const hs=location.hash;
+if(hs==="#todo") expandAll(); else if(hs.startsWith("#pop=")&&KK[hs.slice(5)]){ const kk=KK[hs.slice(5)]; goNode(kk); setTimeout(()=>{ select(kk); popClick(kk); },700); } else if(hs==="#plano"){ KK.root.open=true; KK.may.open=true; refresh(null); setTimeout(()=>{ select(KK.dep); openPlano(); },500); } else if(hs==="#hist"){ KK.root.open=true; KK.may.open=true; refresh(null); setTimeout(()=>{ select(KK.hig); openHist(); },500); } else if(hs.startsWith("#n=")&&KK[hs.slice(3)]) goNode(KK[hs.slice(3)]);
+</script>
+</body>
+</html>
