@@ -8,7 +8,7 @@ import { ctx, seguir, guardar, soltar, agregar, conGuardia } from './s01.js';
 const H = 'humedalburro';
 const POT = [5, 6, 7, 8, 9, 10, 11, 12];
 const BARABASI = { nombre: 'Albert-László Barabási', rol: 'Física · ciencia de redes', img: './img/autores/barabasi.jpg', credito: 'Foto: World Economic Forum, CC BY-SA 2.0, Wikimedia Commons', x: 4, y: 66 };
-const BATTY = { nombre: 'Michael Batty', rol: 'Urbanismo computacional', img: './img/autores/batty.jpg', credito: 'Foto: Pymouss, CC BY-SA 3.0, Wikimedia Commons', x: 4, y: 66 };
+const BATTY = { nombre: 'Michael Batty', rol: 'Urbanismo computacional', img: './img/autores/batty.jpg', credito: 'Foto: Pymouss, CC BY-SA 3.0, Wikimedia Commons', x: 23, y: 66 }; // a la derecha del panel de capas, que se abre en la frase siguiente
 const NO_EXPLICA = ['las interacciones entre *agentes*', 'los procesos de *retroalimentación*', 'las dinámicas *emergentes*', 'cómo producen problemas *a través del tiempo*'];
 const listaNo = (X, n, delay = 0) => X.ed.lista({ items: NO_EXPLICA.slice(0, n), x: 62, y: 45, ancho: 33, delay });
 

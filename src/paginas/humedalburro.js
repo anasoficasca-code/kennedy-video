@@ -25,6 +25,13 @@ const CSS = `
   .gephi-panel { top: 104px !important; }
   .node-inspector { top: 108px !important; }
   .chat-widget-btn, #faqChatModal, #toastNotify, #relTip:empty { display: none !important; }
+  /* limpio: sin título ni botones que no se usan; el botón que el cursor va a pulsar aparece un momento (hb-ver) */
+  .brand-title { display: none !important; }
+  .top-header .btn-flat, .top-header .search-box { opacity: 0 !important; pointer-events: none !important; transition: opacity .45s ease !important; }
+  .top-header .btn-flat.hb-ver { opacity: 1 !important; }
+  .gephi-panel { opacity: 0 !important; transition: opacity .45s ease !important; }
+  .gephi-panel.hb-ver { opacity: 1 !important; }
+  #welcomeModalOverlay .welcome-header, #welcomeModalOverlay .metric-sources + div { display: none !important; }
   :root { --accent: #cfff5e; --accent-glow: rgba(207,255,94,.35); --ink: #f3f4ee; --ink-dim: #a3a89f; --glass-bg: rgba(11,13,16,.92); }
   #hb-cur { position: fixed; left: 0; top: 0; width: 26px; height: 26px; z-index: 99999; pointer-events: none; transform: translate(-200px,-200px); }
   #hb-cur svg { width: 26px; height: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
@@ -65,9 +72,14 @@ function pulsar(doc) {
 }
 function ocultarCursor(doc) { const c = doc.getElementById('hb-cur'); if (c) c.style.transform = 'translate(-200px,-200px)'; }
 /** mueve el cursor hasta `el`, «hace clic» y ejecuta fn (en un salto: solo fn) */
-async function clic(win, doc, el, fn, o, ms = 600) {
+/** muestra el botón (o su panel) un momento antes del clic y lo atenúa después */
+function mostrar(win, el, ms) {
+  const c = el.closest('.gephi-panel') || (el.closest('.top-header') ? el : null); if (!c) return;
+  c.classList.add('hb-ver'); clearTimeout(c._hbT); c._hbT = win.setTimeout(() => c.classList.remove('hb-ver'), ms);
+}
+async function clic(win, doc, el, fn, o, ms = 600, verMs = 1500) {
   if (o.rapido || !el) { fn(); return; }
-  await mover(win, doc, el, ms); pulsar(doc); fn();
+  mostrar(win, el, ms + verMs); await mover(win, doc, el, ms); pulsar(doc); fn();
 }
 function sobre(win, el, on = true) { el?.dispatchEvent(new win.MouseEvent(on ? 'mouseenter' : 'mouseleave', { bubbles: false })); }
 
@@ -143,6 +155,7 @@ const abierto = (doc, id) => doc.getElementById(id)?.style.display === 'flex';
 function base(win, doc, o, cfg = {}) {
   const { capas = [...CAUSAL, ...POT], vista = 'taxonomy', disp = 'red3d', drawer = false, rot = true, camara = true } = cfg;
   terminar(win); quitarAnclas();
+  doc.querySelectorAll('.hb-ver').forEach((e) => { clearTimeout(e._hbT); e.classList.remove('hb-ver'); });
   doc.getElementById('relTip')?.style.setProperty('display', 'none');
   doc.querySelectorAll('.rel-card, .cat-card').forEach((e) => sobre(win, e, false));
   try { win.closeInspector(); } catch (e) { /* */ }
@@ -234,7 +247,7 @@ registrar(NOMBRE, {
     // nodos centrales: clic en «Grado» (tamaño y brillo = número de relaciones)
     grado: async (win, doc, o) => {
       nuevo(win); base(win, doc, o, { capas: POT });
-      await clic(win, doc, doc.getElementById('gpViewdegree'), () => win.setViewMode('degree'), o, 700);
+      await clic(win, doc, doc.getElementById('gpViewdegree'), () => win.setViewMode('degree'), o, 700, 2800);
     },
     // relaciones del POT resaltadas (vista Grado: los enlaces se iluminan según su conexión)
     relaciones: async (win, doc, o) => { nuevo(win); base(win, doc, o, { capas: POT, vista: 'degree' }); ocultarCursor(doc); },
@@ -248,7 +261,7 @@ registrar(NOMBRE, {
     // jerarquías: clic en «Ejes radiales» (un eje por capa, los más conectados al centro)
     jerarquia: async (win, doc, o) => {
       nuevo(win); base(win, doc, o, { capas: POT, vista: 'degree' });
-      await clic(win, doc, doc.getElementById('gpLayoutradial'), () => win.setLayout('radial'), o, 700);
+      await clic(win, doc, doc.getElementById('gpLayoutradial'), () => win.setLayout('radial'), o, 700, 2800);
       if (o.rapido) terminar(win); else await esp(1650);
       encuadrar(win, o);
     },

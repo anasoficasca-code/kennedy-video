@@ -4314,6 +4314,7 @@ float h21(vec2 p){ return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }
   .top-header .btn-flat.hb-ver { opacity: 1 !important; }
   .gephi-panel { opacity: 0 !important; transition: opacity .45s ease !important; }
   .gephi-panel.hb-ver { opacity: 1 !important; }
+  #welcomeModalOverlay .welcome-header, #welcomeModalOverlay .metric-sources + div { display: none !important; }
   :root { --accent: #cfff5e; --accent-glow: rgba(207,255,94,.35); --ink: #f3f4ee; --ink-dim: #a3a89f; --glass-bg: rgba(11,13,16,.92); }
   #hb-cur { position: fixed; left: 0; top: 0; width: 26px; height: 26px; z-index: 99999; pointer-events: none; transform: translate(-200px,-200px); }
   #hb-cur svg { width: 26px; height: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
