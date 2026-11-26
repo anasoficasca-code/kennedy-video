@@ -3,7 +3,7 @@
 // (#kcap: cada problema sobre Kennedy con su indicador) y la conectografía con la leyenda «causas por problema».
 // Estados: red · conecto · capas · paso · criterios
 import { registrar, hasta, precargar, ventana } from '../pagina.js';
-import { pausarOculta, ev, scrollA, aNegro, camRed, quitarResalte, CSS_FORMATO, fondoFormato } from './red.js';
+import { pausarOculta, ev, scrollA, aNegro, camRed, quitarResalte, CSS_FORMATO, fondoFormato, sinNumeros } from './red.js';
 
 const NOMBRE = 'redag';
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -53,9 +53,12 @@ registrar(NOMBRE, {
       #story .card.esc{background:transparent!important}
       #kcap{background:#0b0d10!important}
       #criterios .blq{background:#0b0d10!important}
+      /* el botón «Conectografía» se ve (se le hace clic en el video); la página lo oculta sola durante la historia */
+      .goconecto{visibility:visible!important}
+      body.historia .goconecto{visibility:hidden!important}
     `;
     doc.head.appendChild(st);
-    fondoFormato(win);
+    fondoFormato(win); sinNumeros(win, doc);
   },
   estados: {
     /** la red de seis nodos (sección final), sin resaltes */

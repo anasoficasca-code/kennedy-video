@@ -89,11 +89,18 @@ async function relato(win, o, mio = ++turno) {
   const SQ = win.eval('SQ'), rapido = !!o.rapido;
   const yaEsta = SQ.on && SQ.i === n && SQ.ph === 's';
   if (!yaEsta) {
+    if (!rapido && SQ.on && SQ.ph === 's') { // fundido continuo: la escena y su panel se desvanecen antes de cambiar
+      const d = win.document; d.querySelector('#sqS')?.classList.remove('show');
+      ['#pl', '#hp', '#pp'].forEach((q) => { const p = d.querySelector(q); if (p) { p.style.transition = 'opacity .35s ease'; p.style.opacity = '0'; } });
+      await espera(360); if (!vivo()) return;
+      setTimeout(() => ['#pl', '#hp', '#pp'].forEach((q) => { const p = d.querySelector(q); if (p) { p.style.opacity = ''; p.style.transition = ''; } }), 60);
+    }
     win.eval('SQ.play=false'); win.eval('closeInsp()'); win.sqGo(n); cortarAutomaticos(win);
-    const t = rapido ? 0 : (o.palabra ?? 1100);
+    const t = rapido ? 0 : (o.palabra ?? 0);
     if (t) { await espera(t); if (!vivo()) return; }
     win.sqScene();
     if ((o.panel ?? 'no') !== 'auto') cortarAutomaticos(win);
+    if ((o.panel ?? 'no') === 'no') { win.document.querySelector('#sqS')?.classList.remove('hasp'); win.document.querySelector('#sqV')?.remove(); } // sin panel: el diagrama usa todo el ancho
   }
   const s = win.eval('STEPS[SQ.i]');
   if (!s.panel || o.panel === 'no' || o.panel === 'auto') return;
@@ -129,7 +136,9 @@ html,body{background:#0b0d10}
 #bar b,.sq-top b{font:600 22px/1 var(--tit)!important;letter-spacing:.01em}
 .node{font-family:var(--sans)}
 /* edición: sin controles ni ayudas que tapen (la página se ve como grabada, la explicación la pone la voz) */
-#hint,#legend,#mini,#zoom,#tip,.sq-foot,.sq-word small,.sq-x,.sq-txt p,.sq-txt .nind{display:none!important}
+#hint,#legend,#mini,#zoom,#tip,.sq-foot,.sq-word,.sq-x,.sq-txt p,.sq-txt .nind,.sq-txt .kk{display:none!important}
+.sq-scene{transition:opacity .38s ease!important}
+body.sq-open #sq{animation:fmtIn .45s ease}@keyframes fmtIn{from{opacity:0}}
 .sq-top{display:none!important}
 .sq-scene{top:92px!important;bottom:150px!important}
 #bar{padding-top:62px!important}

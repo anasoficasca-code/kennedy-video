@@ -37,7 +37,7 @@ export function agregar(X, lista, texto, delay = 0) {
   if (!lista) return;
   const ol = lista.querySelector('ol'); const n = ol.children.length + 1;
   const li = document.createElement('li');
-  li.innerHTML = `<span class="n">${String(n).padStart(2, '0')}</span><span>${String(texto).replace(/\*([^*]+)\*/g, '<em>$1</em>')}</span>`;
+  li.innerHTML = `<span class="n"></span><span>${String(texto).replace(/\*([^*]+)\*/g, '<em>$1</em>')}</span>`;
   ol.appendChild(li);
   X.gsap.fromTo(li, { autoAlpha: 0, x: -24 }, { autoAlpha: 1, x: 0, duration: 0.55, ease: 'back.out(1.6)', delay });
 }

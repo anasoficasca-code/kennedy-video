@@ -1,98 +1,94 @@
-﻿// Capítulo 02 · hecho con las páginas reales de las autoras (rapot, potred, complejo, macromodelos)
-import { precargar } from '../pagina.js';
+// Capítulo 02 · El POT y la ciudad como sistema complejo. Todo sobre la página real «Red causal · 3 niveles + POT»
+// (anasoficasca-code/humedalburro, red-causal-3n.html), usada en vivo: el POT se arma como red, «Grado» muestra los
+// nodos centrales, «Métricas» los tipos de relación, «Ejes radiales» las jerarquías, «Todas» las capas la ciudad
+// compleja, y Niveles 3D cómo se producen los problemas. Encima: X.ed (zócalos, cifras leídas de la página, fotos).
+import { anclaNodo, grados, contadores } from '../paginas/humedalburro.js';
+import { ctx, seguir, guardar, agregar } from './s01.js';
+
+const H = 'humedalburro';
+const POT = [5, 6, 7, 8, 9, 10, 11, 12];
+const BARABASI = { nombre: 'Albert-László Barabási', rol: 'Física · ciencia de redes', img: './img/autores/barabasi.jpg', credito: 'Foto: Net999, dominio público, Wikimedia Commons', x: 4, y: 66 };
+const BATTY = { nombre: 'Michael Batty', rol: 'Urbanismo computacional', img: './img/autores/batty.jpg', credito: 'Foto: Pymouss, CC BY-SA 3.0, Wikimedia Commons', x: 4, y: 66 };
+const NO_EXPLICA = ['Interacciones entre *agentes*', 'Procesos de *retroalimentación*', 'Dinámicas *emergentes*', 'Transformación de problemas *en el tiempo*'];
+const listaNo = (X, n, delay = 0) => X.ed.lista({ titulo: 'Lo que el POT no explica suficientemente', items: NO_EXPLICA.slice(0, n), x: 62, y: 40, ancho: 33, delay });
+/** espera a que la página termine el estado y lee un contador de su barra de estado */
+const leer = async (X, p, k) => { await p; return contadores()[k]; };
 
 export default /* ===================================================================== 02 POT */
   {
-    n: '02', nombre: 'El POT y la ciudad como sistema complejo', cam: 'pot', tr: 'persiana', pagina: true,
-    base: () => { precargar('rapot', 'potred', 'complejo', 'macromodelos'); },
+    n: '02', nombre: 'El POT y la ciudad como sistema complejo', pagina: true, precarga: [H],
     beats: [
-      // 1 · el POT: la esfera de sus 38 componentes
       { t: 'Como punto de partida, el Plan de Ordenamiento Territorial de Bogotá', a: (X) => {
-        X.pagina('rapot', 'inicio', { entrada: 'zoom', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 62, y: 52, s: 1.18, d: 6.5, ease: 'sine.inOut' });
+        X.pagina(H, 'pot', { entrada: 'barrido' });
+        X.ed.rotulo('Plan de Ordenamiento Territorial de Bogotá', { kick: 'Punto de partida', delay: 0.5 });
       } },
-      // 2 · «una red»
-      { t: 'se reconstruyó como una red', a: (X) => {
-        X.pagina('potred', 'red', { entrada: 'barrido', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 43.5, y: 59, s: 1.85, d: 3.4, ease: 'power3.inOut' });
+      // el cursor enciende las 8 capas del POT: los componentes aparecen como nodos
+      { t: 'se reconstruyó como una red', a: async (X) => {
+        const c = ctx(X);
+        const n = await leer(X, X.pagina(H, 'potArma'), 'nodos');
+        if (!c.vivo() || !n) return;
+        X.ed.cifra({ v: n, texto: 'componentes del POT, como *nodos* de una red', x: 64, y: 50 });
       } },
-      // 3 · Barabási
-      { t: 'a partir de los aportes de Albert-László Barabási,', a: (X) => {
-        X.pagina('potred', 'red');
-        X.tarjeta('bar', { k: 'Aportes de', t: 'Albert-László Barabási', left: 3, top: '72vh', width: 21 });
-        X.camPag({ x: 36, y: 52, s: 2.3, d: 3.8, ease: 'sine.inOut' });
+      { t: 'a partir de los aportes de Albert-László Barabási, físico e investigador de la ciencia de redes.', a: (X) => {
+        X.pagina(H, 'pot');
+        X.ed.persona({ ...BARABASI, delay: 1.6 });
       } },
-      // 4 · ciencia de redes
-      { t: 'físico e investigador de la ciencia de redes.', a: (X) => {
-        X.pagina('potred', 'red');
-        X.tarjeta('bar', { k: 'Ciencia de redes', t: 'Albert-László Barabási', d: 'Físico e investigador de la ciencia de redes.', left: 3, top: '66vh', width: 21 });
-        X.camPag({ x: 38, y: 60, s: 2.3, d: 3.2, ease: 'sine.inOut' });
+      // «Grado»: tamaño = número de relaciones; se señalan los tres más conectados (calculados de los datos de la página)
+      { t: 'Se identificaron los nodos centrales,', a: async (X) => {
+        const c = ctx(X);
+        await X.pagina(H, 'grado');
+        if (!c.vivo()) return;
+        const top = grados(POT).slice(0, 3);
+        const corto = (s) => s.replace(/\s*\(.*\)$/, '').replace(/^Zonas de amenaza por inundación y encharcamiento$/, 'Amenaza por inundación');
+        c.seq(top.map((t, i) => [0.2 + i * 0.45, () => X.ed.senalar(H, anclaNodo(t.id), { lado: 'circulo', texto: corto(t.nombre), pad: 4 })]));
+        X.ed.rotulo('Nodos *centrales*', { kick: 'Vista «Grado»: tamaño = número de relaciones', delay: 0.2 });
       } },
-      // 5 · nodos centrales: los dos hubs de la red
-      { t: 'Se identificaron los nodos centrales,', a: (X) => {
-        X.quitar('bar');
-        X.pagina('potred', 'hubs');
-        X.camPag({ x: 43.5, y: 59, s: 3.2, d: 2.6, ease: 'power3.inOut' });
+      // «Métricas»: la torta de tipos de relación; la mitad son dependencias de una misma entidad
+      { t: 'las relaciones de dependencia', a: async (X) => {
+        const c = ctx(X);
+        await X.pagina(H, 'metricas');
+        if (!c.vivo()) return;
+        c.seq([[0.9, () => X.ed.senalar(H, '#legendA .legend-row', { texto: 'Una misma entidad responde por ambos nodos', pad: 6 })]]);
       } },
-      // 6 · dependencias: las seis relaciones entre estructuras
-      { t: 'las relaciones de dependencia', a: (X) => {
-        X.pagina('rapot', 'organiza', { entrada: 'barrido', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 68, y: 50, s: 1.4, d: 3.5, ease: 'sine.inOut' });
+      { t: 'y las jerarquías que estructuran este modelo de ciudad.', a: (X) => {
+        X.pagina(H, 'jerarquia');
+        X.ed.rotulo('*Jerarquías*: los más conectados, al centro', { kick: 'Vista «Ejes radiales» · un eje por capa', delay: 0.8 });
       } },
-      // 7 · jerarquías: el tamaño de cada estructura
-      { t: 'y las jerarquías', a: (X) => {
-        X.pagina('rapot', 'prioriza');
-        X.camPag({ x: 58, y: 50, s: 1.25, d: 3, ease: 'sine.inOut' });
-      } },
-      // 8 · la centralidad no equivale a la jerarquía normativa
-      { t: 'que estructuran este modelo de ciudad.', a: (X) => {
-        X.pagina('potred', 'jerarquia', { entrada: 'barrido', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 76, y: 54, s: 1.3, d: 2.6, ease: 'sine.inOut' });
-      } },
-      // 9 · Batty
       { t: 'Esta representación se contrastó con el enfoque de Michael Batty,', a: (X) => {
-        X.pagina('complejo', 'inicio', { entrada: 'zoom', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.tarjeta('bat', { k: 'Enfoque de', t: 'Michael Batty', right: 5, top: '58vh', width: 25 });
-        X.camPag({ x: 38, y: 22, s: 1.4, d: 4, ease: 'sine.inOut' });
+        X.pagina(H, 'pot');
+        guardar('batty', X.ed.persona({ ...BATTY, delay: 2.2 }));
       } },
-      // 10 · urbanismo computacional, sistemas complejos
-      { t: 'investigador del urbanismo computacional que estudia las ciudades como sistemas complejos.', a: (X) => {
-        X.pagina('complejo', 'inicio');
-        X.tarjeta('bat', { k: 'Urbanismo computacional', t: 'Michael Batty', d: 'Estudia las ciudades como sistemas complejos.', right: 5, top: '58vh', width: 25 });
-        X.camPag({ x: 40, y: 18, s: 1.9, d: 5.5, ease: 'sine.inOut' });
+      // «Todas» las capas: la red del POT se vuelve la red causal completa de Kennedy
+      { t: 'investigador del urbanismo computacional que estudia las ciudades como sistemas complejos.', mantener: true, a: async (X) => {
+        const c = ctx(X);
+        seguir(X, 'batty', () => X.ed.persona(BATTY));
+        const p = X.pagina(H, 'complejo');
+        X.ed.rotulo('Las ciudades como *sistemas complejos*', { kick: 'Red causal · 3 niveles + POT', lado: 'der', delay: 0.4 });
+        await p; if (!c.vivo()) return;
       } },
-      // 11 · el plan sí relaciona sus componentes
-      { t: 'Se comprende que aunque el plan establece relaciones entre sus componentes,', a: (X) => {
-        X.quitar('bat');
-        X.pagina('potred', 'relaciones', { entrada: 'barrido', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 43.5, y: 59, s: 2.2, d: 4.5, ease: 'sine.inOut' });
+      { t: 'Se comprende que aunque el plan establece relaciones entre sus componentes,', a: async (X) => {
+        const c = ctx(X);
+        const n = await leer(X, X.pagina(H, 'relaciones'), 'relaciones');
+        if (!c.vivo() || !n) return;
+        X.ed.cifra({ v: n, texto: 'relaciones entre los componentes del POT', x: 64, y: 50 });
       } },
-      // 12 · lo que el POT no puede explicar
-      { t: 'su representación no explica suficientemente', a: (X) => {
-        X.pagina('macromodelos', 'pregunta', { entrada: 'barrido', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 40, y: 50, s: 1.6, d: 3, ease: 'sine.inOut' });
+      // «Ninguna» → solo los actores del POT
+      { t: 'su representación no explica suficientemente las interacciones entre agentes,', a: (X) => {
+        X.pagina(H, 'actores');
+        guardar('no', listaNo(X, 1, 0.9));
       } },
-      // 13 · interacciones entre agentes
-      { t: 'las interacciones entre agentes,', a: (X) => {
-        X.pagina('complejo', 'agentes', { entrada: 'barrido', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 50, y: 50, s: 1.35, d: 2.6, ease: 'power2.inOut' });
+      { t: 'los procesos de retroalimentación,', mantener: true, a: (X) => {
+        X.pagina(H, 'plano');
+        const L = seguir(X, 'no', () => listaNo(X, 1)); agregar(X, L, NO_EXPLICA[1], 0.2);
       } },
-      // 14 · retroalimentación
-      { t: 'los procesos de retroalimentación,', a: (X) => {
-        X.pagina('complejo', 'construccion', { paso: 1 });
-        X.camPag({ x: 50, y: 38, s: 2, d: 2.6, ease: 'power2.inOut' });
+      { t: 'las dinámicas emergentes', mantener: true, a: (X) => {
+        X.pagina(H, 'plano');
+        const L = seguir(X, 'no', () => listaNo(X, 2)); agregar(X, L, NO_EXPLICA[2], 0.2);
       } },
-      // 15 · dinámicas emergentes
-      { t: 'las dinámicas emergentes', a: (X) => {
-        X.pagina('complejo', 'emergencia');
-        X.camPag({ x: 44, y: 50, s: 1.7, d: 2.2, ease: 'power2.inOut' });
-      } },
-      // 16 · a través del tiempo
-      { t: 'ni cómo estas transforman y producen problemas a través del tiempo.', a: (X) => {
-        X.pagina('macromodelos', 'dinamico', { entrada: 'barrido', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 24, y: 40, s: 2.1, d: 3.2, ease: 'power2.inOut' });
+      // Niveles 3D: lo visible (N1) produce efectos (N2) que remiten a una causa estructural (N3)
+      { t: 'ni cómo estas transforman y producen problemas a través del tiempo.', mantener: true, a: (X) => {
+        X.pagina(H, 'niveles', { inicioPaso: 0, pasos: [1, 2, 3], entre: 900 });
+        const L = seguir(X, 'no', () => listaNo(X, 3)); agregar(X, L, NO_EXPLICA[3], 0.2);
       } },
     ],
   };
-
-

@@ -132,15 +132,12 @@ export function senalar(nombre, objetivo, o = {}) {
 export function capitulo(n, titulo, durante) {
   // Fluido: sin números y sin tapar la pantalla. Un fundido corto a oscuro monta la escena nueva,
   // y el título aparece encima mientras la escena ya corre; se va solo, sin detener nada.
+  // Sin título: en pantalla solo sale texto de lo que dice la voz. Solo un fundido corto monta la escena nueva.
   const velo = h('div', 'ed-velo'); capa().appendChild(velo);
-  const e = h('div', 'ed-capitulo', `<div class="cont"><span class="mask"><b>${titulo}</b></span><i class="linea"></i></div>`);
   return new Promise((res) => {
     gsap.timeline()
       .fromTo(velo, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.35, ease: 'power1.in' })
-      .add(() => { try { durante?.(); } catch (err) { console.error(err); } capa().appendChild(e); res(); })
-      .to(velo, { autoAlpha: 0, duration: 0.7, ease: 'power1.out', onComplete: () => velo.remove() })
-      .fromTo(e.querySelector('.mask b'), { yPercent: 110 }, { yPercent: 0, duration: 0.8, ease: SUAVE }, 0.5)
-      .fromTo(e.querySelector('.linea'), { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: SUAVE }, 0.65)
-      .to(e.querySelector('.cont'), { autoAlpha: 0, y: -14, duration: 0.6, ease: 'power2.in', onComplete: () => e.remove() }, 3.2);
+      .add(() => { try { durante?.(); } catch (err) { console.error(err); } res(); })
+      .to(velo, { autoAlpha: 0, duration: 0.7, ease: 'power1.out', onComplete: () => velo.remove() });
   });
 }

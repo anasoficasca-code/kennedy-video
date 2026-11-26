@@ -10,8 +10,7 @@ let gen = 0; // cada frase invalida las acciones diferidas de la anterior (salto
 /** contexto de una frase: pasos temporizados con guardia de vigencia */
 function ctx(X) {
   const g = ++gen, vivo = () => g === gen;
-  // si la frase entra con la portadilla del capítulo, la voz empieza cuando la portadilla se abre
-  const off = document.querySelector('#edicion .ed-capitulo') ? 2.4 : 0;
+  const off = 0; // la portadilla ahora es un fundido corto encima de la escena: la acción no espera
   const en = (t, f) => { if (X.R.rapido) return; X.gsap.delayedCall(off + t, () => { if (vivo()) f(); }); };
   const pag = (estado, o = {}) => (vivo() ? X.pagina(P, estado, { entrada: 'corte', ...o }) : null);
   /** señala un nodo del diagrama causal (espera a que esté dibujado) */
@@ -31,7 +30,7 @@ export default /* ==============================================================
       { t: 'El análisis de estos índices permitió identificar diferentes problemas en Kennedy,', a: (X) => {
         const c = ctx(X);
         X.pagina(P, 'arbol', { entrada: 'corte', crece: (c.off + 1.0) * 1000 });
-        c.en(2.0, () => X.ed.rotulo('Diferentes *problemas* en Kennedy', { kick: 'Del análisis de los índices' }));
+        c.en(3.0, () => X.ed.rotulo('Diferentes *problemas* en Kennedy', { kick: 'Del análisis de los índices' }));
       } },
       // causas profundas (columnas del fondo del árbol) → el cursor abre el Relato → FRAGMENTACIÓN: raíz y 3 ramas
       { t: 'dando paso al estudio de sus causas más profundas y a comprender cómo convergen en un problema estructural más amplio: la fragmentación territorial.', a: (X) => {
@@ -39,32 +38,32 @@ export default /* ==============================================================
         if (X.R.rapido) { X.pagina(P, 'relato', { entrada: 'corte', paso: 0, palabra: 0 }); return; }
         X.pagina(P, 'todo', { entrada: 'corte' });
         c.en(1.6, () => { const k = cajaProfundas(3); if (k) X.ed.senalar(P, k, { texto: 'Causas más profundas', dur: 2.6 }); });
-        c.en(4.0, () => c.pag('abrirRelato', { paso: 0, palabra: 1500 }));
+        c.en(4.0, () => c.pag('abrirRelato', { paso: 0, palabra: 0 }));
         c.nodo('root', 'Problema estructural', 7.4);
       } },
       // Relato 02 · HIPERCONCENTRACIÓN
       { t: 'La hiperconcentración del mercado mayorista', a: (X) => {
         const c = ctx(X);
-        c.pag('relato', { paso: 1, palabra: 900 });
-        c.en(0.5, () => X.ed.rotulo('Hiperconcentración del *mercado mayorista*', { kick: 'Problema 01' }));
+        c.pag('relato', { paso: 1, palabra: 0 });
+        c.en(0.5, () => X.ed.rotulo('Hiperconcentración del *mercado mayorista*', { kick: 'Problema de fondo' }));
       } },
       // Relato 04 · 1972: nace Corabastos — el cursor abre la axonometría y pulsa 1972; la higiene/salubridad se marca en el diagrama
       { t: 'comienza por la inauguración de Corabastos en 1972 para mejorar la salubridad del abastecimiento,', a: (X) => {
         const c = ctx(X);
-        c.pag('relato', { paso: 3, palabra: 800, panel: 'clic', clicPanel: 250, anio: 1972, clicAnio: 2600 });
+        c.pag('relato', { paso: 3, palabra: 0, panel: 'clic', clicPanel: 250, anio: 1972, clicAnio: 2600 });
         c.en(2.3, () => X.ed.cifra({ v: 1972, desde: 1900, dur_conteo: 1.1, texto: 'Se inaugura *Corabastos*', miles: false, x: 31, y: 9 }));
         c.nodo('hig', 'Salubridad del abastecimiento', 3.9);
       } },
       // Relato 05 · RAÍCES: pérdida de producción local
       { t: 'a medida que se perdió producción agrícola local,', a: (X) => {
         const c = ctx(X);
-        c.pag('relato', { paso: 4, palabra: 700, panel: 'no' });
+        c.pag('relato', { paso: 4, palabra: 0, panel: 'no' });
         c.nodo('perd', 'Pérdida de producción local', 1.0);
       } },
       // Relato 03 · DEPENDENCIA: el cursor abre el plano con los flujos que llegan a Corabastos
       { t: 'aumentó la dependencia de otras regiones y se concentraron los viajes de carga.', a: (X) => {
         const c = ctx(X);
-        c.pag('relato', { paso: 2, palabra: 600, panel: 'clic', clicPanel: 150 });
+        c.pag('relato', { paso: 2, palabra: 0, panel: 'clic', clicPanel: 150 });
         c.en(0.2, () => X.ed.lista({ titulo: 'En cadena', items: ['Pérdida de producción local', 'Dependencia de *otras regiones*', 'Viajes de carga *concentrados*'], x: 29, y: 10, paso: 1.25, ancho: 26 }));
         c.nodo('dep', 'Dependencia alimentaria', 1.4, 2.4);
         c.en(3.2, () => X.ed.senalar(P, '#pl', { texto: 'Viajes de carga hacia Corabastos', pad: 0, lado: 'arriba' }));
@@ -72,8 +71,8 @@ export default /* ==============================================================
       // Relato 10 · RESIDUOS
       { t: 'El segundo es la saturación de residuos.', a: (X) => {
         const c = ctx(X);
-        c.pag('relato', { paso: 9, palabra: 1500 });
-        c.en(0.5, () => X.ed.rotulo('Saturación de *residuos*', { kick: 'Problema 02' }));
+        c.pag('relato', { paso: 9, palabra: 0 });
+        c.en(0.5, () => X.ed.rotulo('Saturación de *residuos*', { kick: 'Problema de fondo' }));
       } },
       // misma escena: la voz recorre la cadena y cada nodo se marca cuando se nombra
       { t: 'La concentración comercial incrementa la generación de desechos que, cuando superan la capacidad de recolección y tratamiento, se acumulan.', a: (X) => {
@@ -95,8 +94,8 @@ export default /* ==============================================================
       // Relato 12 · SOPORTE ECOLÓGICO
       { t: 'Finalmente, la degradación del soporte ecológico está relacionada con la expansión urbana y la pérdida de vegetación, que fragmentan los hábitats.', a: (X) => {
         const c = ctx(X);
-        c.pag('relato', { paso: 11, palabra: 1300 });
-        c.en(0.6, () => X.ed.rotulo('Degradación del *soporte ecológico*', { kick: 'Problema 03' }));
+        c.pag('relato', { paso: 11, palabra: 0 });
+        c.en(0.6, () => X.ed.rotulo('Degradación del *soporte ecológico*', { kick: 'Problema de fondo' }));
         c.nodo('supcons', 'Expansión urbana', 4.2, 1.8);
         c.nodo('perdveg', 'Pérdida de vegetación', 5.6, 1.8);
         c.nodo('hab', 'Hábitats fragmentados', 7.3);

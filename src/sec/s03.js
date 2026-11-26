@@ -1,5 +1,8 @@
 // Capítulo 03 · páginas reales de las autoras corriendo a pantalla completa (sin zoom), usadas con un cursor:
 // «De 18 capas a 9 índices» (picos/cruces) y «Indicadores en 3D» (picos). Encima, edición X.ed.
+/** nodo de un índice en la página de cruces (o null si aún no está) */
+const nodo = (X, id) => { try { return X.ventana('cruces')?.eval('nodos.' + id) || null; } catch (e) { return null; } };
+
 export default /* ===================================================================== 03 INDICADORES */
   {
     n: '03', nombre: 'De los mapas a las dinámicas territoriales', cam: 'capas', tr: 'recorte', pagina: true, precarga: ['cruces', 'picos'],
@@ -21,10 +24,10 @@ export default /* ==============================================================
         X.pagina('cruces', 'indices', { espera: 1300, paso: 110, alPaso: (k) => { if (b) b.textContent = k; } });
       } },
       { t: 'Entre ellos, el índice de concentración comercial y logística', a: (X) => {
-        X.pagina('cruces', 'ccl', { alClic: () => X.ed.senalar('cruces', X.ventana('cruces').eval('nodos.CCL'), { texto: 'Concentración comercial y logística', lado: 'arriba', pad: 12 }) });
+        X.pagina('cruces', 'ccl', { alClic: () => X.ed.senalar('cruces', nodo(X, 'CCL'), { texto: 'Concentración comercial y logística', lado: 'arriba', pad: 12 }) });
       } },
       { t: 'y el índice de soporte ecológico.', a: (X) => {
-        X.pagina('cruces', 'se', { alClic: () => X.ed.senalar('cruces', X.ventana('cruces').eval('nodos.SE'), { texto: 'Soporte ecológico', lado: 'arriba', pad: 12 }) });
+        X.pagina('cruces', 'se', { alClic: () => X.ed.senalar('cruces', nodo(X, 'SE'), { texto: 'Soporte ecológico', lado: 'arriba', pad: 12 }) });
       } },
       { t: 'Mientras las actividades comerciales y logísticas se intensificaban alrededor de Corabastos,', a: (X) => {
         X.pagina('picos', 'ccl', { entrada: 'barrido' });

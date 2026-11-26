@@ -94,7 +94,27 @@ export const CSS_FORMATO = `
   #cgfr{visibility:visible!important}
   #story .card,#story .hcard,.rd .card{background-color:rgba(11,13,16,.9)!important}
   h1,h2,h3{font-family:'Barlow Condensed','Geist',sans-serif!important}
+  /* sin numeración de tarjetas ni de nodos («06 · 5 conex») */
+  #lbls small,.cpb .n,#criterios .ey>b:first-child{display:none!important}
 `;
+/**
+ * sin numeración de capítulo/tarjeta en la página («01 / 06», «06 · 5 conex», «03 · Valorización…»): la autora no la quiere.
+ * Las cifras de datos se quedan. Vigila los elementos que la página arma después (capas, conectografía).
+ */
+export function sinNumeros(win, doc) {
+  const limpia = () => {
+    doc.querySelectorAll('#story .card .num').forEach((n) => {
+      if (n.dataset.sn) return; n.dataset.sn = 1;
+      const b = n.querySelector('b'); if (b) n.innerHTML = b.outerHTML; else n.style.display = 'none';
+    });
+    doc.querySelectorAll('.kc-tag .h, .cpb .n, #criterios .ey b, .ee-num').forEach((el) => {
+      const w = doc.createTreeWalker(el, 4); let t;
+      while ((t = w.nextNode())) { const v = t.nodeValue.replace(/^\s*\d{1,2}\s*(\/\s*\d{1,2})?\s*(·\s*)?/, ''); if (v !== t.nodeValue) t.nodeValue = v; }
+    });
+  };
+  limpia();
+  let pend = 0; new win.MutationObserver(() => { if (pend) return; pend = 1; win.setTimeout(() => { pend = 0; limpia(); }, 50); }).observe(doc.body, { childList: true, subtree: true });
+}
 export function fondoFormato(win) { try { ev(win, 'scene.background&&scene.background.set(0x0b0d10);scene.fog&&scene.fog.color.set(0x0b0d10)'); } catch (e) { /* */ } }
 
 /* ---------------------------------------------------------------- driver */
@@ -140,7 +160,7 @@ registrar(NOMBRE, {
     `;
     doc.head.appendChild(st);
     doc.querySelectorAll('#story .hcard .seis span').forEach((s, i) => { s.dataset.k = 'FBCDAE'[i]; });
-    fondoFormato(win);
+    fondoFormato(win); sinNumeros(win, doc);
   },
   estados: {
     /** portada sin selección (lo pueden usar otros capítulos) */
