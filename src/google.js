@@ -17,9 +17,11 @@ export function crearGoogle(W, U) {
   tiles.registerPlugin(new GoogleCloudAuthPlugin({ apiToken: GKEY, autoRefreshToken: true }));
   tiles.registerPlugin(new GLTFExtensionsPlugin({ dracoLoader: new DRACOLoader().setDecoderPath('./draco/') }));
   tiles.setCamera(W.cam); tiles.setResolutionFromRenderer(W.cam, W.r);
-  tiles.parseQueue.maxJobs = 4; // menos teselas procesadas a la vez (el plugin pone 10): carga un poco más lenta, sin tirones
+  tiles.parseQueue.maxJobs = 2; tiles.downloadQueue.maxJobs = 8; // carga repartida en el tiempo: sin picos
+  // caché grande: lo que ya se cargó no se descarta ni se vuelve a bajar cuando la cámara regresa (el video vuelve a Kennedy muchas veces)
+  if (tiles.lruCache) { tiles.lruCache.minSize = 2500; tiles.lruCache.maxSize = 3500; if ('minBytesSize' in tiles.lruCache) { tiles.lruCache.minBytesSize = 0.5e9; tiles.lruCache.maxBytesSize = 0.8e9; } } // menos teselas procesadas a la vez (el plugin pone 10): carga un poco más lenta, sin tirones
   const MOVIL = innerWidth < 900 || /Android|iPhone|iPad/i.test(navigator.userAgent);
-  tiles.errorTarget = MOVIL ? 40 : 40; G.meta = MOVIL ? 9 : 7;
+  tiles.errorTarget = MOVIL ? 40 : 40; G.meta = MOVIL ? 12 : 10; // 10: nítido a la altura de las tomas y con la mitad de teselas que 7 (menos tirones)
   const frame = new THREE.Matrix4(); WGS84_ELLIPSOID.getEastNorthUpFrame(LAT0 * D2R, LNG0 * D2R, frame);
   frame.multiply(new THREE.Matrix4().makeTranslation(0, 0, 2564)); // altura elipsoidal aproximada del suelo de Kennedy; luego se calibra
   const M = new THREE.Matrix4().makeRotationX(-Math.PI / 2).multiply(frame.invert());

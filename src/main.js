@@ -217,6 +217,25 @@ function publicar() {
   canal.postMessage({ tipo: 'estado', n: idx, total: TOTAL, cap: c.n + ' · ' + c.nombre, ahora: b.t, sig: s ? s.t : '— fin —', sigCap: s && s.bi === 0 ? CAPITULOS[s.ci].n + ' · ' + CAPITULOS[s.ci].nombre : '' });
 }
 
+/* ======================================================================= precarga para grabar (tecla G) */
+// Recorre todas las frases sin animación y espera en cada una a que la foto de Google termine de cargar.
+// Así, al grabar, lo que se ve ya está en memoria: sin descargas a mitad de un movimiento (sin tirones).
+let precalentando = false;
+async function precalentar() {
+  if (precalentando) return; precalentando = true;
+  const av = document.createElement('div'); av.id = 'precarga';
+  av.style.cssText = 'position:fixed;right:24px;bottom:24px;z-index:30;padding:10px 16px;border-radius:12px;background:rgba(11,13,16,.75);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);color:#f3f4ee;font:400 14px/1.3 Geist,sans-serif';
+  document.body.appendChild(av);
+  const quieto = async (max) => { const t0 = performance.now(); let ok = 0; while (performance.now() - t0 < max) { const s = W.gfoto?.tiles?.stats; const libre = !s || (s.downloading === 0 && s.parsing === 0); ok = libre ? ok + 1 : 0; if (ok >= 5) return; await new Promise((r) => setTimeout(r, 120)); } };
+  for (let n = 0; n < TOTAL; n++) {
+    av.textContent = `Preparando para grabar · ${Math.round((n / TOTAL) * 100)} %`;
+    await ir(n, false); await quieto(12000); console.log('PRE', n + 1, '/', TOTAL, JSON.stringify(W.gfoto?.tiles?.stats || {}), (performance.memory?.usedJSHeapSize / 1e6 | 0) + 'MB');
+  }
+  await ir(0, false); await quieto(12000);
+  av.innerHTML = '<span style="color:#cfff5e">●</span> Listo para grabar'; setTimeout(() => av.remove(), 4000);
+  precalentando = false;
+}
+
 /* ======================================================================= modo automático (ensayo) */
 let auto = null;
 function alternarAuto() {
@@ -248,7 +267,7 @@ function cuadro() {
   { const h = Math.max(50, W.cam.position.y), n = Math.min(1500, Math.max(5, h * 0.04)), f = Math.min(200000, Math.max(70000, h * 12));
     if (Math.abs(W.cam.near - n) > n * 0.06 || Math.abs(W.cam.far - f) > f * 0.06) { W.cam.near = n; W.cam.far = f; W.cam.updateProjectionMatrix(); } }
   ['vias-prin', 'flujos', 'iso', 'metro', 'red-pot', 'agentes', 'pA', 'pB', 'pC', 'pD', 'pE', 'pF'].forEach((n) => { const u = uni(n); if (u?.uT) u.uT.value = t; });
-  moverAgentes(dt); moverEspecies(t); moverBavaria(t); W.gfoto?.update(dt);
+  moverAgentes(dt); moverEspecies(t); moverBavaria(t); if (!document.body.classList.contains('con-pagina') || document.body.classList.contains('pagina-transparente')) W.gfoto?.update(dt); // con una página encima no se descargan teselas (todo el rendimiento para la página)
   W.estaciones?.forEach((g) => { g.userData.a.rotation.z = t * 0.8; g.userData.b.rotation.y = t * 1.3; });
   W.coraAros?.forEach((a, i) => (a.rotation.z = t * (i ? -0.2 : 0.3)));
   W.mercados?.forEach((g, i) => (g.userData.n.rotation.y = t * 1.2 + i));
@@ -277,12 +296,13 @@ async function iniciar() {
   document.getElementById('empezar').onclick = (e) => { e.stopPropagation(); empezar(); }; // el clic de Comenzar no cuenta como 'siguiente'
   if (new URLSearchParams(location.search).has('directo')) empezar();
   addEventListener('keydown', (e) => {
+    if (e.key === 'g' || e.key === 'G') { precalentar(); return; } // precarga para grabar
+    if (precalentando) return;
     if (document.getElementById('inicio')) { if (e.key === 'Enter' || e.key === ' ') empezar(); return; }
     const k = e.key;
     if (['ArrowRight', 'PageDown', ' ', 'Enter', 'ArrowDown'].includes(k)) { e.preventDefault(); sig(); }
     else if (['ArrowLeft', 'PageUp', 'ArrowUp', 'Backspace'].includes(k)) { e.preventDefault(); ant(); }
     else if (k === 'f' || k === 'F') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
-    else if (k === 's' || k === 'S') alternarStop();
     else if (k === 't' || k === 'T') document.body.classList.toggle('subs');
     else if (k === 'a' || k === 'A') alternarAuto();
     else if (k === 'p' || k === 'P') window.open(location.pathname + '?presentador', 'presentadora', 'width=1100,height=700');
