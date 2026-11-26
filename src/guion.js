@@ -2,6 +2,7 @@
 // X = API (ui.js + mundo.js + main.js). Todas las cifras son las del guion de las autoras.
 import { I, E, V, P, nodoEt, lugar } from './sec/util.js';
 import s01 from './sec/s01.js';
+import * as IN from './sec/intro.js';
 import s02 from './sec/s02.js';
 import s03 from './sec/s03.js';
 import s04 from './sec/s04.js';
@@ -10,15 +11,14 @@ import s06 from './sec/s06.js';
 
 export const CAPITULOS = [
   /* ===================================================================== 00 PORTADA */
+  // sobrevuelo de apertura sobre la fotogrametría real: arranca tras un velo cuando la foto ya cubre la vista,
+  // dolly lento del suroccidente hacia los cerros, el límite de la localidad se dibuja y entra el nombre del proyecto
   {
-    n: '00', nombre: 'Kennedy', cam: 'portada', tr: 'vuelo',
-    base: (X) => { X.W.capas.edif.userData.u.uSube.value = 0; },
+    n: '00', nombre: 'Kennedy', cine: true,
+    base: (X) => { IN.armar(X); },
+    fin: (X, nuevo) => { IN.cortar(); if (!nuevo?.cine) IN.fin(X); },
     beats: [
-      { t: '[Portada] Kennedy: modelamiento dinámico y simulación.', a: (X) => {
-        X.sube(1, X.LUG.corabastos, 5); X.capa('agua'); X.capa('vias-prin');
-        X.titulo('Kennedy: *modelamiento dinámico* y simulación', { kick: 'Sustentación · Modelamiento dinámico y simulación', top: '58vh', width: 70 });
-        X.cam({ p: [-4600, 1150, 1900], o: [3200, 700, -1600], nom: 'Kennedy y los cerros orientales' }, 14); // avance lento hacia los cerros
-      } },
+      { t: '[Portada] Kennedy: modelamiento dinámico y simulación.', a: (X) => IN.portada(X) },
     ],
   },
 

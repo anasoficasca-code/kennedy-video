@@ -39,10 +39,53 @@ const ESTACIONES = {
   lejos: { p: [9000, 26000, 26000], o: [0, 0, 0], nom: 'Bogotá' },
 };
 const camT = { p: new THREE.Vector3(...ESTACIONES.portada.p), o: new THREE.Vector3(...ESTACIONES.portada.o) };
+/* ---- movimientos de cámara cinematográficos (intro): vuelo por una curva suave y deriva lenta al llegar ---- */
+let vueloTw = null, derivaTw = null;
+const EJE_Y = new THREE.Vector3(0, 1, 0);
+const aV = (e) => { const s = typeof e === 'string' ? ESTACIONES[e] : e; return { p: new THREE.Vector3(...s.p), o: new THREE.Vector3(...s.o) }; };
+function pararCam() { gsap.killTweensOf(camT.p); gsap.killTweensOf(camT.o); vueloTw?.kill(); vueloTw = null; derivaTw?.kill(); derivaTw = null; }
+/** órbita muy lenta alrededor del objetivo (arranca y termina con velocidad cero: nunca un tirón) */
+function derivar(ang = 0.08, d = 26) {
+  derivaTw?.kill(); if (R.rapido || !ang) return;
+  const st = { a: 0 }; let prev = 0;
+  derivaTw = gsap.to(st, { a: ang, duration: d, ease: 'sine.inOut', onUpdate: () => { const da = st.a - prev; prev = st.a; const rel = camT.p.clone().sub(camT.o).applyAxisAngle(EJE_Y, da); camT.p.copy(camT.o).add(rel); } });
+}
+/** vuelo: la cámara recorre una curva Catmull-Rom (posición y objetivo) por los puntos dados, con easing largo.
+ *  ruta: [estación | {p,o}, …] (el primer punto es la cámara actual) · o: { ease, delay, deriva: ángulo de la deriva al llegar } */
+const velCam = { p: new THREE.Vector3(), o: new THREE.Vector3(), t: 0 };
+function vuelo(ruta, d = 6, o = {}) {
+  const cur = { p: camT.p.clone(), o: camT.o.clone() };
+  // si la cámara venía volando, el nuevo vuelo sale en la misma dirección (sin quiebre ni frenazo)
+  const enMarcha = vueloTw?.isActive() && performance.now() - velCam.t < 100;
+  const pts = [cur];
+  if (enMarcha) { const k = Math.min(0.6, d * 0.12); pts.push({ p: cur.p.clone().addScaledVector(velCam.p, k), o: cur.o.clone().addScaledVector(velCam.o, k) }); }
+  pts.push(...ruta.map(aV));
+  pararCam();
+  const fin = pts[pts.length - 1];
+  if (R.rapido || d === 0) { camT.p.copy(fin.p); camT.o.copy(fin.o); return; }
+  const cp = new THREE.CatmullRomCurve3(pts.map((q) => q.p), false, 'centripetal'), co = new THREE.CatmullRomCurve3(pts.map((q) => q.o), false, 'centripetal');
+  const k = { u: 0 }, prevP = camT.p.clone(), prevO = camT.o.clone(); let prevT = performance.now();
+  vueloTw = gsap.to(k, { u: 1, duration: d, delay: o.delay || 0, ease: o.ease || (enMarcha ? 'power2.out' : 'power2.inOut'),
+    onUpdate: () => {
+      cp.getPointAt(k.u, camT.p); co.getPointAt(k.u, camT.o);
+      const now = performance.now(), dt = Math.max(1, now - prevT) / 1000;
+      velCam.p.subVectors(camT.p, prevP).divideScalar(dt); velCam.o.subVectors(camT.o, prevO).divideScalar(dt); velCam.t = now;
+      prevP.copy(camT.p); prevO.copy(camT.o); prevT = now;
+    },
+    onComplete: () => { vueloTw = null; derivar(o.deriva ?? 0.08, o.derivaD ?? 26); } });
+}
+/** órbita explícita alrededor del objetivo: ang (rad), k = factor de distancia final, dy = cambio de altura */
+function orbita(ang, d = 8, o = {}) {
+  pararCam();
+  const rel0 = camT.p.clone().sub(camT.o), st = { a: 0, k: 1, y: 0 };
+  const aplicar = () => { const r = rel0.clone().applyAxisAngle(EJE_Y, st.a).multiplyScalar(st.k); r.y += st.y; camT.p.copy(camT.o).add(r); };
+  if (R.rapido || d === 0) { Object.assign(st, { a: ang, k: o.k ?? 1, y: o.dy ?? 0 }); aplicar(); return; }
+  vueloTw = gsap.to(st, { a: ang, k: o.k ?? 1, y: o.dy ?? 0, duration: d, delay: o.delay || 0, ease: o.ease || 'sine.inOut', onUpdate: aplicar, onComplete: () => { vueloTw = null; } });
+}
 /** cámara con convención de zoom: si el destino está lejos → zoom out, desplazamiento, zoom in */
 function cam(nombre, d = 2.2) {
   const e = typeof nombre === 'string' ? ESTACIONES[nombre] : nombre;
-  gsap.killTweensOf(camT.p); gsap.killTweensOf(camT.o);
+  pararCam();
   if (R.rapido || d === 0) { camT.p.set(...e.p); camT.o.set(...e.o); return; }
   const dO = new THREE.Vector3(...e.o), dP = new THREE.Vector3(...e.p);
   const d0 = camT.p.distanceTo(camT.o), d1 = dP.distanceTo(dO), salto = camT.o.distanceTo(dO);
@@ -60,7 +103,9 @@ function cam(nombre, d = 2.2) {
 }
 const uTo = (nombre, k, v, d = 1, ease = 'expo.out') => { const u = uni(nombre); if (u?.[k]) tw(u[k], { value: v, duration: D(d), ease }); };
 const X = {
-  ...UI, R, D, tw, twf, gsap, W, LUG, COL_P, NOM_P, CAPAS_POT, cam, uTo,
+  ...UI, R, D, tw, twf, gsap, W, LUG, COL_P, NOM_P, CAPAS_POT, cam, uTo, THREE,
+  /** cámara cinematográfica: X.vuelo([estación|{p,o}, …], dur, {ease, deriva}) · X.orbita(ang, dur, {k, dy}) · X.derivar(ang, dur) */
+  vuelo, orbita, derivar, camT,
   /** páginas reales de las autoras: X.pagina('red', 'estado', { camara: {x,y,s} }) · X.camPag({x,y,s}) · X.sinPagina() */
   pagina: PAG.pagina, camPag: PAG.camara, sinPagina: PAG.sinPagina, ventana: PAG.ventana, hasta: PAG.hasta,
   /** edición tipo video (src/edicion.js): X.ed.pop / persona / cifra / rotulo / senalar / capitulo / limpiar */
@@ -113,8 +158,12 @@ function reiniciarMundo() {
   W.pot.nodos.forEach((m) => m.scale.setScalar(m.userData.r));
   W.agentes.vel = 1;
 }
+let capActual = -1;
 function entrarCapitulo(ci) {
   const c = CAPITULOS[ci];
+  if (capActual !== ci) { try { CAPITULOS[capActual]?.fin?.(X, c); } catch (e) { console.error(e); } capActual = ci; }
+  // capítulos «cine» (portada + introducción): sin HUD cartográfico y sin la deriva automática (la cámara la llevan sus vuelos)
+  document.body.classList.toggle('cine', !!c.cine); W.deriva = c.cine ? 0 : 1;
   reiniciarMundo();
   UI.limpiarTodo();
   if (!c.pagina) PAG.sinPagina(true); // los capítulos con página la ponen en su primera frase
@@ -135,6 +184,8 @@ async function correrBeat(n, conTransicion) {
   const b = BEATS[n]; const c = CAPITULOS[b.ci];
   if (b.bi === 0) {
     // portadilla limpia de capítulo (reemplaza las transiciones 3D): tapa, monta la escena debajo y se abre
+    // capítulo «continuo»: sigue el mismo plano del anterior (sin fundido a negro)
+    if (conTransicion && !R.rapido && n > 0 && c.continuo) { UI.limpiar(); entrarCapitulo(b.ci); b.a?.(X); return; }
     if (conTransicion && !R.rapido && n > 0) { UI.limpiar(); ED.limpiar(); await ED.capitulo(c.n, c.nombre, () => { entrarCapitulo(b.ci); b.a?.(X); }); return; }
     else entrarCapitulo(b.ci);
   }
@@ -187,7 +238,7 @@ function cuadro() {
   const dt = W.stop ? 1 / 12 : gsap.ticker.deltaRatio() / 60;
   // la cámara nunca se detiene: órbita lenta + respiración alrededor del objetivo
   const rel = camT.p.clone().sub(camT.o);
-  rel.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.sin(t * 0.03) * 0.12); // deriva muy lenta y suave, sin vaivén
+  rel.applyAxisAngle(EJE_Y, Math.sin(t * 0.03) * 0.12 * (W.deriva ?? 1)); // deriva muy lenta y suave, sin vaivén (0 en la intro: allí la llevan los vuelos)
   W.cam.position.copy(camT.o).add(rel);
   const ob = camT.o.clone();
   if (W.stop) { const k = rel.length() * 0.0009; W.cam.position.x += (Math.random() - .5) * k; W.cam.position.y += (Math.random() - .5) * k; ob.x += (Math.random() - .5) * k; }

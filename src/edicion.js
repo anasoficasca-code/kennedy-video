@@ -11,10 +11,15 @@
 //   senalar(nombrePagina, selector|rect, {texto, lado:'arriba'|'izq'|'der', delay}) → marco fino + etiqueta con línea
 //   frase(texto con *énfasis*, {y})                     → frase centrada palabra por palabra
 //   capitulo(n, titulo, durante) → Promise             → fundido corto entre capítulos (sin título)
+//   lugar(p3, texto, {sub, lado:'der'|'izq', delay, alto, pin}) → etiqueta de vidrio anclada a un punto 3D del mundo
+//   ventanas() → contenedor de pantallas flotando en perspectiva; .agregar(img, texto, {delay})
+//   quitar(e) · limpiarSalvo([e, …])                   → quita un gráfico suelto · limpia todo menos los dados
 //   limpiar()
 import gsap from 'gsap';
+import * as THREE from 'three';
 import { R } from './ui.js';
 import { ventana } from './pagina.js';
+import { W } from './mundo.js';
 
 const capa = () => document.getElementById('edicion');
 const vivos = new Set();
@@ -37,6 +42,16 @@ function escribir(tl, raiz, en = 0, paso = 0.055) {
 export function limpiar() {
   for (const e of [...vivos]) { vivos.delete(e); e._sal?.(); gsap.killTweensOf(e); gsap.to(e, { autoAlpha: 0, y: '-=8', duration: R.rapido ? 0 : 0.3, ease: 'power2.in', onComplete: () => e.remove() }); }
 }
+/** agrega a la capa de edición un elemento armado afuera (se limpia como los demás) */
+export function anexar(e) { capa().appendChild(e); vivos.add(e); return e; }
+export { palabras, escribir };
+/** quita un gráfico suelto (con su salida) */
+export function quitar(e, d = 0.35) {
+  if (!e || !vivos.has(e)) return; vivos.delete(e); e._sal?.(); gsap.killTweensOf(e);
+  gsap.to(e, { autoAlpha: 0, duration: R.rapido ? 0 : d, ease: 'power2.in', onComplete: () => e.remove() });
+}
+/** limpia todos los gráficos menos los dados (para frases que conservan parte de la anterior) */
+export function limpiarSalvo(guardar = []) { for (const e of [...vivos]) if (!guardar.includes(e)) quitar(e); }
 function salir(e, dur) { if (dur) gsap.delayedCall(dur, () => { if (!vivos.has(e)) return; vivos.delete(e); gsap.to(e, { autoAlpha: 0, y: '-=8', duration: 0.3, onComplete: () => e.remove() }); }); }
 
 /** texto de la voz, abajo */
@@ -96,7 +111,7 @@ export function cifra(o = {}) {
 /** filas compactas que van saliendo (paso = segundos entre filas, para ir con la voz) */
 export function lista(o = {}) {
   if (R.rapido) return;
-  const e = h('div', 'ed-lista', `<ol>${o.items.map((t) => `<li><i class="n"></i><span>${palabras(t)}</span></li>`).join('')}</ol>`);
+  const e = h('div', 'ed-lista' + (o.cls ? ' ' + o.cls : ''), `<ol>${o.items.map((t) => `<li><i class="n"></i><span>${palabras(t)}</span></li>`).join('')}</ol>`);
   if (o.ancho) e.style.width = o.ancho + 'vw';
   poner(e, o.x ?? 6, o.y ?? 18);
   gsap.set(e, { autoAlpha: 1, delay: o.delay || 0 });
@@ -145,6 +160,110 @@ export function senalar(nombre, objetivo, o = {}) {
       .fromTo(e.querySelector('.et'), { autoAlpha: 0, scale: 0.94 }, { autoAlpha: 1, scale: 1, duration: 0.4, ease: POP }, 0.6);
     escribir(tl, e.querySelector('.et'), 0.65, 0.04);
   }
+  salir(e, o.dur); return e;
+}
+
+/** agrega una fila a una lista existente (misma entrada que las demás filas) */
+export function listaMas(e, texto, delay = 0) {
+  if (!e || R.rapido) return;
+  const li = h('li', null, `<i class="n"></i><span>${palabras(texto)}</span>`); e.querySelector('ol').appendChild(li);
+  const tl = gsap.timeline({ delay });
+  tl.fromTo(li, { autoAlpha: 0, y: 10, scale: 0.97 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.45, ease: POP });
+  escribir(tl, li, 0.1, 0.035);
+}
+
+/* ------------------------------------------------------------------ LUGAR: etiqueta de vidrio anclada al mundo 3D */
+const LIMA = new THREE.Color('#cfff5e');
+const GEO_L = { aro: new THREE.RingGeometry(0.86, 1, 64).rotateX(-Math.PI / 2), fino: new THREE.RingGeometry(0.95, 1, 64).rotateX(-Math.PI / 2), disco: new THREE.CircleGeometry(0.86, 48).rotateX(-Math.PI / 2) };
+const v3 = new THREE.Vector3();
+function anclaDe(p3) {
+  if (p3?.isObject3D) return () => p3.getWorldPosition(v3);
+  const p = p3?.isVector3 ? p3.clone() : p3.length === 2 ? new THREE.Vector3(p3[0], 0, p3[1]) : new THREE.Vector3(p3[0], p3[1], p3[2]);
+  return () => v3.copy(p);
+}
+/**
+ * Señala un lugar del mundo 3D: anillo pulsante en el suelo + línea fina con nodo cuadrado + etiqueta de vidrio.
+ * Se proyecta cada cuadro con la cámara (W.cam); se oculta si queda detrás o fuera de pantalla. Se va con limpiar().
+ * p3: [x, z] (suelo) | [x, y, z] | THREE.Vector3 | Object3D · texto con *énfasis* · o: { sub, lado: 'der'|'izq', delay, alto (px), pin: false sin anillo }
+ */
+export function lugar(p3, texto, o = {}) {
+  if (R.rapido || !W.cam) return;
+  const lado = o.lado === 'izq' ? 'izq' : 'der';
+  const e = h('div', 'ed-lugar ' + lado, `<div class="in"><i class="tallo"></i><i class="nodo"></i><div class="et"><b>${palabras(texto)}</b>${o.sub ? `<small>${palabras(o.sub)}</small>` : ''}</div></div>`);
+  e.style.setProperty('--h', (o.alto ?? 64) + 'px');
+  poner(e, 0, 0);
+  const inn = e.querySelector('.in'), ancla = anclaDe(p3);
+  // pin en el suelo (3D): disco tenue + aro + pulso que se expande
+  const k = { s: 0 }; let pin = null;
+  if (o.pin !== false) {
+    const mat = (op) => new THREE.MeshBasicMaterial({ color: LIMA, transparent: true, opacity: op, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, side: THREE.DoubleSide, toneMapped: false });
+    const g = new THREE.Group(), aro = new THREE.Mesh(GEO_L.aro, mat(0.9)), pulso = new THREE.Mesh(GEO_L.fino, mat(0.7)), disco = new THREE.Mesh(GEO_L.disco, mat(0.12));
+    [aro, pulso, disco].forEach((m) => { m.renderOrder = 30; g.add(m); }); g.renderOrder = 30;
+    W.scene.add(g); pin = { g, aro, pulso, disco, op: { v: 1 } };
+  }
+  let visto = null, vivo = true;
+  const tick = () => {
+    if (!vivo) return;
+    const p = ancla(); const d = W.cam.position.distanceTo(p);
+    if (pin) {
+      pin.g.position.set(p.x, p.y + 3, p.z);
+      const s = Math.min(420, Math.max(14, d * 0.016)) * k.s, f = (gsap.ticker.time * 0.55) % 1;
+      pin.aro.scale.setScalar(s); pin.disco.scale.setScalar(s);
+      pin.pulso.scale.setScalar(s * (1 + f * 1.8)); pin.pulso.material.opacity = 0.7 * (1 - f) * k.s * pin.op.v;
+      pin.aro.material.opacity = 0.9 * pin.op.v; pin.disco.material.opacity = 0.12 * pin.op.v;
+    }
+    v3.copy(p).project(W.cam);
+    const vis = v3.z < 1 && Math.abs(v3.x) < 1.02 && Math.abs(v3.y) < 1.02;
+    if (vis !== visto) { visto = vis; gsap.to(inn, { autoAlpha: vis ? 1 : 0, duration: 0.25, overwrite: true }); }
+    if (vis) e.style.transform = `translate3d(${((v3.x + 1) / 2 * innerWidth).toFixed(1)}px, ${((1 - v3.y) / 2 * innerHeight).toFixed(1)}px, 0)`;
+  };
+  gsap.ticker.add(tick); tick();
+  e._sal = () => {
+    vivo = false; gsap.ticker.remove(tick);
+    if (pin) gsap.to(pin.op, { v: 0, duration: R.rapido ? 0 : 0.35, onUpdate: () => { pin.aro.material.opacity = 0.9 * pin.op.v; pin.disco.material.opacity = 0.12 * pin.op.v; pin.pulso.material.opacity = 0; }, onComplete: () => { W.scene.remove(pin.g); [pin.aro, pin.pulso, pin.disco].forEach((m) => m.material.dispose()); } });
+  };
+  const tl = gsap.timeline({ delay: o.delay || 0 });
+  tl.set(e, { autoAlpha: 1 }, 0)
+    .to(k, { s: 1, duration: 0.9, ease: 'expo.out' }, 0)
+    .fromTo(e.querySelector('.tallo'), { scaleY: 0 }, { scaleY: 1, duration: 0.5, ease: 'power3.out' }, 0.1)
+    .fromTo(e.querySelector('.nodo'), { scale: 0 }, { scale: 1, duration: 0.35, ease: POP }, 0.45)
+    .fromTo(e.querySelector('.et'), { autoAlpha: 0, x: lado === 'der' ? -8 : 8, clipPath: lado === 'der' ? 'inset(0 100% 0 0 round 10px)' : 'inset(0 0 0 100% round 10px)' }, { autoAlpha: 1, x: 0, clipPath: 'inset(0 0% 0 0% round 10px)', duration: 0.55, ease: 'power3.out' }, 0.5);
+  escribir(tl, e.querySelector('.et'), 0.6, 0.045);
+  salir(e, o.dur); return e;
+}
+
+/* ------------------------------------------------------------------ VENTANAS: pantallas reales flotando en perspectiva */
+// la más nueva al frente (derecha); las anteriores se corren hacia atrás y a la izquierda, como una pila de pantallas
+const SLOT = [
+  { x: 8, z: 0, ry: -9, op: 1 }, { x: -13, z: -300, ry: 14, op: 0.92 }, { x: -29, z: -600, ry: 19, op: 0.8 }, { x: -42, z: -900, ry: 23, op: 0.68 },
+];
+export function ventanas(o = {}) {
+  if (R.rapido) return;
+  const e = h('div', 'ed-ventanas', '<i class="luz"></i><div class="escenario"></div>');
+  poner(e, 0, 0);
+  const esc = e.querySelector('.escenario'), lista = [];
+  const colocar = (dur) => lista.forEach((w, i) => {
+    const s = SLOT[Math.min(SLOT.length - 1, lista.length - 1 - i)];
+    if (i === lista.length - 1) return; // la nueva entra con su propia animación
+    gsap.to(w, { x: s.x + 'vw', z: s.z, rotationY: s.ry, autoAlpha: s.op, duration: dur, ease: 'power3.inOut' });
+    gsap.to(w.querySelector('.cap'), { autoAlpha: 0, duration: dur * 0.5 });
+  });
+  gsap.fromTo(e, { autoAlpha: 0 }, { autoAlpha: 1, duration: o.fundido ?? 1.1, ease: 'power2.out', delay: o.delay || 0 });
+  /** agrega una pantalla (img = captura de la página real) con su texto de la voz debajo */
+  e.agregar = (img, texto, op = {}) => {
+    if (R.rapido) return null;
+    const w = h('div', 'ed-ven', `<div class="barra"><i></i><i></i><i></i></div><div class="img" style="background-image:url('${img}')"></div>
+      <div class="cap"><i class="tallo"></i><i class="nodo"></i><span>${palabras(texto)}</span></div>`);
+    esc.appendChild(w); lista.push(w);
+    const tl = gsap.timeline({ delay: op.delay || 0 });
+    tl.add(() => colocar(1.5), 0)
+      .fromTo(w, { x: '46vw', z: -150, rotationY: -32, autoAlpha: 0 }, { x: SLOT[0].x + 'vw', z: 0, rotationY: SLOT[0].ry, autoAlpha: 1, duration: 1.5, ease: 'power3.out', immediateRender: true }, 0)
+      .fromTo(w.querySelector('.tallo'), { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: 'power3.out' }, 0.75)
+      .fromTo(w.querySelector('.nodo'), { scale: 0 }, { scale: 1, duration: 0.3, ease: POP }, 1.0)
+      .fromTo(w.querySelector('.cap span'), { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: 'power3.out' }, 1.05);
+    escribir(tl, w.querySelector('.cap span'), 1.1, 0.045);
+    return w;
+  };
   salir(e, o.dur); return e;
 }
 

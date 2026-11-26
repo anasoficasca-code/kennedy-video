@@ -1,12 +1,12 @@
-// Capítulo 01 · Introducción. Arranca en la fotogrametría 3D (abastecimiento, crecimiento, suelo) y entra a la
-// página real «Red causal · 3 niveles + POT» (humedalburro), que se usa en vivo; cierra con el montaje de las páginas
-// del proyecto (POT → problemas → modelo propio) y vuelve al 3D para las simulaciones.
-// Edición: solo X.ed (listas, zócalos, señales); cada frase limpia la anterior salvo las marcadas `mantener`.
-import { I } from './util.js';
-import { precargar, liberar } from '../pagina.js';
-import { anclaNodo } from '../paginas/humedalburro.js';
+// Capítulo 01 · Introducción — toda en 3D sobre la fotogrametría real de Kennedy (Google Photorealistic 3D Tiles).
+// La cámara vuela (X.vuelo: curvas suaves, easing largo, deriva lenta al llegar) hacia los lugares reales que la voz
+// relaciona, y X.ed.lugar los señala con etiquetas de vidrio ancladas al mundo. Las capas se encienden con la voz:
+// flujos de carga → Corabastos (abastecimiento), ola de la ciudad (crecimiento), humedales (ecosistemas),
+// red de los seis problemas + agentes (dinámicas que se refuerzan). Cierra con un montaje de pantallas de vidrio
+// flotando en perspectiva con las páginas reales del proyecto (capturas en public/img/intro).
+// Cada frase conserva solo lo que sigue diciendo la voz (limpiarSalvo); en un salto se recrea ya terminado (seguir).
+import * as IN from './intro.js';
 
-const H = 'humedalburro';
 let gen = 0;
 /** contexto de frase: pasos diferidos que se anulan si llega otra frase; en un salto corren de inmediato */
 export function ctx(X) {
@@ -42,99 +42,164 @@ export function agregar(X, lista, texto, delay = 0) {
   X.gsap.fromTo(li, { autoAlpha: 0, x: -24 }, { autoAlpha: 1, x: 0, duration: 0.55, ease: 'back.out(1.6)', delay });
 }
 
-const TRES = ['la modernización del *abastecimiento*', 'el crecimiento *urbano*', 'la transformación del *suelo*'];
-const PROYECTO = ['el análisis del *POT de Bogotá*', 'el diagnóstico y la formulación de los *problemas de Kennedy*', 'la construcción de un *modelo propio* de ciudad', 'la exploración de sus posibles consecuencias mediante *simulaciones*'];
-const listaProyecto = (X, n, delay = 0) => X.ed.lista({ items: PROYECTO.slice(0, n), x: 62, y: 45, ancho: 33, paso: 0.5, delay });
-const AXO = ['1956', '1972', '1988', '2024']; // axonometrías reales de Kennedy (public/img)
-
 /** cada frase anula lo diferido o asíncrono de la anterior (saltos: las frases async no pintan tarde) */
 export const conGuardia = (beats) => beats.map((b) => ({ ...b, a: (X) => { gen++; return b.a(X); } }));
 
+/* ======================================================================= textos de la voz y lugares */
+const TRES = ['la modernización del *abastecimiento*', 'el crecimiento *urbano*', 'la transformación del *suelo*'];
+const EFECTOS = ['la dependencia *alimentaria*', 'la acumulación de *residuos*', 'la degradación de los *ecosistemas*'];
+const IMG = (n) => './img/intro/' + n + '.jpg';
+const PANTALLAS = [
+  [IMG('pot'), 'el análisis del *POT de Bogotá*'],
+  [IMG('problemas'), 'el diagnóstico y la formulación de los *problemas de Kennedy*'],
+  [IMG('red'), 'la construcción de un *modelo propio* de ciudad'],
+  [IMG('picos'), 'la exploración de sus posibles consecuencias mediante *simulaciones*'],
+];
+const PUNTOS = ['pA', 'pB', 'pC', 'pD', 'pE', 'pF'];
+
+// lista de vidrio (arriba a la izquierda) y lugares señalados (se recrean ya terminados en un salto)
+const lista = (X, items) => X.ed.lista({ items, x: 4.5, y: 12, cls: 'vidrio', paso: 0.5 });
+const L = {
+  cora: (X, d = 0) => X.ed.lugar(IN.P.cora, 'Corabastos', { delay: d }),
+  patio: (X, d = 0) => X.ed.lugar(IN.P.patio, 'Patio Bonito', { lado: 'izq', delay: d }),
+  bav: (X, d = 0) => X.ed.lugar(IN.P.bavaria, 'Bavaria', { delay: d }),
+};
+/** puntos reales de los problemas (conectografía) que aparecen suaves */
+function puntos(X, ks, on = true, d = 2.2, paso = 0.25) {
+  ks.forEach((k, i) => { const u = X.W.capas[k]?.userData.u; if (!u) return; if (on && X.W.capas[k].visible && u.uAp.value > 0.99) return; if (on) { u.uS.value = (k === 'pF' ? 90 : k === 'pB' ? 10 : 22) * 2.2; X.capa(k, true, 0.4); if (X.R.rapido) u.uAp.value = 1; else X.gsap.fromTo(u.uAp, { value: 0 }, { value: 1, duration: d, ease: 'power2.out', delay: i * paso }); } else X.capa(k, false, 1.2); });
+}
+/** precarga y decodifica las capturas del montaje (que no haya espera a mitad de frase) */
+let precargadas = false;
+function precargarImgs() { if (precargadas) return; precargadas = true; PANTALLAS.forEach(([src]) => { const im = new Image(); im.src = src; im.decode?.().catch(() => {}); }); }
+
+// encuadres (marco local en metros: x = este, z = sur)
+const CAM = {
+  cora: () => ({ p: [IN.P.cora[0] + 1150, 1250, IN.P.cora[1] + 1650], o: [IN.P.cora[0], 0, IN.P.cora[1]] }),
+  coraVia: () => ({ p: [-2300, 1500, 2900], o: [-600, 0, -250] }),
+  tres: { p: [500, 4700, 4400], o: [-150, 0, -650] },
+  efectos: () => ({ p: [IN.P.cora[0] + 700, 1150, IN.P.cora[1] + 1500], o: [IN.P.cora[0] - 120, 0, IN.P.cora[1] + 60] }),
+  sistema: { p: [1100, 6600, 6000], o: [-200, 0, -250] },
+  central: { p: [500, 8800, 6600], o: [0, 0, -200] },
+  montaje: { p: [3000, 9800, 8200], o: [0, 0, 0] },
+};
+
 export default /* ===================================================================== 01 INTRODUCCIÓN */
   {
-    n: '01', nombre: 'Introducción', cam: 'alto', precarga: [H],
-    base: (X) => { X.capa('agua', true, 0); },
+    n: '01', nombre: 'Introducción', cine: true, continuo: true, precarga: ['humedalburro'],
+    base: (X) => { IN.armar(X); IN.poner(X, { borde: 1 }, 1.5); precargarImgs(); },
+    fin: (X, nuevo) => { if (!nuevo?.cine) IN.fin(X); },
     beats: conGuardia([
-      // 3D: Corabastos (abastecimiento) → los edificios crecen (crecimiento urbano) → axonometrías reales 1956-2024 (suelo)
-      { t: 'La modernización del abastecimiento, el crecimiento urbano y la transformación del suelo', a: (X) => {
-        const c = ctx(X);
-        X.sinPagina(); X.W.capas.edif.userData.u.uSube.value = 0.15;
-        X.cam('cora', 3.2); X.capa('corabastos'); X.foco(X.LUG.corabastos, 900, '#cfff5e');
-        guardar('tres', X.ed.lista({ items: TRES, x: 5, y: 16, ancho: 30, paso: 1.45, delay: 0.1 }));
-        c.seq([[1.6, () => { X.sinFoco(); X.sube(1, X.LUG.corabastos, 3.2); }],
-          [3.0, () => {
-            const e = guardar('axo', X.ed.pop({ img: I('axo_1956.jpg'), t: '', cls: 'oscuro hb-axo', x: 66, y: 16, ancho: 26 }));
-            if (!e) return; const im = e.querySelector('.img'); Object.assign(im.style, { flex: '1 1 auto', height: '30vh' }); e.querySelector('.cuerpo').style.display = 'none';
-            AXO.slice(1).forEach((a, i) => X.gsap.delayedCall(0.9 + i * 0.85, () => { if (!e.isConnected) return; im.style.backgroundImage = `url('${I('axo_' + a + '.jpg')}')`; }));
-          }]]);
-        if (X.R.rapido) { X.sube(1, X.LUG.corabastos, 0); X.sinFoco(0); }
+      // Corabastos: la cámara baja desde la portada; los flujos de carga reales convergen en la central
+      { t: 'La modernización del abastecimiento,', mantener: true, a: (X) => {
+        X.ed.limpiar();
+        X.vuelo([CAM.coraVia(), CAM.cora()], 4.6, { ease: 'power2.inOut', deriva: 0.06 });
+        IN.poner(X, { bordeOp: 0.45 }, 3);
+        X.capa('flujos', true, 1.6); X.uTo('flujos', 'uV', 520, 0.1);
+        guardar('tres', lista(X, TRES.slice(0, 1)));
+        guardar('lCora', L.cora(X, 1.5));
       } },
-      // las tres siguen en pantalla; se suma «necesidades diferentes» y la cámara se abre a toda Kennedy
+      // crecimiento: la cámara se abre a toda Kennedy y la ciudad se rehace en ola desde Kennedy Central; Patio Bonito y Bavaria
+      { t: 'el crecimiento urbano y la transformación del suelo', mantener: true, a: (X) => {
+        const c = ctx(X);
+        const li = seguir(X, 'tres', () => lista(X, TRES.slice(0, 1))), cora = seguir(X, 'lCora', () => L.cora(X));
+        X.ed.limpiarSalvo([li, cora]);
+        X.vuelo([CAM.tres], 4.8, { deriva: 0.13, derivaD: 22 });
+        X.capa('flujos', false, 1.4); IN.poner(X, { bordeOp: 1 }, 2.5);
+        const u = X.W.capas.edif.userData.u; X.gsap.killTweensOf(u.uSube); u.uOri.value.set(IN.P.kennedy[0], IN.P.kennedy[1]);
+        if (!X.R.rapido) X.gsap.timeline().to(u.uSube, { value: 0.3, duration: 0.9, ease: 'power2.in' }).to(u.uSube, { value: 1, duration: 3.4, ease: 'power2.out' });
+        X.ed.listaMas(li, TRES[1], 0.15);
+        guardar('lPatio', L.patio(X, 0.9));
+        c.seq([[1.7, () => { X.ed.listaMas(li, TRES[2]); guardar('lBav', L.bav(X, 0.2)); }]]);
+      } },
+      // tres lugares, tres necesidades: la cámara sigue su deriva lenta sobre Kennedy
       { t: 'buscaban responder a necesidades diferentes,', mantener: true, a: (X) => {
-        X.sinPagina(); X.sinFoco(); X.capa('corabastos', false); X.W.capas.edif.userData.u.uSube.value = 1;
-        X.cam('alto', 3);
-        soltar(X, 'axo');
-        seguir(X, 'tres', () => X.ed.lista({ items: TRES, x: 5, y: 16, ancho: 30 }));
-        X.ed.rotulo('buscaban responder a *necesidades diferentes*', { lado: 'der' });
+        const keep = [seguir(X, 'tres', () => lista(X, TRES)), seguir(X, 'lCora', () => L.cora(X)), seguir(X, 'lPatio', () => L.patio(X)), seguir(X, 'lBav', () => L.bav(X))];
+        X.ed.limpiarSalvo(keep);
+        if (X.R.rapido) X.vuelo([CAM.tres], 0);
+        X.ed.rotulo('buscaban responder a *necesidades diferentes*', { delay: 0.15 });
       } },
-      // la red causal real: sus relaciones se encienden una a una (se entrelazan)
-      { t: 'pero sus efectos terminaron entrelazándose,', a: (X) => {
-        X.pagina(H, 'entrelaza', { entrada: 'barrido' });
-        X.ed.rotulo('sus efectos terminaron *entrelazándose*', { lado: 'der', delay: 0.6 });
+      // los tres lugares se enlazan: arcos que se dibujan y fluyen
+      { t: 'pero sus efectos terminaron entrelazándose,', mantener: true, a: (X) => {
+        const keep = [seguir(X, 'tres', () => lista(X, TRES)), seguir(X, 'lCora', () => L.cora(X)), seguir(X, 'lPatio', () => L.patio(X)), seguir(X, 'lBav', () => L.bav(X))];
+        X.ed.limpiarSalvo(keep);
+        IN.poner(X, { arcos: 1, arcosOp: 1 }, 2.4, 'power2.inOut', 0.1);
+        X.ed.rotulo('sus efectos terminaron *entrelazándose*', { delay: 0.15 });
       } },
-      // los tres problemas, señalados sobre sus nodos en la red
-      { t: 'intensificando la dependencia alimentaria, la acumulación de residuos y la degradación de los ecosistemas.', a: async (X) => {
+      // los tres efectos, señalados en sus lugares: Corabastos, María Paz, humedal La Vaca
+      { t: 'intensificando la dependencia alimentaria, la acumulación de residuos y la degradación de los ecosistemas.', mantener: true, a: (X) => {
         const c = ctx(X);
-        await X.pagina(H, 'red');
-        if (!c.vivo()) return;
-        X.ed.lista({ items: ['la dependencia *alimentaria*', 'la acumulación de *residuos*', 'la degradación de los *ecosistemas*'], x: 4, y: 16, ancho: 27, paso: 1.5, delay: 0.5 });
-        c.seq([[0.8, () => X.ed.senalar(H, anclaNodo('N3-HIP'), { lado: 'circulo arriba', texto: 'dependencia alimentaria', pad: 6 })],
-          [2.3, () => X.ed.senalar(H, anclaNodo('N1-RES'), { lado: 'circulo', texto: 'residuos', pad: 6 })],
-          [3.8, () => X.ed.senalar(H, anclaNodo('N2-HEB'), { lado: 'circulo', texto: 'ecosistemas', pad: 6 })]]);
+        X.ed.limpiar();
+        IN.poner(X, { arcos: 0 }, 1.0, 'power2.in'); IN.poner(X, { bordeOp: 0.4 }, 2);
+        X.vuelo([CAM.efectos()], 3.8, { deriva: 0.08, derivaD: 24 });
+        X.capa('flujos', true, 1.4);
+        const li = guardar('efectos', lista(X, [EFECTOS[0]]));
+        X.ed.lugar(IN.P.cora, 'Corabastos', { delay: 0.9 });
+        c.seq([[1.9, () => { X.ed.listaMas(li, EFECTOS[1]); X.ed.lugar(IN.P.mariapaz, 'María Paz', { delay: 0.15 }); puntos(X, ['pE'], true, 1.8); }],
+          [3.6, () => { X.ed.listaMas(li, EFECTOS[2]); X.ed.lugar(IN.P.vaca, 'Humedal La Vaca', { lado: 'izq', delay: 0.1 }); IN.poner(X, { agua: 1 }, 1.6, 'power2.out'); }]]);
       } },
-      // Niveles 3D de la página: no hay una sola causa, la red sube por niveles
+      // no una sola causa: la cámara se abre y aparecen los puntos reales de los seis problemas en toda Kennedy
       { t: 'Problemas que no fueron consecuencia de una sola decisión,', a: (X) => {
-        X.pagina(H, 'niveles', { paso: 0 });
-        X.ed.frase('no fueron consecuencia de *una sola decisión*', { y: 15, delay: 0.3 });
+        IN.soltarVistas(X);
+        X.vuelo([CAM.sistema], 4.2, { deriva: 0.16, derivaD: 22 });
+        X.capa('flujos', false, 1.2); IN.poner(X, { agua: 0.55, bordeOp: 1 }, 2);
+        puntos(X, PUNTOS, true, 2.4, 0.22);
+        X.ed.frase('no fueron consecuencia de *una sola decisión*', { y: 11, delay: 0.3 });
       } },
-      // el cursor recorre Nivel 1 → Nivel 2 → Nivel 3 (cada nivel refuerza al siguiente)
+      // las dinámicas: agentes en movimiento por las vías reales y la red dirigida de los seis problemas que se dibuja
       { t: 'sino de múltiples dinámicas que se reforzaron entre sí.', a: (X) => {
-        X.pagina(H, 'niveles', { pasos: [1, 2, 3], entre: 700 });
-        X.ed.pop({ t: 'múltiples dinámicas que *se reforzaron entre sí*', cls: 'oscuro', x: 4, y: 16, ancho: 30, delay: 0.3 });
+        const c = ctx(X);
+        if (X.R.rapido) X.vuelo([CAM.sistema], 0);
+        IN.poner(X, { agua: 0.35 }, 2);
+        X.capa('agentes', true, 1.6); X.agentesVel(1);
+        puntos(X, PUNTOS, false);
+        X.capa('red6', true, 0.8);
+        X.W.red6.tubos.forEach((t, i) => c.seq([[0.25 + i * 0.36, () => X.arista(i, 1.1)]]));
+        X.ed.rotulo('múltiples dinámicas que *se reforzaron entre sí*', { delay: 0.2 });
       } },
-      // la red completa con el filtro abierto: capas y tipos de relación
-      { t: 'Precisamente, estas dinámicas y las relaciones son el punto central', a: (X) => {
-        X.pagina(H, 'cajon', { sobre: [0, 7] });
-        X.ed.rotulo('estas *dinámicas* y las *relaciones*', { lado: 'der', delay: 0.3 });
-        X.ed.senalar(H, '#relGridHost', { texto: 'las relaciones', lado: 'arriba', delay: 0.9, pad: 8 });
+      // las relaciones, señaladas sobre los arcos reales de la red (crecimiento → dependencia → residuos)
+      { t: 'Precisamente, estas dinámicas y las relaciones', a: (X) => {
+        const c = ctx(X);
+        X.capa('agentes', true, 0); X.capa('red6', true, 0);
+        if (X.R.rapido) { X.vuelo([CAM.sistema], 0); X.W.red6.tubos.forEach((t, i) => X.arista(i, 0)); }
+        const ap = (a, b) => { const t = X.W.red6.tubos.find((q) => q.userData.a === a && q.userData.b === b); return t?.userData.curva.getPoint(0.5); };
+        X.ed.rotulo('estas *dinámicas* y las *relaciones*', { delay: 0.15 });
+        c.seq([[0.9, () => X.ed.lugar(ap('B', 'A'), 'Crecimiento poblacional → *Dependencia de alimentos*', { pin: false, alto: 40 })],
+          [1.6, () => X.ed.lugar(ap('A', 'E'), 'Dependencia de alimentos → *Gestión de residuos*', { pin: false, alto: 40, lado: 'izq' })]]);
       } },
-      { t: 'del proyecto de Modelamiento Dinámico y Simulación.', a: (X) => {
-        X.pagina(H, 'cajon');
-        X.ed.rotulo('Modelamiento *Dinámico* y *Simulación*', { lado: 'der' });
+      // el centro del proyecto: Kennedy completa desde lo alto, con su límite encendido
+      { t: 'son el punto central del proyecto de Modelamiento Dinámico y Simulación.', a: (X) => {
+        X.capa('agentes', true, 0); X.capa('red6', true, 0);
+        if (X.R.rapido) X.W.red6.tubos.forEach((t, i) => X.arista(i, 0));
+        X.vuelo([CAM.central], 4.6, { deriva: 0.1, derivaD: 30 });
+        IN.poner(X, { bordeOp: 1, agua: 0.35 }, 1.5);
+        IN.centro3(X, 'el punto central: Modelamiento *Dinámico* y *Simulación*', { delay: 0.5, y: 13 });
       } },
-      // montaje del proyecto: 01 POT (el cursor apaga la red causal y queda el POT)
-      { t: 'Su desarrollo comprende el análisis del POT de Bogotá,', a: (X) => {
-        X.pagina(H, 'potQuita');
-        precargar('problemas');
-        guardar('proyecto', listaProyecto(X, 1, 0.3));
+      // montaje: pantallas de vidrio flotando en perspectiva con las páginas reales, una por cada parte de la frase
+      { t: 'Su desarrollo comprende el análisis del POT de Bogotá,', mantener: true, a: (X) => {
+        X.ed.limpiar();
+        X.capa('red6', false, 1.2); X.capa('agentes', true, 0);
+        X.vuelo([CAM.montaje], 7, { ease: 'sine.inOut', deriva: 0.12, derivaD: 40 });
+        const V = guardar('ven', X.ed.ventanas());
+        V?.agregar(...PANTALLAS[0], { delay: 0.35 });
       } },
-      // 02 problemas de Kennedy (página «Problemáticas de Kennedy»)
       { t: 'el diagnóstico y la formulación de los problemas de Kennedy,', mantener: true, a: (X) => {
-        Promise.resolve().then(() => X.pagina('problemas', null, { entrada: 'barrido' })).catch(() => {});
-        precargar('red');
-        const L = seguir(X, 'proyecto', () => listaProyecto(X, 1)); agregar(X, L, PROYECTO[1], 0.4);
+        const V = seguir(X, 'ven', () => montaje(X, 1));
+        X.ed.limpiarSalvo([V]);
+        V?.agregar(...PANTALLAS[1], { delay: 0.2 });
       } },
-      // 03 modelo propio de ciudad (página «Red de problemas»: Kennedy en 3D)
       { t: 'la construcción de un modelo propio de ciudad', mantener: true, a: (X) => {
-        Promise.resolve().then(() => X.pagina('red', null, { entrada: 'barrido' })).catch(() => {});
-        ctx(X).seq([[1.4, () => liberar([H])]]); // una sola página pesada viva
-        const L = seguir(X, 'proyecto', () => listaProyecto(X, 2)); agregar(X, L, PROYECTO[2], 0.4);
+        const V = seguir(X, 'ven', () => montaje(X, 2));
+        X.ed.limpiarSalvo([V]);
+        V?.agregar(...PANTALLAS[2], { delay: 0.2 });
       } },
-      // 04 simulaciones: de vuelta al territorio 3D con los agentes en movimiento
       { t: 'y la exploración de sus posibles consecuencias mediante simulaciones.', mantener: true, a: (X) => {
-        X.sinPagina(); ctx(X).seq([[1.3, () => liberar([H])]]);
-        X.cam('cora', 3); X.capa('agentes'); X.capa('flujos'); X.uTo('flujos', 'uV', 900, 2);
-        const L = seguir(X, 'proyecto', () => listaProyecto(X, 3)); agregar(X, L, PROYECTO[3], 0.4);
+        const V = seguir(X, 'ven', () => montaje(X, 3));
+        X.ed.limpiarSalvo([V]);
+        X.capa('agentes', true, 0.8); X.agentesVel(1.6); X.capa('flujos', true, 1.6);
+        V?.agregar(...PANTALLAS[3], { delay: 0.2 });
       } },
     ]),
   };
+
+/** montaje ya armado con n pantallas (cuando se salta directo a una frase del montaje) */
+function montaje(X, n) { const V = X.ed.ventanas({ fundido: 0 }); if (!V) return V; PANTALLAS.slice(0, n).forEach((p) => V.agregar(...p)); return V; }
