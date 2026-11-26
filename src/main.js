@@ -115,6 +115,8 @@ function entrarCapitulo(ci) {
   reiniciarMundo();
   UI.limpiarTodo();
   if (!c.pagina) PAG.sinPagina(true); // los capítulos con página la ponen en su primera frase
+  // precarga las páginas de este capítulo y del siguiente para que no haya espera al llegar
+  PAG.precargar(...(c.precarga || []), ...(CAPITULOS[ci + 1]?.precarga || []));
   capa('losa', true, 0); capa('edif', true, 0);
   gsap.killTweensOf(W.capas.edif.userData.u.uSube); W.capas.edif.userData.u.uSube.value = 1;
   c.base?.(X);

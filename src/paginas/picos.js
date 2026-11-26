@@ -1,4 +1,4 @@
-// Visor «Indicadores en 3D» (picos/index.html): los picos de cada índice sobre el territorio de Kennedy.
+﻿// Visor «Indicadores en 3D» (picos/index.html): los picos de cada índice sobre el territorio de Kennedy.
 // Los estados eligen índices y encuadran la cámara con las mismas variables del visor (selected, sync, controls…).
 import gsap from 'gsap';
 import { registrar, hasta } from '../pagina.js';
@@ -51,17 +51,17 @@ registrar('picos', {
     const st = doc.createElement('style'); st.textContent = CSS; doc.head.appendChild(st);
     // se construyen las mallas de CCL y SE de antemano para que al aparecer solo crezcan
     for (const c of ['CCL', 'SE']) win.eval(`(()=>{const i=ind.findIndex(o=>o.d.code==='${c}'&&!o.d.year);if(!ind[i].group)build(i);})()`);
-    win.eval('planOn=false;updatePlan();controls.autoRotate=true');
+    win.eval('planOn=false;controls.autoRotate=true;selected=new Set();sync();ind.forEach(o=>{o.t=0});dirty=true');
   },
   estados: {
     /** CCL solo: la superficie crece desde el territorio y la cámara se acerca a su pico */
     ccl: async (win, doc, o) => {
       nuevo(win);
       elegir(win, ['CCL']);
-      if (o.rapido) { crecidos(win); mover(win, { x: PICO_CCL[0], z: PICO_CCL[1], zoom: 2.2, rapido: true }); return; }
+      if (o.rapido) { crecidos(win); mover(win, { x: PICO_CCL[0], z: PICO_CCL[1], zoom: 1.6, rapido: true }); return; }
       mover(win, { x: 0, z: 0, zoom: 1, giro: 0.5, rapido: true });
       await esp(500);
-      mover(win, { x: PICO_CCL[0], z: PICO_CCL[1], zoom: 2.2, giro: 0.6, d: 3.4 });
+      mover(win, { x: PICO_CCL[0], z: PICO_CCL[1], zoom: 1.6, giro: 0.6, d: 3.4 });
     },
     /** SE solo: la cobertura vegetal, con sus vacíos */
     se: async (win, doc, o) => {
@@ -74,10 +74,10 @@ registrar('picos', {
     ambos: async (win, doc, o) => {
       nuevo(win);
       elegir(win, ['CCL', 'SE']);
-      if (o.rapido) { crecidos(win); mover(win, { x: COINCIDE[0], z: COINCIDE[1], zoom: 2.4, rapido: true }); return; }
+      if (o.rapido) { crecidos(win); mover(win, { x: COINCIDE[0], z: COINCIDE[1], zoom: 1.45, rapido: true }); return; }
       mover(win, { x: 0, z: 0, zoom: 1, giro: 0.5, rapido: true });
       await esp(900);
-      mover(win, { x: COINCIDE[0], z: COINCIDE[1], zoom: 2.4, giro: 0.7, d: 3.2 });
+      mover(win, { x: COINCIDE[0], z: COINCIDE[1], zoom: 1.45, giro: 0.7, d: 3.2 });
     },
   },
 });

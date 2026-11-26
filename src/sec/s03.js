@@ -1,14 +1,14 @@
-// Capítulo 03 · usa las páginas reales de las autoras: «De 18 capas a 9 índices» (cruces) y «Indicadores en 3D» (picos)
+﻿// Capítulo 03 · usa las páginas reales de las autoras: «De 18 capas a 9 índices» (cruces) y «Indicadores en 3D» (picos)
 import { precargar } from '../pagina.js';
 
 export default /* ===================================================================== 03 INDICADORES */
   {
-    n: '03', nombre: 'De los mapas a las dinámicas territoriales', cam: 'capas', tr: 'recorte', pagina: true,
+    n: '03', nombre: 'De los mapas a las dinámicas territoriales', cam: 'capas', tr: 'recorte', pagina: true, precarga: ['cruces', 'picos'],
     base: (X) => { X.gris(0.8, 0); },
     beats: [
       { t: 'Para comenzar a comprender Kennedy desde la complejidad, se cruzaron dieciocho capas de información satelital,', a: (X) => {
         precargar('picos');
-        X.pagina('cruces', 'pila', { entrada: 'barrido', camara: { x: 27, y: 52, s: 1.55, d: 0 } });
+        X.pagina('cruces', 'pila', { entrada: 'barrido', camara: { x: 27, y: 49, s: 1.32, d: 0 } });
       } },
       { t: 'a partir de las cuales se construyeron nueve índices territoriales.', a: (X) => {
         X.pagina('cruces', 'nueve');

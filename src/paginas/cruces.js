@@ -1,4 +1,4 @@
-// Página «De 18 capas a 9 índices» (picos/cruces): pila de 18 láminas → filamentos → 9 índices.
+﻿// Página «De 18 capas a 9 índices» (picos/cruces): pila de 18 láminas → filamentos → 9 índices.
 // Los estados simulan lo que hace el visor con el cursor (hover / clic) sin tocar su contenido.
 import { registrar, hasta, camara } from '../pagina.js';
 
@@ -8,9 +8,11 @@ const IDX9 = ['IC', 'CCL', 'PA', 'EPO', 'PM', 'OC', 'CO', 'SE', 'CV']; // el ord
 
 const CSS = `
 .marco,.pie{display:none!important}
-.genealogia{padding-top:26px}
+.genealogia{padding-top:66px}
 /* frase de las 18 capas: solo la pila; lo demás espera (animaciones pausadas) y entra cuando se quita la clase */
 .red.solo-pila :is(.red__indices,.red__sintesis,.red__flujos){visibility:hidden}
+.genealogia__cabeza{transition:opacity .9s}
+.genealogia:has(.red.solo-pila) .genealogia__cabeza{opacity:0}
 .red.solo-pila :is(.red__indices,.red__sintesis,.red__flujos) *{animation-play-state:paused!important}
 `;
 
@@ -24,7 +26,7 @@ const centro = (win, id) => {
 function enfocar(win, id, o = {}) {
   const ent = win.eval(`IDX.find(d=>d.id==='${id}').in.filter(esBase)`);
   const caj = [id, ...ent].map((k) => centro(win, k));
-  const l = Math.min(...caj.map((c) => c.l)), r = Math.max(...caj.map((c) => c.r)), t = Math.min(...caj.map((c) => c.t)), b = Math.max(...caj.map((c) => c.b));
+  const l = Math.min(...caj.map((c) => c.l)) - (ent.length ? 230 : 0), r = Math.max(...caj.map((c) => c.r)), t = Math.min(...caj.map((c) => c.t)), b = Math.max(...caj.map((c) => c.b));
   const W = win.innerWidth, H = win.innerHeight;
   const s = Math.max(1, Math.min(o.max || 2.1, 0.78 * Math.min(W / (r - l), H / (b - t))));
   camara({ x: ((l + r) / 2 / W) * 100, y: ((t + b) / 2 / H) * 100, s, d: o.d ?? 1.6, ease: 'power3.inOut' });
