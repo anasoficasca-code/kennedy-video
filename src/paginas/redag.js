@@ -12,8 +12,13 @@ let gen = 0;
 const secFin = (win) => { const S = ev(win, 'SECS'); const s = S[S.length - 1]; return s.getBoundingClientRect().top + win.scrollY; };
 const topDe = (win, el) => el.getBoundingClientRect().top + win.scrollY;
 /** la conectografía (módulo 12, otra página) empieza a cargar antes de que se use */
-function cgCarga(win) { try { ev(win, 'CG.pre=1;cgArma();if(!CG.fr.src||CG.fr.src==="about:blank"){CG.listo=false;CG.fr.src=CGURL}'); } catch (e) { console.warn('[redag] conectografía', e); } }
-function cgApaga(win, rapido) { try { if (ev(win, 'CG.to')) { ev(win, 'cgIr(false)'); if (rapido) ev(win, 'CG.t0=performance.now()-20000'); } } catch (e) { /* aún no se armó */ } }
+function cgCarga(win) { clearTimeout(win.__raCgT); try { ev(win, 'CG.pre=1;cgArma();if(!CG.fr.src||CG.fr.src==="about:blank"){CG.listo=false;CG.fr.src=CGURL}'); } catch (e) { console.warn('[redag] conectografía', e); } }
+function cgApaga(win, rapido) {
+  try { if (ev(win, 'CG.to')) { ev(win, 'cgIr(false)'); if (rapido) ev(win, 'CG.t0=performance.now()-20000'); } } catch (e) { /* aún no se armó */ }
+  // el módulo 12 es pesado: fuera de la conectografía se descarga (deja la GPU libre para lo que se ve)
+  clearTimeout(win.__raCgT);
+  win.__raCgT = setTimeout(() => { try { ev(win, 'if(CG.fr&&!CG.to&&CG.fr.src&&CG.fr.src!=="about:blank"){CG.fr.src="about:blank";CG.listo=false}'); } catch (e) { /* */ } }, 1500);
+}
 const cerrarPanel = (win) => { try { if (ev(win, 'P.open')) ev(win, 'closePanel()'); } catch (e) { /* */ } };
 
 /** se llama desde el capítulo 05 unos segundos antes de la conectografía: la página (oculta) queda en la red y el módulo 12 cargando */
@@ -30,7 +35,7 @@ async function irPaso(win, doc, k, o) {
   const p = doc.querySelector(`#story .paso[data-k="${k}"]`); if (!p) { console.warn('[redag] paso', k); return null; }
   const y = topDe(win, p);
   const dist = Math.abs(win.scrollY - y);
-  if (o.rapido || dist < 2) win.scrollTo(0, y);
+  if (o.rapido || dist < 2) { scrollA(win, y, 0, true); }
   else if (dist <= win.innerHeight * 1.2) await scrollA(win, y, o.d ?? 1.5, false); // el paso siguiente: scroll como una persona
   else await aNegro(win, async () => { win.scrollTo(0, y); await espera(60); }, false); // salto largo: corte limpio
   return p;
@@ -93,7 +98,7 @@ registrar(NOMBRE, {
       const yA = y0 + H * (o.desde ?? o.p), yB = y0 + H * o.p;
       const lejos = Math.abs(win.scrollY - yA) > win.innerHeight * 1.5;
       if (lejos && !o.rapido) await aNegro(win, async () => { cgApaga(win, true); win.scrollTo(0, yA); await espera(300); }, false);
-      else if (lejos) { cgApaga(win, true); win.scrollTo(0, yA); }
+      else if (lejos) { cgApaga(win, true); scrollA(win, yA, 0, true); }
       if (yo !== gen) return;
       await scrollA(win, yB, o.d ?? 3, o.rapido);
     },

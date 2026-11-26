@@ -3,11 +3,11 @@
 // nodos centrales, «Métricas» los tipos de relación, «Ejes radiales» las jerarquías, «Todas» las capas la ciudad
 // compleja, y Niveles 3D cómo se producen los problemas. Encima: X.ed solo con las palabras de la voz (zócalos, listas) y las fotos de los autores.
 import { anclaNodo, grados } from '../paginas/humedalburro.js';
-import { ctx, seguir, guardar, agregar, conGuardia } from './s01.js';
+import { ctx, seguir, guardar, soltar, agregar, conGuardia } from './s01.js';
 
 const H = 'humedalburro';
 const POT = [5, 6, 7, 8, 9, 10, 11, 12];
-const BARABASI = { nombre: 'Albert-László Barabási', rol: 'Física · ciencia de redes', img: './img/autores/barabasi.jpg', credito: 'Foto: Net999, dominio público, Wikimedia Commons', x: 4, y: 66 };
+const BARABASI = { nombre: 'Albert-László Barabási', rol: 'Física · ciencia de redes', img: './img/autores/barabasi.jpg', credito: 'Foto: World Economic Forum, CC BY-SA 2.0, Wikimedia Commons', x: 4, y: 66 };
 const BATTY = { nombre: 'Michael Batty', rol: 'Urbanismo computacional', img: './img/autores/batty.jpg', credito: 'Foto: Pymouss, CC BY-SA 3.0, Wikimedia Commons', x: 4, y: 66 };
 const NO_EXPLICA = ['las interacciones entre *agentes*', 'los procesos de *retroalimentación*', 'las dinámicas *emergentes*', 'cómo producen problemas *a través del tiempo*'];
 const listaNo = (X, n, delay = 0) => X.ed.lista({ items: NO_EXPLICA.slice(0, n), x: 62, y: 45, ancho: 33, delay });
@@ -23,7 +23,7 @@ export default /* ==============================================================
       // el cursor enciende las 8 capas del POT: los componentes aparecen como nodos
       { t: 'se reconstruyó como una red', a: async (X) => {
         const c = ctx(X);
-        X.ed.rotulo('se reconstruyó como *una red*', { delay: 0.3 });
+        X.ed.rotulo('se reconstruyó como *una red*', { lado: 'der', delay: 0.3 });
         await X.pagina(H, 'potArma'); if (!c.vivo()) return;
       } },
       { t: 'a partir de los aportes de Albert-László Barabási, físico e investigador de la ciencia de redes.', a: (X) => {
@@ -53,11 +53,11 @@ export default /* ==============================================================
         const c = ctx(X);
         await X.pagina(H, 'metricas');
         if (!c.vivo()) return;
-        c.seq([[0.9, () => X.ed.senalar(H, '#legendA .legend-row', { texto: 'relaciones de *dependencia*', pad: 6 })]]);
+        c.seq([[0.9, () => X.ed.senalar(H, '#legendA .legend-row', { texto: 'relaciones de dependencia', lado: 'arriba', pad: 6 })]]);
       } },
       { t: 'y las jerarquías que estructuran este modelo de ciudad.', a: (X) => {
         X.pagina(H, 'jerarquia');
-        X.ed.rotulo('las *jerarquías* que estructuran este modelo de ciudad', { delay: 0.8 });
+        X.ed.rotulo('las *jerarquías* que estructuran este modelo de ciudad', { lado: 'der', delay: 0.8 });
       } },
       { t: 'Esta representación se contrastó con el enfoque de Michael Batty,', a: (X) => {
         X.pagina(H, 'pot');
@@ -79,11 +79,11 @@ export default /* ==============================================================
       // «Ninguna» → solo los actores del POT
       { t: 'su representación no explica suficientemente las interacciones entre agentes,', a: (X) => {
         X.pagina(H, 'actores');
-        X.ed.rotulo('su representación *no explica* suficientemente', { lado: 'der', delay: 0.2 });
+        guardar('noexp', X.ed.rotulo('su representación *no explica* suficientemente', { lado: 'der', delay: 0.2 }));
         guardar('no', listaNo(X, 1, 1.6));
       } },
       { t: 'los procesos de retroalimentación,', mantener: true, a: (X) => {
-        X.pagina(H, 'plano');
+        X.pagina(H, 'plano'); soltar(X, 'noexp');
         const L = seguir(X, 'no', () => listaNo(X, 1)); agregar(X, L, NO_EXPLICA[1], 0.2);
       } },
       { t: 'las dinámicas emergentes', mantener: true, a: (X) => {

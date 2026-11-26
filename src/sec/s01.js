@@ -121,12 +121,12 @@ export default /* ==============================================================
       // 02 problemas de Kennedy (página «Problemáticas de Kennedy»)
       { t: 'el diagnóstico y la formulación de los problemas de Kennedy,', mantener: true, a: (X) => {
         Promise.resolve().then(() => X.pagina('problemas', null, { entrada: 'barrido' })).catch(() => {});
-        precargar('propuesta');
+        precargar('red');
         const L = seguir(X, 'proyecto', () => listaProyecto(X, 1)); agregar(X, L, PROYECTO[1], 0.4);
       } },
-      // 03 modelo propio de ciudad (página «Propuesta» de red-de-problemas)
+      // 03 modelo propio de ciudad (página «Red de problemas»: Kennedy en 3D)
       { t: 'la construcción de un modelo propio de ciudad', mantener: true, a: (X) => {
-        Promise.resolve().then(() => X.pagina('propuesta', null, { entrada: 'barrido' })).catch(() => {});
+        Promise.resolve().then(() => X.pagina('red', null, { entrada: 'barrido' })).catch(() => {});
         ctx(X).seq([[1.4, () => liberar([H])]]); // una sola página pesada viva
         const L = seguir(X, 'proyecto', () => listaProyecto(X, 2)); agregar(X, L, PROYECTO[2], 0.4);
       } },

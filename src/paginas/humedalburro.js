@@ -125,6 +125,16 @@ function camaraCasa(win, o, ms = 1400) {
   if (camera.position.distanceTo(new win.THREE.Vector3(p.x, p.y, p.z)) < 1 && controls.target.length() < 0.5) return;
   win.gsap.to(camera.position, { ...p, duration: ms / 1000, ease: 'power2.inOut' }); win.gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: ms / 1000, ease: 'power2.inOut' });
 }
+/** centra la cámara en lo visible (como cuando una persona arrastra la vista para verlo entero) */
+function encuadrar(win, o) {
+  const { camera, controls } = win.__viewer, V = win.THREE.Vector3; const b = new win.THREE.Box3(), p = new V();
+  win.__viewer.scene.traverse((s) => { if (s.isSprite && s.visible && s.userData?.taxaId) b.expandByPoint(s.getWorldPosition(p)); });
+  if (b.isEmpty()) return; const c = b.getCenter(new V()), r = b.getSize(new V()).length() / 2;
+  const D = (r + 4) / Math.tan(camera.fov * Math.PI / 360) / Math.min(1, camera.aspect);
+  const dst = { x: c.x, y: c.y, z: c.z + D };
+  if (o.rapido) { camera.position.set(dst.x, dst.y, dst.z); controls.target.copy(c); return; }
+  win.gsap.to(camera.position, { ...dst, duration: 1.2, ease: 'power2.inOut' }); win.gsap.to(controls.target, { x: c.x, y: c.y, z: c.z, duration: 1.2, ease: 'power2.inOut' });
+}
 function ponerCapas(win, lista) { const o = win.opts; for (let c = 0; c < 13; c++) { const q = lista.includes(c); if (!!o.cats[c] !== q) win.toggleCat(c); } }
 function ponerRelaciones(win, todas = true) { const o = win.opts; for (let i = 0; i < 16; i++) if ((o.interactions[i] !== false) !== todas) win.toggleInteraction(i); }
 function cajon(win, doc, abierto) { const d = doc.getElementById('sideDrawer'); if (d && d.classList.contains('collapsed') === abierto) win.toggleSideDrawer(); }
@@ -239,7 +249,8 @@ registrar(NOMBRE, {
     jerarquia: async (win, doc, o) => {
       nuevo(win); base(win, doc, o, { capas: POT, vista: 'degree' });
       await clic(win, doc, doc.getElementById('gpLayoutradial'), () => win.setLayout('radial'), o, 700);
-      if (o.rapido) terminar(win);
+      if (o.rapido) terminar(win); else await esp(1650);
+      encuadrar(win, o);
     },
     // ciudad como sistema complejo: el cursor enciende «Todas» las capas → 83 nodos, 426 relaciones
     complejo: async (win, doc, o) => {

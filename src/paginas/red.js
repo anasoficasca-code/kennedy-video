@@ -42,6 +42,7 @@ export function scrollA(win, y, d, rapido) {
 /** «fundido a negro» corto para saltos largos dentro de la misma página (corte limpio de edición) */
 export async function aNegro(win, fn, rapido) {
   const fr = win.frameElement;
+  gsap.killTweensOf(win.__rpScroll || {}); // un scroll anterior no debe seguir moviendo la página después del salto
   if (rapido || !fr) { await fn(); return; }
   await new Promise((r) => gsap.to(fr, { opacity: 0, duration: 0.28, ease: 'power1.in', onComplete: r }));
   await fn();
@@ -205,6 +206,8 @@ registrar(NOMBRE, {
       // la página vuela hacia el nodo: se suaviza (sin acercarse de golpe; la distancia se mantiene)
       ev(win, 'if(tw){const d=tw.fP.distanceTo(tw.fT),dir=tw.tP.clone().sub(tw.tT).normalize();tw.tT=tw.tT.clone().multiplyScalar(.45);tw.tP=tw.tT.clone().addScaledVector(dir,d*.9);tw.d=2400}');
       if (o.rapido) ev(win, 'if(tw){tw.t0=performance.now()-5000}');
+      // el panel (dialog) toma el foco: se devuelve a la presentación para que el clicker siga avanzando
+      try { win.document.activeElement?.blur(); win.parent.focus(); } catch (e) { /* */ }
     },
   },
 });

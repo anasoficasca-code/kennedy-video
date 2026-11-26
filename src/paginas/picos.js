@@ -18,6 +18,7 @@ const nuevo = (win) => (win.__tok = (win.__tok || 0) + 1);
 const CORA = [-471, -532];
 const SECTOR = [-1100, -700], SECTOR_R = 520;
 const S = 0.1; // 1 unidad de escena = 10 m
+const ALTO = 55; // el objetivo de la cámara va por encima del suelo: centra en pantalla el territorio con sus picos
 
 const CSS = `
 /* colores del formato: tinta #0b0d10, papel #f3f4ee, lima #cfff5e, grises; Barlow Condensed + Geist */
@@ -27,7 +28,11 @@ aside{background:#0b0d10;border-right:1px solid rgba(214,228,222,.12);padding:22
 aside h1,.mtitle{display:none!important}
 #list{margin-top:64px}   /* deja libre la marca del video (arriba a la izquierda) */
 .ind button{background:#111418;border:1px solid rgba(214,228,222,.12);border-radius:6px;font:400 13.5px/1.25 'Geist',sans-serif;color:#c9cdc5;transition:border-color .25s,background .25s,color .25s}
-.ind button .code{font:500 12.5px/1 'Geist Mono','Geist',monospace;color:#9aa09a;min-width:38px}
+.ind button .code,.yr{display:none!important}
+.ind button{padding:10px 12px 10px 22px}
+/* el panel queda atenuado; se enciende solo mientras el cursor lo usa */
+aside{opacity:.3;transition:opacity .6s ease}
+body.ed-usa aside{opacity:1}
 .ind button.on{background:#161a10;border-color:#cfff5e;color:#f3f4ee;font-weight:500}
 .ind button.on .code{color:#cfff5e}
 .yr{border-color:rgba(214,228,222,.25);color:#9aa09a;font:500 10.5px/1.5 'Geist',sans-serif}
@@ -72,9 +77,12 @@ const boton = (win, code) => [...win.document.querySelectorAll('#list .ind butto
 /** nombres 3D de los índices: con uno solo ayudan; con dos se cruzan con los marcadores, se apagan */
 function nombres(win, on, rapido) { const p = { v: win.__nombres ?? 1 }; gsap.killTweensOf(win.__nomTw || {}); if (rapido) { win.__nombres = on ? 1 : 0; return; } win.__nomTw = p; gsap.to(p, { v: on ? 1 : 0, duration: 0.6, onUpdate: () => (win.__nombres = p.v) }); }
 
+/** el panel se enciende mientras el cursor lo usa y se atenúa después */
+function usar(win, on, rapido) { const b = win.document.body; clearTimeout(win.__usaT); if (on) b.classList.add('ed-usa'); else if (rapido) b.classList.remove('ed-usa'); else win.__usaT = setTimeout(() => { b.classList.remove('ed-usa'); ocultarCursor(win); }, 1100); }
+
 /** desplaza el objetivo de la cámara (y su zoom) con suavidad; la órbita lenta del visor sigue */
-function mover(win, { x = 0, y = 0, zoom = 1.18, d = 3, rapido = false }) {
-  const c = win.eval('controls'), cam = win.eval('camera'), v = aEscena(win, x, y, 6);
+function mover(win, { x = 0, y = 0, zoom = 1.05, d = 3, rapido = false, alto = ALTO }) {
+  const c = win.eval('controls'), cam = win.eval('camera'), v = aEscena(win, x, y, alto);
   const p = { k: 0, x0: c.target.x, y0: c.target.y, z0: c.target.z, zm0: cam.zoom };
   const poner = (k) => {
     const tx = p.x0 + (v.x - p.x0) * k, ty = p.y0 + (v.y - p.y0) * k, tz = p.z0 + (v.z - p.z0) * k;
@@ -172,13 +180,13 @@ registrar('picos', {
     ccl: async (win, doc, o) => {
       const t = nuevo(win); nombres(win, true, true); verAnillo(win, false, true); mostrar(doc.getElementById('pin-sector'), false, true);
       const cora = doc.getElementById('pin-cora');
-      if (o.rapido) { selec(win, ['CCL']); crecidos(win); mover(win, { rapido: true }); mostrar(cora, true, true); const p = centroDe(boton(win, 'CCL'), 0.4, 0.5); moverCursor(win, p.x, p.y, { rapido: true }); return; }
+      if (o.rapido) { selec(win, ['CCL']); crecidos(win); mover(win, { rapido: true }); mostrar(cora, true, true); const p = centroDe(boton(win, 'CCL'), 0.4, 0.5); moverCursor(win, p.x, p.y, { rapido: true, oculto: true }); usar(win, false, true); return; }
       selec(win, []); mostrar(cora, false, true); mover(win, { rapido: true });
       await moverCursor(win, win.innerWidth * 0.5, win.innerHeight * 0.5, { rapido: true, oculto: true });
       await esp(500); if (win.__tok !== t) return;
       const p = centroDe(boton(win, 'CCL'), 0.4, 0.5);
-      await moverCursor(win, p.x, p.y, { d: 0.95 }); if (win.__tok !== t) return;
-      clic(win); selec(win, ['CCL']);
+      usar(win, true); await moverCursor(win, p.x, p.y, { d: 0.95 }); if (win.__tok !== t) return;
+      clic(win); selec(win, ['CCL']); usar(win, false);
       await esp(1300); if (win.__tok !== t) return;
       mostrar(cora, true); o.alPin?.();
     },
@@ -187,28 +195,28 @@ registrar('picos', {
       const t = nuevo(win); nombres(win, true, o.rapido); verAnillo(win, false, true); mostrar(doc.getElementById('pin-sector'), false, true);
       mostrar(doc.getElementById('pin-cora'), true, o.rapido); mover(win, { rapido: o.rapido, d: 2 });
       const p = centroDe(boton(win, 'SE'), 0.4, 0.5);
-      if (o.rapido) { selec(win, ['SE']); crecidos(win); moverCursor(win, p.x, p.y, { rapido: true }); return; }
-      await esp(200); await moverCursor(win, p.x, p.y, { d: 0.8 }); if (win.__tok !== t) return;
-      clic(win); selec(win, ['SE']);
+      if (o.rapido) { selec(win, ['SE']); crecidos(win); moverCursor(win, p.x, p.y, { rapido: true, oculto: true }); usar(win, false, true); return; }
+      usar(win, true); await esp(200); await moverCursor(win, p.x, p.y, { d: 0.8 }); if (win.__tok !== t) return;
+      clic(win); selec(win, ['SE']); usar(win, false);
     },
     /** «al cruzar estos índices»: activa «Ver varios a la vez» y suma CCL → CCL y SE sobre el mismo territorio */
     cruce: async (win, doc, o) => {
       const t = nuevo(win); nombres(win, false, o.rapido); verAnillo(win, false, true); mostrar(doc.getElementById('pin-sector'), false, true);
       mostrar(doc.getElementById('pin-cora'), true, o.rapido); mover(win, { rapido: o.rapido, d: 2 });
       const pc = centroDe(doc.getElementById('multi'), 0.5, 0.5), pb = centroDe(boton(win, 'CCL'), 0.4, 0.5);
-      if (o.rapido) { selec(win, ['SE', 'CCL'], true); crecidos(win); moverCursor(win, pb.x, pb.y, { rapido: true }); return; }
+      if (o.rapido) { selec(win, ['SE', 'CCL'], true); crecidos(win); moverCursor(win, pb.x, pb.y, { rapido: true, oculto: true }); usar(win, false, true); return; }
       selec(win, ['SE']);
-      await moverCursor(win, pc.x, pc.y, { d: 0.7 }); if (win.__tok !== t) return;
+      usar(win, true); await moverCursor(win, pc.x, pc.y, { d: 0.7 }); if (win.__tok !== t) return;
       clic(win); doc.getElementById('multi').checked = true; await esp(350); if (win.__tok !== t) return;
       await moverCursor(win, pb.x, pb.y, { d: 0.75 }); if (win.__tok !== t) return;
-      clic(win); selec(win, ['SE', 'CCL'], true); o.alClic?.();
+      clic(win); selec(win, ['SE', 'CCL'], true); usar(win, false); o.alClic?.();
     },
     /** «sectores donde coinciden presiones»: la cámara se desplaza despacio al sector CCL alto · SE bajo y se marca */
     coinciden: async (win, doc, o) => {
       const t = nuevo(win); nombres(win, false, true); selec(win, ['SE', 'CCL'], true); mostrar(doc.getElementById('pin-cora'), true, o.rapido);
-      if (o.rapido) { crecidos(win); mover(win, { x: SECTOR[0] * 0.6, y: SECTOR[1] * 0.6, zoom: 1.28, rapido: true }); verAnillo(win, true, true); mostrar(doc.getElementById('pin-sector'), true, true); ocultarCursor(win, true); return; }
-      ocultarCursor(win);
-      mover(win, { x: SECTOR[0] * 0.6, y: SECTOR[1] * 0.6, zoom: 1.28, d: 3.2 });
+      if (o.rapido) { crecidos(win); mover(win, { x: SECTOR[0] * 0.4, y: SECTOR[1] * 0.4, zoom: 1.15, rapido: true }); verAnillo(win, true, true); mostrar(doc.getElementById('pin-sector'), true, true); ocultarCursor(win, true); return; }
+      ocultarCursor(win); usar(win, false, true);
+      mover(win, { x: SECTOR[0] * 0.4, y: SECTOR[1] * 0.4, zoom: 1.15, d: 3.2 });
       await esp(900); if (win.__tok !== t) return;
       verAnillo(win, true); await esp(500); if (win.__tok !== t) return;
       mostrar(doc.getElementById('pin-sector'), true); o.alSector?.();
@@ -218,7 +226,7 @@ registrar('picos', {
       nuevo(win); nombres(win, false, true); selec(win, ['SE', 'CCL'], true); if (o.rapido) crecidos(win);
       ocultarCursor(win, o.rapido); verAnillo(win, true, true);
       mostrar(doc.getElementById('pin-cora'), true, true); mostrar(doc.getElementById('pin-sector'), true, true);
-      mover(win, { zoom: 1.12, rapido: o.rapido, d: 3.5 });
+      mover(win, { rapido: o.rapido, d: 3.5 });
     },
   },
 });

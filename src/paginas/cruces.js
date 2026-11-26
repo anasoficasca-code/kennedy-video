@@ -55,6 +55,8 @@ const CSS = `
 :root{--campo-0:#0b0d10;--tinta-1:#f3f4ee;--acento-1:#cfff5e}
 body{background:#0b0d10}
 .genealogia__cabeza h2,.sintesis__titulo{visibility:hidden}   /* sin títulos en pantalla: solo lo que dice la voz */
+/* sin números de capa ni siglas sueltas: el nombre basta */
+.rotulo__num,.nodo__simbolo{display:none!important}
 /* las entradas sin desenfoque (más nítido y más liviano) */
 @keyframes surgir{0%{opacity:0;translate:-16px 0}}
 /* frases de las 18 capas: solo la pila; lo demás espera (animaciones pausadas) y entra cuando se quita la clase */
