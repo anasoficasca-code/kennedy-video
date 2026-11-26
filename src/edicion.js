@@ -34,7 +34,8 @@ export function rotulo(texto, o = {}) {
   const e = h('div', 'ed-rotulo' + (o.lado === 'der' ? ' der' : ''), `<i class="barra"></i><div class="txt">${o.kick ? `<span class="kick">${o.kick}</span>` : ''}<span class="mask"><b>${enfasis(texto)}</b></span></div>`);
   poner(e);
   const tl = gsap.timeline({ delay: o.delay || 0 });
-  tl.fromTo(e.querySelector('.barra'), { scaleY: 0 }, { scaleY: 1, duration: 0.45, ease: SUAVE })
+  tl.set(e, { autoAlpha: 1 }, 0) // el contenedor arranca oculto (#edicion > *)
+    .fromTo(e.querySelector('.barra'), { scaleY: 0 }, { scaleY: 1, duration: 0.45, ease: SUAVE })
     .fromTo(e.querySelector('.kick'), { autoAlpha: 0, x: -14 }, { autoAlpha: 1, x: 0, duration: 0.4, ease: SUAVE }, 0.15)
     .fromTo(e.querySelector('.mask b'), { yPercent: 105 }, { yPercent: 0, duration: 0.7, ease: SUAVE }, 0.22);
   salir(e, o.dur); return e;
@@ -59,7 +60,8 @@ export function persona(o = {}) {
   poner(e, o.x ?? 6, o.y ?? 62);
   const c = e.querySelector('circle'), L = 2 * Math.PI * 57; c.style.strokeDasharray = L;
   const tl = gsap.timeline({ delay: o.delay || 0 });
-  tl.fromTo(e.querySelector('.img'), { scale: 0.4, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.7, ease: SPRING })
+  tl.set(e, { autoAlpha: 1 }, 0)
+    .fromTo(e.querySelector('.img'), { scale: 0.4, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.7, ease: SPRING })
     .fromTo(c, { strokeDashoffset: L }, { strokeDashoffset: 0, duration: 0.9, ease: 'power2.inOut' }, 0.05)
     .fromTo(e.querySelector('.kick'), { autoAlpha: 0, x: -10 }, { autoAlpha: 1, x: 0, duration: 0.4, ease: SUAVE }, 0.35)
     .fromTo(e.querySelector('.mask b'), { yPercent: 105 }, { yPercent: 0, duration: 0.7, ease: SUAVE }, 0.4)
@@ -72,7 +74,7 @@ export function cifra(o = {}) {
   if (R.rapido) return;
   const e = h('div', 'ed-cifra' + (o.cls ? ' ' + o.cls : ''), `<div class="num"><span class="pre">${o.pre || ''}</span><b>0</b><span class="suf">${o.suf || ''}</span></div><i class="linea"></i><p>${enfasis(o.texto || '')}</p>${o.fuente ? `<small>${o.fuente}</small>` : ''}`);
   poner(e, o.x ?? 6, o.y ?? 50);
-  const b = e.querySelector('b'), dec = o.dec ?? 0, fmt = (v) => v.toLocaleString('es-CO', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  const b = e.querySelector('b'), dec = o.dec ?? 0, fmt = (v) => v.toLocaleString('es-CO', { minimumFractionDigits: dec, maximumFractionDigits: dec, useGrouping: o.miles !== false }); // miles:false para años (1972)
   const p = { v: o.desde ?? 0 }; b.textContent = fmt(p.v);
   const tl = gsap.timeline({ delay: o.delay || 0 });
   tl.fromTo(e, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: SUAVE })
@@ -85,10 +87,11 @@ export function cifra(o = {}) {
 /** enumeración que va saliendo (paso = segundos entre ítems, para ir con la voz) */
 export function lista(o = {}) {
   if (R.rapido) return;
-  const e = h('div', 'ed-lista', `${o.titulo ? `<span class="kick">${o.titulo}</span>` : ''}<ol>${o.items.map((t, i) => `<li><span class="n">${String(i + 1).padStart(2, '0')}</span><span>${enfasis(t)}</span></li>`).join('')}</ol>`);
+  const e = h('div', 'ed-lista', `${o.titulo ? `<span class="kick">${o.titulo}</span>` : ''}<ol>${o.items.map((t, i) => `<li><span class="n"></span><span>${enfasis(t)}</span></li>`).join('')}</ol>`);
   if (o.ancho) e.style.width = o.ancho + 'vw';
   poner(e, o.x ?? 6, o.y ?? 18);
-  gsap.fromTo(e.querySelector('.kick'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, delay: o.delay || 0 });
+  gsap.set(e, { autoAlpha: 1, delay: o.delay || 0 });
+  if (o.titulo) gsap.fromTo(e.querySelector('.kick'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, delay: o.delay || 0 });
   gsap.fromTo(e.querySelectorAll('li'), { autoAlpha: 0, x: -24 }, { autoAlpha: 1, x: 0, duration: 0.55, ease: SPRING, stagger: o.paso ?? 0.6, delay: (o.delay || 0) + 0.15 });
   salir(e, o.dur); return e;
 }
@@ -99,6 +102,7 @@ export function frase(texto, o = {}) {
   const e = h('div', 'ed-frase', String(texto).split(/(\*[^*]+\*)/).filter(Boolean).map((p) => p.startsWith('*') ? `<em>${p.slice(1, -1).split(' ').map((w) => `<span class="w">${w}</span>`).join(' ')}</em>` : p.split(' ').filter(Boolean).map((w) => `<span class="w">${w}</span>`).join(' ')).join(' '));
   if (o.y != null) e.style.top = o.y + 'vh';
   poner(e);
+  gsap.set(e, { autoAlpha: 1, delay: o.delay || 0 });
   gsap.fromTo(e.querySelectorAll('.w'), { autoAlpha: 0, yPercent: 60 }, { autoAlpha: 1, yPercent: 0, duration: 0.55, ease: SUAVE, stagger: o.paso ?? 0.07, delay: o.delay || 0 });
   salir(e, o.dur); return e;
 }
@@ -119,23 +123,24 @@ export function senalar(nombre, objetivo, o = {}) {
   const seguir = () => { if (!vivo) return; const r = rectDe(); if (r) Object.assign(e.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }); requestAnimationFrame(seguir); };
   seguir();
   const tl = gsap.timeline({ delay: o.delay || 0 });
-  tl.fromTo(e.querySelector('.marco'), { autoAlpha: 0, scale: 1.25 }, { autoAlpha: 1, scale: 1, duration: 0.55, ease: SPRING });
+  tl.set(e, { autoAlpha: 1 }, 0).fromTo(e.querySelector('.marco'), { autoAlpha: 0, scale: 1.25 }, { autoAlpha: 1, scale: 1, duration: 0.55, ease: SPRING });
   if (o.texto) tl.fromTo(e.querySelector('.et'), { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: SUAVE }, 0.25);
   salir(e, o.dur); return e;
 }
 
 /** portadilla de capítulo: cubre la pantalla, ejecuta `durante` (montar la escena) y se abre */
 export function capitulo(n, titulo, durante) {
-  const e = h('div', 'ed-capitulo', `<div class="fondo"></div><div class="cont"><span class="n">${n}</span><span class="mask"><b>${titulo}</b></span><i class="linea"></i></div>`);
-  capa().appendChild(e);
+  // Fluido: sin números y sin tapar la pantalla. Un fundido corto a oscuro monta la escena nueva,
+  // y el título aparece encima mientras la escena ya corre; se va solo, sin detener nada.
+  const velo = h('div', 'ed-velo'); capa().appendChild(velo);
+  const e = h('div', 'ed-capitulo', `<div class="cont"><span class="mask"><b>${titulo}</b></span><i class="linea"></i></div>`);
   return new Promise((res) => {
-    const tl = gsap.timeline({ onComplete: () => { e.remove(); res(); } });
-    tl.fromTo(e.querySelector('.fondo'), { xPercent: -101 }, { xPercent: 0, duration: 0.6, ease: 'expo.inOut' })
-      .fromTo(e.querySelector('.n'), { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: SUAVE }, 0.45)
-      .fromTo(e.querySelector('.mask b'), { yPercent: 110 }, { yPercent: 0, duration: 0.8, ease: SUAVE }, 0.55)
-      .fromTo(e.querySelector('.linea'), { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: SUAVE }, 0.7)
-      .add(() => { try { durante?.(); } catch (err) { console.error(err); } }, 0.7)
-      .to(e.querySelector('.cont'), { autoAlpha: 0, y: -20, duration: 0.45, ease: 'power2.in' }, 2.3)
-      .to(e.querySelector('.fondo'), { xPercent: 101, duration: 0.7, ease: 'expo.inOut' }, 2.5);
+    gsap.timeline()
+      .fromTo(velo, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.35, ease: 'power1.in' })
+      .add(() => { try { durante?.(); } catch (err) { console.error(err); } capa().appendChild(e); res(); })
+      .to(velo, { autoAlpha: 0, duration: 0.7, ease: 'power1.out', onComplete: () => velo.remove() })
+      .fromTo(e.querySelector('.mask b'), { yPercent: 110 }, { yPercent: 0, duration: 0.8, ease: SUAVE }, 0.5)
+      .fromTo(e.querySelector('.linea'), { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: SUAVE }, 0.65)
+      .to(e.querySelector('.cont'), { autoAlpha: 0, y: -14, duration: 0.6, ease: 'power2.in', onComplete: () => e.remove() }, 3.2);
   });
 }

@@ -42,7 +42,7 @@
 
   .base{fill:none;stroke:var(--c);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:0;
     stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1) var(--dl,0s),opacity .3s var(--dl,0s)}
-  .base.on{opacity:.9;stroke-dashoffset:0}
+  .base.on{opacity:.6;stroke-dashoffset:0}
   .flow{fill:none;stroke:var(--c);stroke-width:2.6;stroke-dasharray:1.5 13;stroke-linecap:round;opacity:0;transition:opacity .4s calc(var(--dl,0s) + .5s);animation:flow 1.1s linear infinite}
   .flow.on{opacity:1}
   @keyframes flow{to{stroke-dashoffset:-14.5}}
@@ -54,54 +54,12 @@
   @keyframes trav{from{stroke-dashoffset:.16}to{stroke-dashoffset:-1}}
   @keyframes travr{from{stroke-dashoffset:-1}to{stroke-dashoffset:.16}}
   .dimL{opacity:.07!important}
-  body:not(.xall) .xl.tr:not(.sel):not(.hot){opacity:0!important}
-  body:not(.xall) .pg.x.tr:not(.lit){opacity:0!important}
-  body:not(.xall) .xh.tr{pointer-events:none}
-  .xl.fb.on{opacity:.55}
-  #xTog{margin-top:10px;width:100%;display:flex;align-items:center;justify-content:center;gap:7px;height:32px;border-radius:9px;border:1px solid var(--line2);background:#0b0b0b;color:#ddd;font:500 11.5px var(--sans);cursor:pointer}
-  #xTog svg{width:14px;height:14px}#xTog.on{background:#fff;color:#000;border-color:#fff}
-  /* partículas que viajan de la causa al efecto (siguen activas aunque la red esté completa) */
-  #pts{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
-  .pg{position:absolute;left:0;top:0;opacity:0;transition:opacity .4s calc(var(--dl,0s) + .7s)}
-  .pg.on{opacity:1}.pg.dimL,.pg.dimS{opacity:.06!important}
-  .pd{position:absolute;left:0;top:0;width:var(--sz,22px);height:var(--sz,22px);margin:calc(var(--sz,22px)/-2) 0 0 calc(var(--sz,22px)/-2);border-radius:50%;
-    background:radial-gradient(circle,#fff 0 17%,var(--c) 27%,color-mix(in srgb,var(--c) 35%,transparent) 42%,transparent 68%);offset-rotate:0deg;will-change:offset-distance;
-    animation:pdrun var(--du,2.6s) cubic-bezier(.45,0,.55,1) infinite;animation-delay:var(--de,0s);animation-play-state:paused}
-  .pd.t1{--sz:13px;opacity:.55}
-  .pg.on .pd{animation-play-state:running}
-  .pg.x .pd{animation-timing-function:linear;--sz:16px}.pg.x .pd.t1{--sz:10px}
-  @keyframes pdrun{from{offset-distance:0%}to{offset-distance:100%}}
-  /* insignia giratoria de cada retroalimentación */
-  .fbb{opacity:0;transition:opacity .5s .6s;pointer-events:none}.fbb.on{opacity:1}.fbb.dimL,.fbb.dimS{opacity:.08!important}
-  .fbb circle{fill:#000;stroke:#fff;stroke-width:1.8}
-  .fbb .spin{transform-box:fill-box;transform-origin:center;animation:fbspin 3.2s linear infinite}
-  .fbb .ring{fill:none;stroke:#fff;stroke-opacity:.5;stroke-width:1.2;transform-box:fill-box;transform-origin:center;animation:fbring 2.4s ease-out infinite}
-  @keyframes fbspin{to{transform:rotate(360deg)}}
-  @keyframes fbring{0%{transform:scale(1);stroke-opacity:.6}100%{transform:scale(2.3);stroke-opacity:0}}
-  /* ola causal: un brillo recorre las tarjetas de izquierda (causas) a derecha (fenómeno) */
-  .wv{position:absolute;inset:-1px;border-radius:inherit;border:1.5px solid var(--c);box-shadow:0 0 22px -4px var(--c),inset 0 0 18px -8px var(--c);opacity:0;will-change:opacity;pointer-events:none;animation:wave 6s ease-in-out infinite;animation-delay:var(--wd,0s)}
-  @keyframes wave{0%,70%,100%{opacity:0}78%{opacity:1}}
-
-  .halo{position:absolute;pointer-events:none;border-radius:22px;opacity:0;transition:opacity .6s}
-  .halo.on{opacity:1}
-  .halo i{position:absolute;inset:0;border-radius:inherit;border:2px solid var(--c);box-shadow:0 0 30px 4px color-mix(in srgb,var(--c) 60%,transparent);will-change:transform,opacity;animation:halo 3.2s ease-out infinite}
-  .halo i+i{animation-delay:1.6s}
-  .halo.r i{border-radius:40px;animation-duration:2.6s}
-  @keyframes halo{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.35,1.6);opacity:0}}
-  .node:not(.on) .wv{animation:none}
-  .tile svg{transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
-  .node:hover .tile svg{transform:scale(1.14) rotate(-6deg)}
-  .node.on .tile{animation:tilein .6s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--dl,0s) + .25s)}
-  @keyframes tilein{from{transform:scale(.4) rotate(-25deg);opacity:0}}
-  @media (prefers-reduced-motion:reduce){.fbb .spin,.fbb .ring,.wv,.halo i,.node.on .tile{animation:none!important}.pd{display:none}}
 
   .lane{display:none!important}
   /* enlaces entre ramas (conexiones reales que cruzan el mapa): salen por arriba/abajo de la tarjeta, con degradado entre los colores de las dos ramas */
   .xl{fill:none;stroke-width:2.2;stroke-dasharray:7 6;stroke-linecap:round;opacity:0;transition:opacity .5s .4s,stroke-width .2s}
-  .xl.fb{stroke-dasharray:1.5 5.5;stroke-width:2.8}
-  #tip .why{margin-top:8px;max-width:260px;font-size:11.5px;line-height:1.35;color:#bbb;white-space:normal}
   .xl.hot,.xl.sel{animation:xflow 1.2s linear infinite}
-  .xl.on{opacity:.7}
+  .xl.on{opacity:.5}
   .xl.sel{opacity:1!important;stroke-width:4.4;filter:drop-shadow(0 0 6px rgba(255,255,255,.45))}
   .xl.dimS{opacity:.1!important}
   .node.dimS{opacity:.2}
@@ -593,16 +551,17 @@
 <script src="lib/d3-lite.js"></script>
 <script>
 /* =====================================================================
-   DATOS: 56 variables · relaciones causa → efecto, transversales y retroalimentaciones (lectura de izquierda a derecha)
+   DATOS: 41 variables y 49 conexiones tal como están en el tablero de Miro
    ===================================================================== */
 const PALS = {
   mineral:  { name:"Mineral",  c1:"#d9755f", c2:"#cdae67", c3:"#6fb1a7", root:"#ebe5d9" },
   mono:     { name:"Monocromo",c1:"#f4f4f4", c2:"#a8a8a8", c3:"#6d6d6d", root:"#ffffff" },
   oceano:   { name:"Océano",   c1:"#7aa2f7", c2:"#9ece6a", c3:"#bb9af7", root:"#e6ecff" },
   carmesi:  { name:"Carmesí",  c1:"#e5484d", c2:"#f2f2f2", c3:"#8f8f8f", root:"#ff6a6f" },
-  bosque:   { name:"Bosque",   c1:"#8fbf7f", c2:"#d6c39a", c3:"#5aa6a0", root:"#e9efe0" }
+  bosque:   { name:"Bosque",   c1:"#8fbf7f", c2:"#d6c39a", c3:"#5aa6a0", root:"#e9efe0" },
+  formato:  { name:"Formato",  c1:"#cfff5e", c2:"#c9bf9f", c3:"#86b4c4", root:"#f3f4ee" }   // presentación: tinta / lima / papel / grises
 };
-let PK="mineral"; try{ PK=localStorage.getItem("pal")||"mineral"; }catch(e){}
+let PK="mineral"; try{ PK=new URLSearchParams(location.search).get("pal")||localStorage.getItem("pal")||"mineral"; }catch(e){}
 const P = PALS[PK]||PALS.mineral;
 const G = {
   1:{ name:"Hiperconcentración del mercado mayorista", short:"Mercado mayorista",      color:P.c1, icon:"Store" },
@@ -639,80 +598,28 @@ const ND = [
  ["san","Presión sobre los sistemas de saneamiento","","Gauge",2],
  ["aguasres","Generación de aguas residuales","","Droplet",2],
  ["cargas","Cargas contaminantes en aguas superficiales","","FlaskConical",2],
- // nuevas ramificaciones de la Saturación de los residuos (causas y niveles de profundidad)
- ["rsol","Generación masiva de residuos orgánicos en la central de abastos","Generación masiva de residuos orgánicos","Recycle",2],
- ["desperd","Pérdida y desperdicio de alimentos en la cadena mayorista","Pérdida y desperdicio de alimentos","PackageX",2],
- ["empaq","Manipulación a granel, sin cadena de frío ni empaques adecuados","Manipulación sin cadena de frío","Snowflake",2],
- ["vinf","Ventas informales y acumulación de desechos en los andenes","Ventas informales y desechos en andenes","ShoppingCart",2],
- ["infor","Informalidad laboral y economía de rebusque","","HandCoins",2],
- ["empl","Déficit de empleo formal cercano a la vivienda","Déficit de empleo formal cercano","BriefcaseBusiness",2],
- ["alc","Red de alcantarillado combinado de capacidad insuficiente","Alcantarillado combinado insuficiente","Waves",2],
- ["recol","Recolección y disposición final centralizadas e insuficientes","Recolección y disposición insuficientes","Truck",2],
- ["sep","Baja separación en la fuente y escaso aprovechamiento de residuos","Baja separación en la fuente","Recycle",2],
  ["calagua","Deterioro de la calidad de agua","","Droplets",3],
  ["aire","Deterioro de la calidad del aire","","Wind",3],
  ["no2","Emisiones de NO₂ y CO","","Car",3],
  ["biodiv","Pérdida de la biodiversidad","","Bird",3],
  ["hab","Falta de disponibilidad de hábitats naturales","Faltan hábitats naturales","TreePine",3],
  ["lluvia","Vulnerabilidad frente a eventos de lluvia","","CloudRain",3],
- ["plan","Desarrollo urbano orientado a la demanda del mercado y no a la descentralización territorial","Desarrollo urbano orientado al mercado","PencilRuler",3],
+ ["plan","Planificación urbana orientada a la demanda del mercado y no a la descentralización territorial","Planificación urbana orientada al mercado","PencilRuler",3],
  ["supcons","Transformación en superficies construidas","","Construction",3],
  ["suelo","Alteración de las condiciones del suelo","","Mountain",3],
  ["imperm","Impermeabilización del suelo","","BrickWall",3],
- ["frag","Fragmentación ecológica y de la cobertura vegetal","","Scissors",3],
- ["perdveg","Pérdida de la cobertura vegetal","","Leaf",3],
- // las tres ramificaciones del Desarrollo urbano orientado al mercado
- ["rent","Rentabilidad del suelo por encima de su función ecológica","Rentabilidad del suelo sobre lo ecológico","Coins",3],
- ["plusv","Captura privada de la valorización del suelo","","PiggyBank",3],
- ["eep","Débil integración de la Estructura Ecológica Principal en el ordenamiento territorial","Estructura Ecológica Principal desarticulada","Trees",3],
- ["gest","Gestión institucional fragmentada entre sectores y escalas","Gestión institucional fragmentada","Split",3],
- ["dsuelo","Demanda de suelo para vivienda y logística","","Warehouse",3],
- ["bodeg","Expansión de bodegas y corredores logísticos alrededor de Corabastos","Expansión de bodegas y corredores logísticos","Container",3]
+ ["frag","Fragmentación de la cobertura vegetal","","Scissors",3],
+ ["perdveg","Pérdida de la cobertura vegetal","","Leaf",3]
 ];
-// Todas las relaciones van de CAUSA → EFECTO. "d" = causal · "f" = retroalimentación (cierra un ciclo causal)
-// El árbol se lee de izquierda (causas profundas) a derecha (consecuencias): cada hijo es causa de su padre.
-const TREE = {
- root:["may","res","eco"],
- may:["hig","dep","conc"], hig:["epi"], epi:["desc"], desc:["infra"], infra:["ind"], ind:["mono"],
- dep:["perd"], perd:["mod"], mod:["crec"], crec:["exp"],
- conc:["clust","dens"], clust:["econag"], econag:["monoc"], dens:["esp"], esp:["esc"],
- res:["rsol","vinf","san"], rsol:["desperd"], desperd:["empaq"],
- vinf:["infor"], infor:["empl"],
- san:["aguasres","alc","recol"], recol:["sep"],
- eco:["aire","calagua","lluvia","biodiv"],
- aire:["no2"], no2:["trans"], trans:["desp"], desp:["sinc"], sinc:["cult"],
- calagua:["cargas"],
- lluvia:["imperm","suelo"], imperm:["supcons"],
- biodiv:["hab"], hab:["frag","perdveg"], frag:["plan"], plan:["rent","eep","dsuelo"],
- rent:["plusv"], eep:["gest"], dsuelo:["bodeg"]
-};
+// d = flecha origen → destino · u = relación sin flecha
 const ED = [
- // relaciones del árbol (causa → efecto = hijo → padre)
- ...Object.entries(TREE).flatMap(([p,ks])=>ks.map(k=>[k,p,"d"])),
- // relaciones transversales (entre ramas y dentro de una misma rama)
- ["may","trans","d"],["dep","trans","d"],["conc","trans","d"],["cult","desp","d"],
- ["may","rsol","d"],["may","vinf","d"],["may","bodeg","d"],["desc","rsol","d"],["desc","san","d"],["infra","empaq","d"],
- ["exp","infor","d"],["monoc","empl","d"],["dens","aguasres","d"],
- ["aguasres","cargas","d"],["aguasres","calagua","d"],["san","cargas","d"],["res","cargas","d"],["alc","lluvia","d"],["lluvia","san","d"],
- ["plan","supcons","d"],["plan","conc","d"],["plan","dens","d"],["esp","rent","d"],["crec","dsuelo","d"],
- ["supcons","suelo","d"],["supcons","frag","d"],["frag","perdveg","d"],
- // retroalimentaciones (cierran ciclos causales)
- ["res","san","f"],       // la saturación de residuos vuelve a presionar el saneamiento
- ["may","perd","f"],      // la central única desplaza los circuitos de producción local
- ["esp","esc","f"],       // la especulación retiene suelo y agrava su escasez
- ["conc","dsuelo","f"],   // la concentración aumenta la demanda de suelo que el mercado urbaniza
- ["eco","lluvia","f"],    // un soporte ecológico degradado regula peor el agua de lluvia
- ["root","gest","f"]      // un territorio fragmentado se gestiona de forma fragmentada
+ ["root","may","d"],["may","dep","d"],["may","hig","d"],["dep","perd","d"],["root","res","d"],["desc","infra","d"],["infra","ind","d"],["trans","may","d"],
+ ["res","san","d"],["dep","trans","d"],["root","eco","d"],["cult","sinc","d"],["trans","conc","d"],["monoc","econag","d"],["conc","dens","d"],["conc","clust","d"],
+ ["clust","monoc","d"],["dens","esp","d"],["conc","plan","u"],["aguasres","san","d"],["esp","esc","d"],["aguasres","cargas","d"],["aguasres","calagua","d"],["cargas","calagua","d"],
+ ["trans","no2","d"],["no2","aire","d"],["aire","eco","d"],["calagua","eco","d"],["plan","supcons","u"],["supcons","suelo","u"],["supcons","imperm","u"],["suelo","lluvia","u"],
+ ["imperm","lluvia","u"],["lluvia","eco","u"],["desc","san","d"],["cult","desp","d"],["sinc","desp","d"],["desp","trans","d"],["crec","mod","d"],["mod","perd","d"],
+ ["exp","crec","d"],["epi","hig","d"],["desc","epi","d"],["supcons","frag","u"],["frag","perdveg","u"],["frag","hab","u"],["perdveg","hab","u"],["hab","biodiv","u"],["biodiv","eco","u"]
 ];
-// por qué existe cada retroalimentación (se muestra al pasar el cursor)
-const FBWHY = {
- "res>san":"La saturación de residuos vuelve a presionar el saneamiento, que a su vez la agrava.",
- "may>perd":"La central única desplaza los circuitos de producción local, reforzando la dependencia que la sostiene.",
- "esp>esc":"La especulación retiene suelo vacante y agrava la escasez que la alimenta.",
- "conc>dsuelo":"La concentración de origen y destino eleva la demanda de suelo que el desarrollo de mercado vuelve a concentrar.",
- "eco>lluvia":"Un soporte ecológico degradado regula peor el agua de lluvia, y cada inundación lo degrada más.",
- "root>gest":"Un territorio fragmentado se gestiona por partes, lo que debilita la Estructura Ecológica y profundiza la fragmentación."
-};
 
 /* ============ utilidades ============ */
 const $ = s => document.querySelector(s);
@@ -727,15 +634,18 @@ const isMobile = () => matchMedia("(max-width:900px)").matches;
 /* ============ red real → jerarquía (árbol) + enlaces entre ramas ============ */
 const gn = ND.map((d,i)=>({ id:i, key:d[0], t:d[1], s:d[2]||d[1], i:d[3], g:d[4], nei:[], inn:[], out:[], und:[], groups:[d[4]] }));
 const K = Object.fromEntries(gn.map(n=>[n.key,n]));
-const edges = ED.map((d,i)=>({ id:i, a:K[d[0]], b:K[d[1]], dir:d[2]==="d"||d[2]==="f", fb:d[2]==="f" }));
+const edges = ED.map((d,i)=>({ id:i, a:K[d[0]], b:K[d[1]], dir:d[2]==="d" }));
 edges.forEach(e=>{
   e.cross = !!(e.a.g && e.b.g && e.a.g!==e.b.g);
   e.a.nei.push({n:e.b,e}); e.b.nei.push({n:e.a,e});
   if(e.dir){ e.a.out.push({n:e.b,e}); e.b.inn.push({n:e.a,e}); } else { e.a.und.push({n:e.b,e}); e.b.und.push({n:e.a,e}); }
   if(e.cross){ if(!e.a.groups.includes(e.b.g)) e.a.groups.push(e.b.g); if(!e.b.groups.includes(e.a.g)) e.b.groups.push(e.a.g); }
 });
-// árbol causal explícito: cada hijo es una causa de su padre (se dibuja a su izquierda)
-const kidsOf={}; gn.forEach(n=>kidsOf[n.key]=(TREE[n.key]||[]).slice());
+// árbol de expansión: cada problema se recorre en anchura por sus conexiones reales dentro del mismo grupo
+const kidsOf={}; gn.forEach(n=>kidsOf[n.key]=[]); kidsOf.root=["may","res","eco"];
+["may","res","eco"].forEach(h=>{ const g=K[h].g, seen=new Set([h]); let q=[h];
+  while(q.length){ const nq=[]; q.forEach(c=>K[c].nei.map(o=>o.n).filter(m=>m.g===g&&!seen.has(m.key)).sort((x,y)=>x.id-y.id).forEach(m=>{ seen.add(m.key); kidsOf[c].push(m.key); nq.push(m.key); })); q=nq; } });
+kidsOf.infra.push("mono");   // la monoexportación no tiene conectores en el tablero: queda junto a su vecina
 const mk = k => ({ key:k, t:K[k].t, s:K[k].s, i:K[k].i, c:kidsOf[k].map(mk) });
 const DATA = mk("root"); DATA.c.forEach((h,i)=>{ h.color=G[i+1].color; });
 
@@ -787,11 +697,11 @@ function refresh(origin){
     if(n.vis&&!was){ const dl = origin ? (n.depth-origin.depth-1)*.12 + n.parent.kids.indexOf(n)*.05 : n.depth*.1;
       n.el.style.setProperty("--dl",dl+"s"); if(n.base) [n.base,n.flow,n.arrow].forEach(x=>x&&x.style.setProperty("--dl",dl+"s")); }
     else if(!n.vis&&was){ n.el.style.setProperty("--dl","0s"); if(n.base) [n.base,n.flow,n.arrow].forEach(x=>x&&x.style.setProperty("--dl","0s")); }
-    n.el.classList.toggle("on",n.vis); n.el.classList.toggle("open",n.open); if(n.halo) n.halo.classList.toggle("on",n.vis);
+    n.el.classList.toggle("on",n.vis); n.el.classList.toggle("open",n.open);
     if(n.base) [n.base,n.flow,n.arrow].forEach(x=>x&&x.classList.toggle("on",n.vis));
     n.mel.classList.toggle("open",n.open);
   });
-  let vx=0; xedges.forEach(x=>{ const on=x.s.vis&&x.t.vis; if(on) vx++; [x.p,x.pt,x.fbb].forEach(el=>el&&el.classList.toggle("on",on)); });
+  let vx=0; xedges.forEach(x=>{ const on=x.s.vis&&x.t.vis; if(on) vx++; x.p.classList.toggle("on",on); });
   const el=$("#sX"); if(el) el.textContent=vx+"/"+xedges.length; const sn=$("#sN"); if(sn) sn.textContent=all.filter(n=>n.vis).length+"/"+all.length;
   updateLanes(); drawMini(); renderInsp(); applySelFocus(); const gh=$("#ghost"); if(gh) gh.classList.toggle("off",!(introStage===1&&!DATA.open)); document.body.classList.toggle("lite",all.filter(n=>n.vis&&n.base).length>6);
 }
@@ -819,11 +729,6 @@ function updateLanes(){
     const L=lanes[i]; L.style.left=(x0-22)+"px"; L.style.top=(y0-40)+"px"; L.style.width=(x1-x0+44)+"px"; L.style.height=(y1-y0+66)+"px"; L.classList.add("on");
   });
 }
-const PTS=document.createElement("div"); PTS.id="pts"; world.insertBefore(PTS,LK.nextSibling);
-function mkDot(d,c,x){ const g=document.createElement("span"); g.className="pg"+(x?" x":""); g.style.setProperty("--c",c);
-  const du=x?3.2+Math.random()*1.4:2+Math.random()*.8, de=-Math.random()*du;
-  g.innerHTML=["","t1"].map((t,k)=>`<i class="pd ${t}" style="offset-path:path('${d}');--du:${du.toFixed(2)}s;--de:${(de-k*.09).toFixed(2)}s"></i>`).join("");
-  PTS.appendChild(g); return g; }
 all.forEach(n=>{
   const e=document.createElement("div");
   e.className=`node d${Math.min(n.depth,2)}${n.bridge?" bridge":""}${n.kids.length?" has":""}`; e.style.setProperty("--c",n.color); e.style.setProperty("--ink",ink(n.color));
@@ -831,8 +736,7 @@ all.forEach(n=>{
   e.style.width=n.w+"px"; e.style.height=n.h+"px"; e.style.left=n.x+"px"; e.style.top=(n.y-n.h/2)+"px";
   const p=n.parent||n; e.style.setProperty("--dx",(n.parent?p.x+p.w-n.x:0)+"px"); e.style.setProperty("--dy",(p.y-n.y)+"px");
   const xb=n.xs.length?`<span class="xb" title="Conexiones con otras ramas">${icon("ArrowLeftRight",2.4)}${n.xs.length}</span>`:"";
-  e.style.setProperty("--wd",((7-n.depth)*.32).toFixed(2)+"s");
-  e.innerHTML=`<div class="wv"></div><div class="glare"></div><div class="wm">${icon(n.i,1.2)}</div><div class="tile">${icon(n.i)}</div><div class="txt"><span class="id">${n.depth===0?"FENÓMENO CENTRAL":"VAR "+n.code}${xb}${n.key==="hig"?`<span class="xb" title="Abre la evolución histórica">${icon("History",2.2)}historia</span>`:""}</span><span class="lb">${n.depth===0?n.t:n.s}</span></div>${n.kids.length?`<div class="cnt"><span>${n.kids.length}</span>${icon("ChevronRight",2.4)}</div>`:""}`;
+  e.innerHTML=`<div class="glare"></div><div class="wm">${icon(n.i,1.2)}</div><div class="tile">${icon(n.i)}</div><div class="txt"><span class="id">${n.depth===0?"FENÓMENO CENTRAL":"VAR "+n.code}${xb}${n.key==="hig"?`<span class="xb" title="Abre la evolución histórica">${icon("History",2.2)}historia</span>`:""}</span><span class="lb">${n.depth===0?n.t:n.s}</span></div>${n.kids.length?`<div class="cnt"><span>${n.kids.length}</span>${icon("ChevronRight",2.4)}</div>`:""}`;
   e.title=n.t; n.el=e; world.appendChild(e);
   if(n.depth===0) e.classList.add("on");
   e.addEventListener("click",ev=>{ ev.stopPropagation(); if(moved) return;
@@ -847,16 +751,12 @@ all.forEach(n=>{
     const te=treeEdge.get(n.key), kc=p.kids.length, ic=p.kids.indexOf(n);
     const spread=Math.min(p.h-26,20*(kc-1)), py=p.y+(kc>1?(ic/(kc-1)-.5)*spread:0), px=p.x+p.w, cx=n.x, cy=n.y;
     const srcIsChild=!!te&&te.dir&&te.a.key===n.key, hasArrow=!!te&&te.dir, kk=Math.max(46,(cx-px)*.5);
-    const d = srcIsChild ? `M${cx} ${cy}C${cx-kk} ${cy} ${px+kk} ${py} ${px+2} ${py}` : `M${px} ${py}C${px+kk} ${py} ${cx-kk} ${cy} ${cx-2} ${cy}`;
+    const d = srcIsChild ? `M${cx} ${cy}C${cx-kk} ${cy} ${px+kk} ${py} ${px} ${py}` : `M${px} ${py}C${px+kk} ${py} ${cx-kk} ${cy} ${cx} ${cy}`;
     const mkp=(cls,pl)=>{ const el=document.createElementNS(NS,"path"); el.setAttribute("class",cls); el.setAttribute("d",d); if(pl) el.setAttribute("pathLength","1"); el.style.setProperty("--c",n.color); LK.appendChild(el); return el; };
     n.base=mkp("base",true); n.flow=mkp("flow",false); n.trav=mkp("trav",true);
-    n.base.id="tp"+n.id;
-    n.arrow=mkDot(d,n.color,false);
     if(hasArrow) n.base.setAttribute("marker-end","url(#xa)"); else n.flow.style.display="none";
     n.srcIsChild=srcIsChild;
   }});
-all.filter(n=>n.depth<=1).forEach(n=>{ const hl=document.createElement("div"); hl.className="halo"+(n.depth?"":" r"); hl.style.setProperty("--c",n.color);
-  Object.assign(hl.style,{left:n.x+"px",top:(n.y-n.h/2)+"px",width:n.w+"px",height:n.h+"px"}); hl.innerHTML="<i></i><i></i>"; PTS.appendChild(hl); n.halo=hl; });
 // enlaces entre ramas: curvas punteadas con flecha entre tarjetas de distintas ramas
 xedges.forEach((x,ix)=>{
   const a=x.s, b=x.t, ia=a.xs.indexOf(x), ib=b.xs.indexOf(x);
@@ -867,22 +767,16 @@ xedges.forEach((x,ix)=>{
   else { sy=a.y-a.h/2; ty=b.y+b.h/2; const k=Math.max(50,(sy-ty)*.45); d=`M${sx} ${sy}C${sx} ${sy-k} ${tx} ${ty+k} ${tx} ${ty+2}`; }
   const gid="xg"+ix, c1=a.color, c2=b.color===a.color?"#ffffff":b.color;
   LK.querySelector("defs").insertAdjacentHTML("beforeend",`<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${sx}" y1="${sy}" x2="${tx}" y2="${ty}"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>`);
-  const p=document.createElementNS(NS,"path"); p.setAttribute("class","xl"+(x.e.fb?" fb":"")); p.setAttribute("d",d); p.setAttribute("stroke",`url(#${gid})`); if(x.dir) p.setAttribute("marker-end","url(#xa)"); LK.appendChild(p); x.p=p;
+  const p=document.createElementNS(NS,"path"); p.setAttribute("class","xl"); p.setAttribute("d",d); p.setAttribute("stroke",`url(#${gid})`); if(x.dir) p.setAttribute("marker-end","url(#xa)"); LK.appendChild(p); x.p=p;
   const t=document.createElementNS(NS,"path"); t.setAttribute("class","xt"); t.setAttribute("d",d); t.setAttribute("pathLength","1"); LK.appendChild(t); x.tr=t;
-  p.id="xp"+ix;
-  x.pt=mkDot(d,"#fff",true);
-  if(!x.e.fb){ p.classList.add("tr"); x.pt.classList.add("tr"); }
-  if(x.e.fb){ const L=p.getTotalLength(), m=p.getPointAtLength(L/2), g=document.createElementNS(NS,"g"); g.setAttribute("class","fbb"); g.setAttribute("transform",`translate(${m.x-11} ${m.y-11})`);
-    const ic=(lucide.icons.Repeat||[0,0,[]])[2].map(([t,a])=>`<${t} ${Object.entries(a).map(([k,v])=>`${k}="${v}"`).join(" ")}/>`).join("");
-    g.innerHTML=`<circle class="ring" cx="11" cy="11" r="11"/><circle cx="11" cy="11" r="11"/><g class="spin"><svg x="4" y="4" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${ic}</svg></g>`; LK.appendChild(g); x.fbb=g; }
-  const hp=document.createElementNS(NS,"path"); hp.setAttribute("class","xh"+(x.e.fb?"":" tr")); hp.setAttribute("d",d); LK.appendChild(hp); x.h=hp;
+  const hp=document.createElementNS(NS,"path"); hp.setAttribute("class","xh"); hp.setAttribute("d",d); LK.appendChild(hp); x.h=hp;
   hp.addEventListener("mouseenter",ev=>xHover(x,ev)); hp.addEventListener("mousemove",ev=>xHover(x,ev)); hp.addEventListener("mouseleave",()=>xHover(null));
 });function lineageTree(n){ const s=new Set(); for(let p=n;p;p=p.parent) s.add(p); (function dn(m){ m.kids.forEach(k=>{ if(k.vis){ s.add(k); dn(k); } }); })(n); return s; }
 function focusLine(n){
-  if(!n){ all.forEach(m=>{ m.el.classList.remove("dim"); if(m.base) [m.base,m.flow,m.arrow].forEach(x=>x&&x.classList.remove("dimL")); }); xedges.forEach(x=>{ x.p.classList.remove("dimL","hot"); x.pt.classList.toggle("lit",x.p.classList.contains("sel")); [x.pt,x.fbb].forEach(el=>el&&el.classList.remove("dimL")); }); return; }
+  if(!n){ all.forEach(m=>{ m.el.classList.remove("dim"); if(m.base) [m.base,m.flow,m.arrow].forEach(x=>x&&x.classList.remove("dimL")); }); xedges.forEach(x=>x.p.classList.remove("dimL","hot")); return; }
   const lt=lineageTree(n), s=new Set(lt); n.xs.forEach(x=>{ s.add(x.s); s.add(x.t); });
   all.forEach(m=>{ m.el.classList.toggle("dim",!s.has(m)&&m.vis); if(m.base){ const dm=!(lt.has(m)&&lt.has(m.parent)); [m.base,m.flow,m.arrow].forEach(x=>x&&x.classList.toggle("dimL",dm)); } });
-  xedges.forEach(x=>{ const mine=x.s===n||x.t===n; x.p.classList.toggle("hot",mine); x.p.classList.toggle("dimL",!mine); x.pt.classList.toggle("lit",mine||x.p.classList.contains("sel")); [x.pt,x.fbb].forEach(el=>el&&el.classList.toggle("dimL",!mine)); });
+  xedges.forEach(x=>{ const mine=x.s===n||x.t===n; x.p.classList.toggle("hot",mine); x.p.classList.toggle("dimL",!mine); });
 }
 
 /* ============ MÓVIL: lista vertical desplegable ============ */
@@ -928,7 +822,7 @@ function inspHTML(n){
   <div class="ipath" style="--c:${n.color}">${trail.map(p=>`<div style="--pc:${p.depth===0?P.root:p.color}">${p.s}</div>`).join("")}</div>
   ${sec("ArrowDownToLine","Causas directas (←)",gr.inn)}${sec("ArrowUpFromLine","Efectos directos (→)",gr.out)}${sec("Link","Relaciones sin dirección",gr.und)}
   ${xl.length?sec("ArrowLeftRight","Conecta con otras ramas",xl):""}
-  
+  ${n.key==="mono"?`<div class="isec">${icon("Unlink",2)}Sin conectores en el tablero de Miro</div>`:""}
   <div class="isec">${icon("Gauge",2)}Indicadores</div>
   <div class="istats" style="--c:${n.color}"><div>${icon("Layers",2)}<b>${n.depth}</b><span>Nivel</span></div><div>${icon("GitBranch",2)}<b>${n.kids.length}</b><span>Directas</span></div><div>${icon("Network",2)}<b>${gr.nei.length}</b><span>Conexiones</span></div></div>
   <div class="iact"><button class="btn pri" data-a="prop">${icon("Play",2)}Propagar</button>${n.key==="hig"?`<button class="btn" data-a="hist">${icon("History",2)}Evolución histórica</button>`:""}${n.kids.length?`<button class="btn" data-a="branch">${icon("ListTree",2)}Abrir rama</button>`:""}</div>`;
@@ -980,29 +874,23 @@ function xHover(x,ev){
   all.forEach(m=>m.el.classList.toggle("dim",m!==s&&m!==t&&m.vis));
   xedges.forEach(o=>{ o.p.classList.toggle("hot",o===x); o.p.classList.toggle("dimL",o!==x); });
   all.forEach(m=>{ if(m.base) [m.base,m.flow].forEach(el=>el.classList.add("dimL")); });
-  const why=x.e.fb?FBWHY[s.key+">"+t.key]:"";
-  tip.innerHTML=`<b>${x.e.fb?"Retroalimentación · cierra un ciclo":(x.dir?"Causa → efecto":"Relación sin dirección")+" · "+(s.color===t.color?"transversal":"entre ramas")}</b><div class="r" style="--c:${s.color}"><i></i>${s.s}</div><div class="ar">${x.dir?"↓":"—"}</div><div class="r" style="--c:${t.color}"><i></i>${t.s}</div>${why?`<div class="why">${why}</div>`:""}`;
+  tip.innerHTML=`<b>${x.dir?"Causa → efecto":"Relación sin dirección"} · entre ramas</b><div class="r" style="--c:${s.color}"><i></i>${s.s}</div><div class="ar">${x.dir?"↓":"—"}</div><div class="r" style="--c:${t.color}"><i></i>${t.s}</div>`;
   tip.style.left=ev.clientX+"px"; tip.style.top=ev.clientY+"px"; tip.classList.add("show");
 }
 function propagate(start){
   timers.forEach(clearTimeout); timers=[]; all.forEach(n=>{ n.el.classList.remove("ping"); n.mel.classList.remove("ping"); });
-  const up=start===DATA;   // el fenómeno no tiene efectos aguas abajo: se recorre hacia sus causas y se anima de izquierda a derecha
-  const seen=new Set([start.key]), levels=[]; let front=[start];
+  const seen=new Set([start.key]); let front=[start], lv=0; ping(start);
   while(front.length){
     const nxt=[], step=[];
-    front.forEach(n=>{ const g=n.gr; const take=o=>{ const m=KK[o.n.key]; if(m.vis&&!seen.has(m.key)){ seen.add(m.key); nxt.push(m); step.push(up?{a:m,b:n}:{a:n,b:m}); } }; (up?g.inn:g.out).forEach(take); g.und.forEach(take); });
-    if(step.length) levels.push(step); front=nxt;
+    front.forEach(n=>{ const g=n.gr; const take=o=>{ const m=KK[o.n.key]; if(m.vis&&!seen.has(m.key)){ seen.add(m.key); nxt.push(m); step.push({a:n,b:m}); } }; g.out.forEach(take); g.und.forEach(take); });
+    if(step.length){ const d=lv*900;
+      timers.push(setTimeout(()=>step.forEach(s=>{ const an=stepAnim(s.a.key,s.b.key); if(an&&!isMobile()){ an.el.classList.remove("go","rev"); void an.el.getBoundingClientRect(); an.el.classList.add("go"); if(an.flip) an.el.classList.add("rev"); } }),d));
+      timers.push(setTimeout(()=>step.forEach(s=>ping(s.b)),d+(isMobile()?0:700))); }
+    front=nxt; lv++;
   }
-  if(up) levels.reverse();
-  const first=up?[...new Set((levels[0]||[]).map(s=>s.a))]:[start]; first.forEach(ping);
-  levels.forEach((step,lv)=>{ const d=lv*900;
-    timers.push(setTimeout(()=>step.forEach(s=>{ const an=stepAnim(s.a.key,s.b.key); if(an&&!isMobile()){ an.el.classList.remove("go","rev"); void an.el.getBoundingClientRect(); an.el.classList.add("go"); if(an.flip) an.el.classList.add("rev"); } }),d));
-    timers.push(setTimeout(()=>step.forEach(s=>ping(s.b)),d+(isMobile()?0:700))); });
 }
 function runProp(n){ const start=n||sel||DATA; introStage=2; if(!DATA.open){ DATA.open=true; hideHints(); refresh(DATA); if(!isMobile()) reveal([DATA,...DATA.kids]); setTimeout(()=>propagate(DATA),950); } else propagate(start); }
 $("#bProp").onclick=()=>runProp();
-let lastAct=Date.now(); ["pointerdown","wheel","keydown"].forEach(ev=>addEventListener(ev,()=>{ lastAct=Date.now(); },{passive:true}));
-setInterval(()=>{ if(document.hidden||!DATA.open||SQ.on||hpOpen||isMobile()||matchMedia("(prefers-reduced-motion:reduce)").matches) return; if(Date.now()-lastAct<9000) return; propagate(DATA); },13000);
 
 /* ============ Evolución histórica: panel pequeño sobre Higiene estatal (solo 1900 y 1972) ============ */
 const HURL="https://anasoficasca-code.github.io/humedalburro/problematicas.html";   // enlace "ver la página completa"
@@ -1092,31 +980,31 @@ const lk=(k,t)=>`<a data-k="${k}" style="--c:${KK[k].color}">${t}</a>`;
    prop: arranca la propagación de flechas · panel: animación existente que se abre (plano · hist · pop:clave)
    chips: ideas del diagrama causal · ind: indicadores territoriales que se citan en ese tramo */
 const STEPS=[
- { w:"FRAGMENTACIÓN", t:"La fragmentación territorial", ic:"Puzzle", g:0, net:["root","may","res","eco"], sel:"root", prop:["may","res","eco"],
+ { w:"FRAGMENTACIÓN", t:"La fragmentación territorial", ic:"Puzzle", g:0, net:["root","may","res","eco"], sel:"root", prop:["root"],
    x:"En la localidad de Kennedy hemos identificado una problemática central: la fragmentación territorial. Este fenómeno no es aislado; está profundamente alimentado por varios problemas clave del territorio." },
- { w:"HIPERCONCENTRACIÓN", t:"Hiperconcentración del mercado mayorista", ic:"Store", g:1, net:["root","may","hig","dep","trans"], sel:"may", prop:["hig","dep"],
+ { w:"HIPERCONCENTRACIÓN", t:"Hiperconcentración del mercado mayorista", ic:"Store", g:1, net:["root","may","hig","dep","trans"], sel:"may", prop:["may"],
    x:"Empezando por la hiperconcentración del mercado mayorista, cuyos síntomas visibles son una serie de dinámicas sanitarias y operativas que responden a un modelo histórico de higiene estatal y salubridad pública." },
- { w:"DEPENDENCIA", t:"Dependencia alimentaria", ic:"ShoppingBasket", g:1, net:["dep","may","trans","perd"], sel:"dep", prop:["perd"], panel:"plano",
+ { w:"DEPENDENCIA", t:"Dependencia alimentaria", ic:"ShoppingBasket", g:1, net:["dep","may","trans","perd"], sel:"dep", prop:["dep"], panel:"plano",
    x:"El diagrama causal de este problema muestra cómo la dependencia de Bogotá del abastecimiento externo, que supera el 99%, concentra masivamente los viajes hacia Corabastos, atrayendo comercio informal, tráfico de carga, congestión vehicular, acumulación de residuos e impermeabilización del suelo." },
- { w:"1972", t:"1972: nace Corabastos", ic:"History", g:1, net:["mono","ind","infra","desc","epi","hig","may"], sel:"hig", prop:["mono"], panel:"hist",
+ { w:"1972", t:"1972: nace Corabastos", ic:"History", g:1, net:["mono","ind","infra","desc","epi","hig","may"], sel:"hig", prop:["desc"], panel:"hist",
    x:"Para entender el origen de este modelo, debemos devolvernos a 1972, cuando se inaugura la central de Corabastos para responder a las crisis epidémicas provocadas por la descomposición de alimentos en la antigua Plaza España. La falta de tecnología para conservar alimentos obedecía a una infraestructura deficiente por la industrialización tardía del país, cuya causa de fondo fue la monoexportación cafetera: un modelo centrado en el café sin diversificar la producción ni planificar el abastecimiento." },
  { w:"RAÍCES", t:"Por qué Bogotá depende de afuera", ic:"Sprout", g:1, net:["exp","crec","mod","perd","dep"], sel:"perd", prop:["exp"], panel:"pop:exp",
    x:"Adicionalmente, esta concentración se sostiene porque Bogotá mantiene una profunda dependencia alimentaria, derivada de la pérdida de producción agrícola local cuando resultó más rentable transformar la tierra rural en suelo urbano, proceso acelerado por la expulsión violenta de campesinos." },
- { w:"SATURACIÓN", t:"Concentración comercial y logística", ic:"Gauge", g:1, net:["may","dep","trans","no2"], sel:"may", prop:["dep"],
+ { w:"SATURACIÓN", t:"Concentración comercial y logística", ic:"Gauge", g:1, net:["may","dep","trans","no2"], sel:"may", prop:["may"],
    x:"Para medir cómo esta concentración satura el entorno, evaluamos los mapas multitemporales de 2020 y 2026 del indicador de Concentración Comercial y Logística. Al comparar ambos periodos, se evidencia una clara expansión y densificación de los núcleos comerciales desde Corabastos hacia los corredores residenciales colindantes." },
  { w:"MOVILIDAD", t:"Sobrecarga de transporte", ic:"Bus", g:1, net:["cult","sinc","desp","trans"], sel:"trans", prop:["cult"], panel:"pop:trans",
    x:"Todo esto conecta directamente con la sobrecarga de transporte en Kennedy por desplazamientos masivos en franjas horarias específicas. Estos flujos responden a un modelo de sincronización industrial que fijó la jornada a primera hora para aprovechar la luz solar, un hábito cultural que prioriza la presencialidad estricta y el control del tiempo sobre la flexibilidad." },
- { w:"EMPLEO", t:"Clústeres de empleo", ic:"Briefcase", g:1, net:["trans","conc","clust","monoc","econag"], sel:"clust", prop:["monoc"], panel:"pop:clust",
+ { w:"EMPLEO", t:"Clústeres de empleo", ic:"Briefcase", g:1, net:["trans","conc","clust","monoc","econag"], sel:"clust", prop:["conc"], panel:"pop:clust",
    x:"Sumado a esto, existe una alta concentración espacial de clústeres de empleo debido a la expansión monocéntrica de Bogotá, donde el origen de Kennedy desde Ciudad Techo en 1961 masificó la función residencial en la periferia mientras la oferta laboral se centralizaba. Este fenómeno fue impulsado por economías de aglomeración que concentran empresas para reducir costos, obligando a viajes pendulares que sobrecargan las vías." },
- { w:"VIVIENDA", t:"Densificación y especulación", ic:"Building2", g:1, net:["conc","dens","esp","esc","plan"], sel:"dens", prop:["esc","plan"], panel:"hist:dens",
-   x:"Asimismo, la densificación en altura y la especulación inmobiliaria concentran la residencia. Finalmente, esto es alimentado por un desarrollo urbano orientado al mercado y no a la descentralización, donde la infraestructura construida incentiva más clústeres y cierra un ciclo que fragmenta a Kennedy." },
- { w:"RESIDUOS", t:"Saturación de los residuos", ic:"Trash2", g:2, net:["desc","rsol","vinf","aguasres","san","res","cargas"], sel:"res", prop:["desc","vinf","aguasres"],
-   x:"Por otro lado, la saturación de residuos desencadena fragmentación territorial. En los andenes, la acumulación de desechos se intensifica por ventas informales y su descomposición colapsa el saneamiento local, incrementando aguas residuales y cargas contaminantes. Al desplegarlo, el problema se abre en tres ramificaciones, cada una con sus propias causas: la generación masiva de residuos orgánicos, las ventas informales en los andenes y la presión sobre los sistemas de saneamiento, que a su vez se retroalimenta con la saturación." },
+ { w:"VIVIENDA", t:"Densificación y especulación", ic:"Building2", g:1, net:["conc","dens","esp","esc","plan"], sel:"dens", prop:["conc"], panel:"hist:dens",
+   x:"Asimismo, la densificación en altura y la especulación inmobiliaria concentran la residencia. Finalmente, esto es alimentado por una planificación urbana orientada al mercado y no a la descentralización, donde la infraestructura construida incentiva más clústeres y cierra un ciclo que fragmenta a Kennedy." },
+ { w:"RESIDUOS", t:"Saturación de los residuos", ic:"Trash2", g:2, net:["res","desc","san","aguasres","cargas"], sel:"res", prop:["res","desc","aguasres"],
+   x:"Por otro lado, la saturación de residuos desencadena fragmentación territorial. En los andenes, la acumulación de desechos se intensifica por ventas informales y su descomposición colapsa el saneamiento local, incrementando aguas residuales y cargas contaminantes." },
  { w:"AGUA", t:"Del desecho al humedal", ic:"Droplets", g:2, net:["aguasres","san","cargas","calagua","eco"], sel:"calagua", prop:["aguasres"],
    x:"El diagrama causal de este problema sintetiza esta degradación en tres niveles: generación masiva de desechos, colapso de la red de alcantarillado e impacto hídrico por escorrentía, donde los niveles de DBO5, nitrógeno y fósforo superan la capacidad de los humedales.",
    chips:["Generación masiva de desechos","Colapso de la red de alcantarillado","Impacto hídrico por escorrentía · DBO5, nitrógeno y fósforo"] },
- { w:"SOPORTE ECOLÓGICO", t:"Soporte ecológico", ic:"Globe", g:3, net:["rent","eep","dsuelo","plan","supcons","frag","perdveg","hab"], sel:"plan", prop:["rent","eep","dsuelo"],
-   x:"Esto conecta con la degradación del soporte ecológico. Al analizar los mapas multitemporales de 2020 y 2026, observamos la desaparición de corredores ecológicos que conectaban la trama urbana con el humedal, debido a un desarrollo urbano orientado al mercado que prioriza la rentabilidad del suelo sobre la ecología, impulsando la pavimentación masiva. Este desarrollo se sostiene en tres causas —la rentabilidad del suelo, una Estructura Ecológica Principal desarticulada del ordenamiento y la demanda de suelo para vivienda y logística— y es una de las causas directas de la fragmentación ecológica y de la cobertura vegetal." },
+ { w:"SOPORTE ECOLÓGICO", t:"Soporte ecológico", ic:"Globe", g:3, net:["plan","supcons","imperm","frag","perdveg","hab"], sel:"eco", prop:["plan"],
+   x:"Esto conecta con la degradación del soporte ecológico. Al analizar los mapas multitemporales de 2020 y 2026, observamos la desaparición de corredores ecológicos que conectaban la trama urbana con el humedal, debido a una planificación que prioriza la rentabilidad del suelo sobre la ecología, impulsando la pavimentación masiva." },
  { w:"CALOR", t:"Islas de calor", ic:"Mountain", g:3, net:["supcons","suelo","imperm","lluvia","eco"], sel:"imperm", prop:["supcons"],
    x:"Como consecuencia, el indicador de Islas de Calor muestra para 2026 una expansión drástica de la mancha térmica al perder la capacidad de enfriamiento por evapotranspiración." },
  { w:"AIRE", t:"Calidad del aire", ic:"Wind", g:3, net:["trans","no2","aire","eco"], sel:"aire", prop:["trans"],
@@ -1124,7 +1012,7 @@ const STEPS=[
  { w:"METABOLISMO", t:"Saturación del metabolismo territorial", ic:"Droplet", g:3, net:["imperm","lluvia","calagua","aire","biodiv","eco"], sel:"eco", prop:["imperm","calagua","aire","biodiv"],
    x:"El diagrama causal de la saturación del metabolismo territorial sintetiza cómo este desborde impacta la cuenca del Humedal El Burro en tres capas.",
    chips:["Pérdida de regulación hídrica por impermeabilización","Colapso de sumideros ambientales por escorrentía e islas de calor","Deterioro ecológico acumulado: menor resiliencia y mayor vulnerabilidad ambiental"] },
- { w:"RESPUESTA", t:"La respuesta social", ic:"Users", g:0, net:["root","may","res","eco"], sel:"root", prop:["may","res","eco"],
+ { w:"RESPUESTA", t:"La respuesta social", ic:"Users", g:0, net:["root","may","res","eco"], sel:"root", prop:["root"],
    x:"Sin embargo, para contrarrestar esta fragmentación, evaluamos el potencial de respuesta social mediante el indicador de Organizaciones Comunitarias, que mide la presencia de juntas de acción comunal y cooperativas vinculadas a huertas urbanas y equipamientos. A esto se suma el indicador de Densidad del Conocimiento, que identifica la concentración de capacidades educativas e innovación para transformar el entorno." },
  { w:"CONCLUSIÓN", t:"La causa raíz", ic:"Puzzle", g:0, net:["may","dep","trans","no2","aire","eco"], sel:"may", prop:["may"],
    x:"Al cruzar las capas de análisis, la conclusión fundamental a la que llegamos es que la fragmentación de Kennedy no es una suma de fallas aisladas, sino la consecuencia de una hiperconcentración histórica en Corabastos que opera como la causa raíz del colapso del metabolismo territorial. La dependencia del abastecimiento externo genera un flujo de carga que no solo satura la red vial, sino que desencadena un efecto dominó: acumula residuos, degrada la red hídrica e impermeabiliza el suelo, anulando la capacidad natural de autorregulación del entorno y aislando al Humedal El Burro de sus corredores ecológicos. Por lo tanto, concluimos que resolver esta crisis mediante parches de infraestructura desconectados es inviable; recuperar el territorio exige abordar la causa matriz reequilibrando los flujos de abastecimiento y restaurando la estructura socioecológica de la localidad desde un metabolismo territorial integrado." }
@@ -1272,20 +1160,19 @@ function showRelTags(n){
     const t=document.createElement("div"); t.className="rtag"; t.style.setProperty("--c",o.color); t.style.left=o.x+"px"; t.style.top=(o.y-o.h/2-32)+"px"; t.innerHTML=icon(ic,2.2)+txt; world.appendChild(t); });
 }
 function applySelFocus(){
-  const n=sel; all.forEach(m=>m.el.classList.remove("dimS")); xedges.forEach(x=>{ x.p.classList.remove("sel","dimS"); x.pt.classList.remove("lit"); [x.pt,x.fbb].forEach(el=>el&&el.classList.remove("dimS")); });
+  const n=sel; all.forEach(m=>m.el.classList.remove("dimS")); xedges.forEach(x=>x.p.classList.remove("sel","dimS"));
   if(!n||!n.xs.length||isMobile()) return;
-  const xv=n.xs.filter(x=>x.s.vis&&x.t.vis); if(!xv.length) return;
   const keep=new Set([n,n.parent,...n.kids,...n.xs.map(x=>x.s===n?x.t:x.s)]);
   all.forEach(m=>{ if(m.vis&&!keep.has(m)) m.el.classList.add("dimS"); });
-  xedges.forEach(x=>{ const mine=xv.includes(x); x.p.classList.toggle("sel",mine); x.pt.classList.toggle("lit",mine); x.p.classList.toggle("dimS",!mine); [x.pt,x.fbb].forEach(el=>el&&el.classList.toggle("dimS",!mine)); });
+  xedges.forEach(x=>{ const mine=x.s===n||x.t===n; x.p.classList.toggle("sel",mine); x.p.classList.toggle("dimS",!mine); });
 }
 function focusOn(n){
   if(isMobile()) return;
   if(hpOpen&&((hpMode==="hig"&&inHig(n))||(hpMode==="dens"&&n===KK.dens))) return;            // con la axonometría abierta la cámara no se mueve: la fila de Higiene se queda abajo
   if((n.key==="hig"||n.key==="dens")&&!hpOpen) return;       // Higiene se encuadra sola con su panel
-  let changed=false; if(n.depth>0) n.xs.forEach(x=>{ const o=x.s===n?x.t:x.s; if(!o.vis){ for(let p=o.parent;p;p=p.parent){ if(!p.open){ p.open=true; changed=true; } } } });
+  let changed=false; n.xs.forEach(x=>{ const o=x.s===n?x.t:x.s; if(!o.vis){ for(let p=o.parent;p;p=p.parent){ if(!p.open){ p.open=true; changed=true; } } } });
   if(changed) refresh(n);
-  const partners=n.xs.map(x=>x.s===n?x.t:x.s).filter(o=>o.vis);
+  const partners=n.xs.map(x=>x.s===n?x.t:x.s);
   zoomTo([n,...(n.open?n.kids:[]),...(n.parent?[n.parent]:[]),...partners]);
   applySelFocus(); showRelTags(n);
 }
@@ -1307,13 +1194,10 @@ $("#mini").addEventListener("click",e=>{ const r=$("#miniSvg").getBoundingClient
 $("#legend").innerHTML=`<h4>${icon("Layers",2)}Ramas del sistema</h4>`+branches.map((b,i)=>`<div class="li" data-i="${b.id}" style="--c:${b.color}"><i style="color:${ink(b.color)}">${icon(G[i+1].icon,2)}</i><span>${G[i+1].name.length>30?G[i+1].short:G[i+1].name}</span><b>${b.desc+1}</b></div>`).join("")+
   `<h4>${icon("Network",2)}Cómo leer el mapa</h4>
    <div class="key"><svg viewBox="0 0 34 14"><path d="M1 7H27" stroke="${G[1].color}" stroke-width="2.4" stroke-linecap="round"/><path d="M25 2L33 7L25 12z" fill="${G[1].color}"/></svg>Causa → efecto</div>
-   <div class="key"><svg viewBox="0 0 34 14"><path d="M1 7C9 13 19 1 27 7" stroke="#fff" stroke-width="2.4" stroke-dasharray="1.5 4" fill="none" stroke-linecap="round"/><path d="M25 2L33 7L25 12z" fill="#fff"/></svg>Retroalimentación</div>
-   <div class="key" style="opacity:.8"><svg viewBox="0 0 34 14"><path d="M1 7H25" stroke="#9a9a9a" stroke-width="1.6"/><path d="M29 2L33 7L29 12" stroke="#9a9a9a" stroke-width="1.6" fill="none"/></svg>Se abre hacia las causas →</div>
-   <div class="key"><svg viewBox="0 0 34 14"><path d="M1 7C9 1 19 13 27 7" stroke="#fff" stroke-width="2" stroke-dasharray="4 4" fill="none" stroke-linecap="round"/><path d="M25 2L33 7L25 12z" fill="#fff"/></svg>Relación transversal (pasa el cursor sobre una variable)</div>
+   <div class="key"><svg viewBox="0 0 34 14"><path d="M1 7H33" stroke="#9a9a9a" stroke-width="2.4" stroke-linecap="round"/></svg>Relación sin dirección</div>
+   <div class="key"><svg viewBox="0 0 34 14"><path d="M1 7C9 1 19 13 27 7" stroke="#fff" stroke-width="2" stroke-dasharray="4 4" fill="none" stroke-linecap="round"/><path d="M25 2L33 7L25 12z" fill="#fff"/></svg>Conecta con otra rama</div>
    <div class="key"><svg viewBox="0 0 34 14"><rect x="9" y="1" width="6" height="12" rx="2" fill="${G[1].color}"/><rect x="15" y="1" width="6" height="12" rx="2" fill="${G[3].color}"/></svg>Variable compartida</div>
-   <button id="xTog">${icon("ArrowLeftRight",2)}<span>Ver todas las relaciones transversales</span></button>
-   <div id="stat"><div><b id="sN">1/56</b><span>Variables</span></div><div><b id="sX">0/${xedges.length}</b><span>Transversales y ciclos</span></div></div>`;
-$("#xTog").onclick=e=>{ e.stopPropagation(); const on=document.body.classList.toggle("xall"); $("#xTog").classList.toggle("on",on); $("#xTog span").textContent=on?"Ocultar relaciones transversales":"Ver todas las relaciones transversales"; };
+   <div id="stat"><div><b id="sN">1/41</b><span>Variables</span></div><div><b id="sX">0/${xedges.length}</b><span>Enlaces entre ramas</span></div></div>`;
 $("#legend").insertAdjacentHTML("afterbegin",`<button class="lt" aria-label="Leyenda" title="Ver / ocultar leyenda">${icon("Info",2)}</button>`);
 $("#legend .lt").onclick=()=>$("#legend").classList.toggle("open");
 $("#legend").querySelectorAll(".li").forEach(l=>l.addEventListener("click",()=>{ const b=all[+l.dataset.i]; DATA.open=true; b.open=true; hideHints(); refresh(b); reveal([DATA,b,...b.kids]); select(b); }));

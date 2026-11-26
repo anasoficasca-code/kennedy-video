@@ -1,0 +1,13 @@
+{
+  "descripcion": "Resultados de las doce simulaciones: seis experimentos, cada uno sin propuesta y con propuesta, con las mismas condiciones externas. Cada serie tiene 16 valores (año 0 a 15) por indicador de la matriz (ids A1…F6, X1…X10). Vacío hasta que existan corridas: no inventar valores.",
+  "horizonte_anios": 15,
+  "paso": "anio",
+  "experimentos": [
+    { "id": "EXP-01", "problema": "A", "sin": {}, "con": {} },
+    { "id": "EXP-02", "problema": "B", "sin": {}, "con": {} },
+    { "id": "EXP-03", "problema": "C", "sin": {}, "con": {} },
+    { "id": "EXP-04", "problema": "D", "sin": {}, "con": {} },
+    { "id": "EXP-05", "problema": "E", "sin": {}, "con": {} },
+    { "id": "EXP-06", "problema": "F", "sin": {}, "con": {} }
+  ]
+}

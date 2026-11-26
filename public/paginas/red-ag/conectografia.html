@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conectografía · Kennedy</title>
+<meta name="description" content="Conectografía de las problemáticas de Kennedy: la red de problemas y sus causas, y cómo se materializa en el lugar real donde ocurre cada causa.">
+<link rel="icon" type="image/png" sizes="32x32" href="icono-32.png"><link rel="icon" type="image/png" sizes="64x64" href="icono-64.png"><link rel="apple-touch-icon" href="icono-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500&family=Geist:wght@300..600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--fg:#e9ebec;--mut:#9aa2a7;--tx3:#646c71;--bd:rgba(255,255,255,.075);--bd2:rgba(255,255,255,.14);--ui:rgba(13,15,18,.74);--ui2:rgba(255,255,255,.035);
+ --acc:#cfff5e;--acc-bg:rgba(207,255,94,.13);--mono:'Geist Mono',ui-monospace,monospace;--cond:'Barlow Condensed',Geist,system-ui,sans-serif;
+ --sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;color:var(--fg);font-family:Geist,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;
+ background:radial-gradient(120% 90% at 50% 40%,#12161b 0%,#0b0d10 60%,#08090b 100%)}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+.ui{background:var(--ui);border:1px solid var(--bd);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.28);-webkit-backdrop-filter:blur(16px) saturate(1.1);backdrop-filter:blur(16px) saturate(1.1)}
+.mono{font:500 9.5px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--tx3)}
+button{font-family:inherit}
+button:focus-visible,a:focus-visible{outline:1px solid var(--acc);outline-offset:2px}
+
+/* encabezado */
+header{position:fixed;left:20px;top:calc(var(--st) + 20px);z-index:4;padding:14px 16px 15px;width:380px;animation:up .8s .1s cubic-bezier(.2,.8,.2,1) both}
+.eb{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.eb::before{content:'';width:14px;height:14px;flex:none;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cfff5e' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='5' cy='6' r='2.2'/%3E%3Ccircle cx='19' cy='8' r='2.2'/%3E%3Ccircle cx='12' cy='18' r='2.6'/%3E%3Cpath d='M7 7l10 1M6.2 8l4.6 8M17.8 10l-4.4 6'/%3E%3C/svg%3E")}
+.back{margin-left:auto;font:500 9.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mut);text-decoration:none;border:1px solid var(--bd);border-radius:7px;padding:6px 9px;background:var(--ui2);transition:color .2s,border-color .2s,background .2s;white-space:nowrap}
+.back:hover{color:var(--acc);border-color:rgba(207,255,94,.42);background:var(--acc-bg)}
+h1{margin:0;font:300 44px/.92 var(--cond);letter-spacing:.005em;text-transform:uppercase}
+header p{margin:10px 0 0;font-size:12.5px;line-height:1.5;color:var(--mut)}
+.stats{display:flex;gap:0;margin-top:13px;border-top:1px solid var(--bd);padding-top:12px}
+.stats div{flex:1;padding-right:10px}
+.stats div+div{border-left:1px solid var(--bd);padding-left:12px}
+.stats b{display:block;font:300 28px/1 var(--cond);color:var(--fg);font-variant-numeric:tabular-nums}
+.stats span{display:block;margin-top:4px}
+
+/* problemáticas y convenciones */
+.legend{position:fixed;left:20px;bottom:calc(var(--sb) + 20px);z-index:4;padding:11px 10px 12px;width:300px;animation:up .8s .25s cubic-bezier(.2,.8,.2,1) both}
+.legend .ttl{padding:0 6px 9px;border-bottom:1px solid var(--bd);margin-bottom:5px;display:flex;justify-content:space-between}
+.chips{display:flex;flex-direction:column;gap:1px}
+.pb{--c:#fff;display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;color:var(--fg);font:400 12.5px/1.25 Geist,system-ui,sans-serif;padding:6px 6px;border-radius:7px;cursor:pointer;text-align:left;transition:background .2s,opacity .25s}
+.pb:hover{background:rgba(255,255,255,.05)}
+.pb.on{background:rgba(255,255,255,.06);box-shadow:inset 2px 0 0 var(--c)}
+.chips.sel .pb:not(.on){opacity:.42}
+.pb svg{width:17px;height:17px;flex:none;fill:none;stroke:var(--c);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.pb em{margin-left:auto;font:500 10px var(--mono);color:var(--tx3);font-style:normal;padding-left:8px}
+.conv{margin:8px 6px 0;padding-top:10px;border-top:1px solid var(--bd);display:grid;gap:7px;font-size:11.5px;color:var(--mut)}
+.conv div{display:flex;align-items:center;gap:10px}
+.conv svg{width:34px;height:10px;flex:none}
+
+/* botón principal */
+#go{position:fixed;left:50%;bottom:calc(var(--sb) + 26px);transform:translateX(-50%);z-index:4;display:flex;align-items:center;gap:12px;background:var(--acc);color:#141a06;border:0;border-radius:10px;padding:14px 26px 14px 22px;
+ font:600 11px Geist,system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;cursor:pointer;box-shadow:0 12px 32px rgba(0,0,0,.35),0 0 0 0 rgba(207,255,94,.4);transition:background .2s,opacity .3s;animation:upc .8s .4s cubic-bezier(.2,.8,.2,1) both,halo 2.8s 1.6s ease-out infinite}
+#go:hover{background:#dcff86}
+#go:disabled{opacity:.55;cursor:progress;animation:none}
+#go svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transition:transform .5s}
+#go.land{background:rgba(13,15,18,.86);color:var(--fg);border:1px solid var(--bd2);animation:none;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+#go.land:hover{border-color:rgba(207,255,94,.5);color:var(--acc)}
+#go.land svg{transform:rotate(180deg)}
+#hint{position:fixed;left:50%;bottom:calc(var(--sb) + 84px);transform:translateX(-50%);z-index:3;color:var(--mut);white-space:nowrap;pointer-events:none;transition:opacity .6s;text-align:center}
+
+/* etiquetas sobre la escena */
+#lbl{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.lb{--c:#fff;position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:3px;white-space:nowrap;will-change:transform;opacity:0;transition:opacity .35s}
+.lb.p{white-space:normal;width:170px;text-align:center}
+.lb b{font:500 12.5px/1.2 Geist,system-ui,sans-serif;color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.95),0 0 2px rgba(0,0,0,.9);letter-spacing:-.005em}
+.lb small{display:inline-flex;align-items:center;gap:5px;font:500 9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--c);text-shadow:0 1px 8px rgba(0,0,0,.95)}
+.li{width:12px;height:12px;flex:none;fill:none;stroke:var(--c);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+#tip .mono .li{margin-right:6px}
+.lb.c{max-width:200px;white-space:normal;text-align:center}
+.lb.c b{font-size:11px;font-weight:400;color:#dfe3e5;line-height:1.3}
+
+/* tooltip */
+#tip{--c:#fff;position:fixed;left:0;top:0;z-index:6;pointer-events:none;max-width:290px;padding:10px 12px;font-size:12.5px;line-height:1.42;opacity:0;transition:opacity .15s}
+#tip .mono{display:block;margin-bottom:5px;color:var(--c)}
+
+/* panel de detalle */
+#panel{--c:#fff;position:fixed;right:16px;top:calc(var(--st) + 16px);bottom:calc(var(--sb) + 16px);width:min(410px,calc(100% - 32px));z-index:5;overflow:auto;overscroll-behavior:contain;
+ transform:translateX(calc(100% + 28px));transition:transform .4s cubic-bezier(.2,.8,.2,1);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.12) transparent;background:rgba(13,15,18,.86)}
+#panel.open{transform:none}
+.ph{position:sticky;top:0;z-index:1;padding:18px 52px 15px 20px;background:rgba(13,15,18,.96);border-bottom:1px solid var(--bd);border-radius:12px 12px 0 0}
+.ph::before{content:'';position:absolute;left:0;top:0;right:0;height:2px;background:var(--c);border-radius:12px 12px 0 0;opacity:.9}
+.ph .mono{color:var(--c);display:flex;align-items:center;gap:8px}
+.ph .mono svg{width:15px;height:15px;fill:none;stroke:var(--c);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ph h2{margin:9px 0 0;font:400 27px/1 var(--cond);text-transform:uppercase;letter-spacing:.005em}
+.ph h2.lg{font:500 17px/1.32 Geist,system-ui,sans-serif;text-transform:none;letter-spacing:-.01em}
+.x{position:absolute;right:12px;top:13px;width:32px;height:32px;border:1px solid var(--bd);background:var(--ui2);color:var(--mut);border-radius:8px;cursor:pointer;font-size:17px;line-height:1;display:grid;place-items:center;transition:color .2s,border-color .2s}
+.x:hover{color:var(--fg);border-color:var(--bd2)}
+.pbody{padding:16px 20px 24px}
+.kg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kp{border:1px solid var(--bd);background:var(--ui2);border-radius:8px;padding:10px 11px 9px;min-width:0}
+.kp b{display:block;font:300 30px/1 var(--cond);font-variant-numeric:tabular-nums}
+.kp span{display:block;margin-top:5px;font:500 8.5px/1.35 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--tx3)}
+.gh{margin:22px 0 9px;padding-top:14px;border-top:1px solid var(--bd)}
+.ch{--k:var(--c);display:block;width:100%;text-align:left;background:var(--ui2);border:1px solid var(--bd);border-left:3px solid var(--k);border-radius:8px;padding:9px 11px 10px;margin-bottom:6px;color:var(--fg);font:400 12.5px/1.42 Geist,system-ui,sans-serif;cursor:pointer;transition:background .2s,transform .2s}
+.ch:hover{background:rgba(255,255,255,.07);transform:translateX(2px)}
+.ch .m{display:flex;gap:10px;align-items:center;margin-bottom:4px;font:500 9px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--tx3)}
+.ch .m i{font-style:normal;color:var(--acc)}
+.ch .m i.neg{color:#ff9a86}
+.ch small{display:block;margin-top:5px;color:var(--mut);font-size:11.5px;line-height:1.45}
+.arrow{display:flex;align-items:center;gap:8px;font-size:12px;line-height:1.4;padding:7px 0;border-bottom:1px solid var(--bd);color:#c9ced1}
+.arrow:last-child{border-bottom:0}
+.arrow i{font-style:normal;color:var(--tx3);font-family:var(--mono);flex:none}
+.loc{margin-top:12px;font:400 11px var(--mono);color:var(--mut);display:flex;gap:8px;align-items:center}
+.loc::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
+.note{margin-top:20px;font-size:11.5px;line-height:1.55;color:var(--tx3)}
+
+#load{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;color:var(--tx3);pointer-events:none;transition:opacity .6s}
+
+@keyframes up{from{opacity:0;transform:translateY(10px)}}
+@keyframes upc{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes halo{0%{box-shadow:0 12px 32px rgba(0,0,0,.35),0 0 0 0 rgba(207,255,94,.45)}70%,100%{box-shadow:0 12px 32px rgba(0,0,0,.35),0 0 0 14px rgba(207,255,94,0)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* celular */
+@media(max-width:760px){
+ header{left:10px;right:10px;width:auto;top:calc(var(--st) + 10px);padding:11px 13px 12px}
+ .eb{margin-bottom:8px}
+ h1{font-size:32px}
+ header p{font-size:12px;margin-top:6px}
+ .stats{display:none}
+ .eb .k{display:none}
+ .back .l{display:none}
+ .legend{left:10px;right:10px;width:auto;bottom:calc(var(--sb) + 10px);padding:8px}
+ .legend .ttl,.conv{display:none}
+ .chips{flex-direction:row;overflow-x:auto;gap:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ .chips::-webkit-scrollbar{display:none}
+ .pb{flex:none;width:auto;white-space:nowrap;border:1px solid var(--bd);padding:8px 10px;font-size:12px}
+ .pb span{max-width:170px;overflow:hidden;text-overflow:ellipsis}
+ .pb em{display:none}
+ #go{bottom:calc(var(--sb) + 70px);padding:13px 22px 13px 18px}
+ #hint{display:none}
+ #panel{left:8px;right:8px;width:auto;top:auto;bottom:calc(var(--sb) + 8px);max-height:64vh;transform:translateY(calc(100% + 24px))}
+ #panel.open{transform:none}
+ .lb b{font-size:11px}
+ .lb.p{width:128px}
+ .lb.c{max-width:150px}
+}
+@media(max-width:760px) and (max-height:520px){header p,.stats{display:none}}
+/* ?embed=1: solo la conectografía (la red y Materializar), para abrirla dentro de la red de problemas */
+html.embed header,html.embed .legend,html.embed #panel{display:none!important}
+html.embed #go{bottom:calc(var(--sb) + 26px)}
+html.embed #hint{display:block;bottom:calc(var(--sb) + 84px)}
+</style>
+</head>
+<body>
+<script>if(/[?&]embed=1/.test(location.search))document.documentElement.classList.add('embed')</script>
+<canvas id="c" tabindex="0" aria-label="Red 3D de las problemáticas de Kennedy"></canvas>
+<div id="lbl"></div>
+<div id="load" class="mono">Armando la red…</div>
+
+<header class="ui">
+ <div class="eb"><span class="mono"><span class="k">Kennedy · </span>Conectografía</span><a class="back" href="index.html">← Red<span class="l"> de problemas</span></a></div>
+ <h1>Conectografía</h1>
+ <p id="lead">Seis problemáticas y las causas que las producen, unidas como una sola red. Materializa para verlas aterrizar en el lugar real donde ocurre cada causa.</p>
+ <div class="stats"><div><b id="kP">6</b><span class="mono">Problemáticas</span></div><div><b id="kC">0</b><span class="mono">Causas</span></div><div><b id="kR">0</b><span class="mono">Relaciones</span></div></div>
+</header>
+
+<aside class="legend ui" aria-label="Problemáticas">
+ <div class="ttl mono"><span>Problemáticas · color e ícono</span><span>causas</span></div>
+ <div class="chips" id="chips"></div>
+ <div class="conv">
+  <div><svg viewBox="0 0 34 14" style="height:14px"><circle cx="9" cy="7" r="6" fill="#0d1013" stroke="#e9ebec" stroke-width="1.6"/><circle cx="9" cy="7" r="2" fill="#e9ebec"/><circle cx="26" cy="7" r="3.6" fill="#e9ebec"/><circle cx="26" cy="7" r="1.2" fill="#0d1013"/></svg>Disco con ícono: problemática · esfera: causa, con el color y el ícono de su problemática</div>
+  <div><svg viewBox="0 0 34 10"><path d="M1 5h32" stroke="#8a93a0" stroke-width="1.2" opacity=".7"/></svg>Problemática → causa</div>
+  <div><svg viewBox="0 0 34 10"><path d="M1 5h32" stroke="#e9ebec" stroke-width="1.4"/><g fill="#fff"><circle cx="9" cy="5" r="1.6"/><circle cx="21" cy="5" r="1.6"/></g></svg>Una causa provoca otra</div>
+  <div><svg viewBox="0 0 34 10"><path d="M1 5h32" stroke="#cfff5e" stroke-width="1.4"/><g fill="#cfff5e"><circle cx="13" cy="5" r="1.8"/><circle cx="27" cy="5" r="1.8"/></g></svg>Enlace entre problemáticas</div>
+ </div>
+</aside>
+
+<div id="hint" class="mono">Arrastra para girar · toca una esfera</div>
+<button type="button" id="go" disabled><svg viewBox="0 0 24 24"><path d="M12 3v13M6 10l6 6 6-6M4 21h16"/></svg><span id="goT">Cargando territorio…</span></button>
+<div id="tip" class="ui"></div>
+<aside id="panel" class="ui" aria-live="polite"></aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* ============================================================================
+   CONECTOGRAFÍA DE KENNEDY
+   Datos: módulo 12 «Problemáticas de Kennedy» (modelamiento2/modulo-12-problemas.js): las problemáticas,
+   sus causas con coordenadas reales (calibradas con Humedal La Vaca y Humedal El Burro) y las relaciones
+   entre causas, dentro de cada problemática y entre problemáticas.
+   Territorio: nube.bin, vias.json y limite.json de este mismo proyecto (metros desde el centro de la nube).
+   ============================================================================ */
+(()=>{
+'use strict';
+const ICO={
+ vial:'M3 13l2-6h14l2 6v5H3z M3 13h18 M6.5 15.5h1 M16.5 15.5h1 M5.5 18v2.5 M18.5 18v2.5',
+ agua:'M12 3c2.5 3.2 6 7 6 11a6 6 0 0 1-12 0c0-4 3.5-7.8 6-11z M9 14.5a3 3 0 0 0 3 3',
+ mercado:'M3 9h18l-1.5-5h-15z M4 9v11h16V9 M9 20v-6h6v6',
+ torre:'M5 21V5l7-2v18 M12 21V8l7 2v11 M3 21h18 M8 8h.01 M8 11.5h.01 M8 15h.01 M15.5 13h.01 M15.5 16.5h.01',
+ anden:'M12 3.4a1.9 1.9 0 1 1 0 3.8a1.9 1.9 0 1 1 0-3.8z M12 8.5v6.5 M8 12l4-2 4 2 M9.5 21l2.5-6 2.5 6',
+ residuo:'M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6'};
+const PROB=[
+ {id:'n1',corto:'Colapso de la red vial local y arterial',full:'Colapso de la red vial local y de los corredores arteriales',c:'#ffd23f',ico:'vial',x:6280.0,y:2050.0,
+  causas:[['s1_1','Infiltración de camiones pesados de escala regional en calles barriales de una sola calzada',6315.4,2529.8],
+   ['s1_2','Filas de camiones y congestión represada sobre las avenidas principales',8097.5,2265.9],
+   ['s1_3','Deterioro continuo de la capa de rodadura ante el tránsito de carga pesada',7197.9,3738.8],
+   ['s1_4','Conflicto y entrecruzamiento de flujos entre camiones, vehículos particulares, bicipatios y peatones',6876.1,3052.3],
+   ['s1_5','Ingreso vehicular en ángulo recto que obliga a frenar sobre la calzada arterial',6303.1,3748.1]]},
+ {id:'n2',corto:'Contaminación de la red hídrica',full:'Contaminación y alteración biofísica de la red hídrica y cuerpos de agua',c:'#3d9bff',ico:'agua',x:6096.0,y:2297.4,
+  causas:[['s2_1','Vertimiento de lixiviados orgánicos al alcantarillado sin tratamiento',7563.4,3372.6],
+   ['s2_2','Escorrentía de residuos de alimentos',6220.1,1816.0],
+   ['s2_3','Eutrofización y tinción de aguas en la cuenca hídrica',5823.4,4944.2],
+   ['s2_4','Vertimiento de grasas y agua de lavado de bodegas hacia canales superficiales',6048.5,4123.4],
+   ['s2_5','Escorrentía de alimentos',4746.1,4233.7],
+   ['s2_7','Vertimiento de agua sucia y lixiviados al alcantarillado pluvial sin tratamiento',8216.2,4012.9],
+   ['s2_8','Arrastre de basuras desde la calle hacia los canales de agua en eventos de lluvia',6505.6,4421.9],
+   ['s2_9','Infiltración de agua contaminada en la franja del humedal',6012.9,1933.1],
+   ['s2_11','Insuficiencia de redes sanitarias destinadas a la limpieza de bodegas',6779.3,2429.1]]},
+ {id:'n3',corto:'Concentración del mercado mayorista',full:'Concentración metropolitana del mercado mayorista de alimentos en la trama barrial',c:'#ff4d5a',ico:'mercado',x:6396.0,y:2168.0,
+  causas:[['s3_1','Entrada masiva de carga alimentaria regional en un solo predio',7351.1,2267.9],
+   ['s3_3','Saturación comercial intensiva en un grupo reducido de bodegas',6488.3,2252.8],
+   ['s3_4','Llegada masiva y continua de carga alimentaria regional a un único punto urbano',6252.8,1993.0],
+   ['s3_5','Represión de camiones en vía pública durante la espera de apertura de bodegas',6707.5,1990.2],
+   ['s3_6','Mezcla física de comercialización mayorista con almacenamiento, empaque y preparación de alimentos',5701.5,2460.8],
+   ['s3_7','Saturación comercial intensiva en una franja reducida de bodegas',5901.1,2200.8],
+   ['s3_8','Aglomeración de compradores, carretas y vehículos en los accesos a los sectores de venta',6426.7,3000.7]]},
+ {id:'n4',corto:'Sobrecarga por densificación en altura',full:'Sobrecarga infraestructural de la densificación residencial en altura',c:'#b07cff',ico:'torre',x:6150.0,y:2280.0,
+  causas:[['s4_1','Crecimiento de torres de apartamentos sobre infraestructuras con capacidad límite',7888.5,4383.3],
+   ['s4_3','Fricción en la convivencia directa entre conjuntos residenciales y zonas de bodegaje',5413.3,2762.6],
+   ['s4_4','Coincidencia temporal entre los viajes de residentes y el transporte de carga',7239.1,2609.5],
+   ['s4_5','Ocupación de vías barriales con carros particulares ante estacionamientos agotados',6678.7,2917.5],
+   ['s4_6','Construcción masiva de torres residenciales superando la capacidad de las vías barriales',7933.8,2667.8],
+   ['s4_7','Generación concentrada de viajes cotidianos desde conjuntos verticales hacia pocos corredores',7932.3,3554.7],
+   ['s4_8','Saturación del sistema masivo (TransMilenio y SITP) por exceso de pasajeros en horas pico',7626.1,2222.8],
+   ['s4_9','Retraso en las frecuencias de buses debido al parqueo informal en los carriles mixtos',6809.2,3351.5]]},
+ {id:'n5',corto:'Interferencia en el espacio público',full:'Interferencia de actividades logísticas en la red de espacio público barrial',c:'#2ee6a6',ico:'anden',x:6440.0,y:2190.0,
+  causas:[['s5_1','Ocupación comercial de andenes estrechos con cajas, huacales y mercancía',6476.6,1793.7],
+   ['s5_2','Instalación de puestos informales de venta de alimentos sobre la calzada vehicular',6928.1,2589.0],
+   ['s5_3','Expulsión de peatones hacia la calle junto al tránsito de camiones pesados',6360.9,1445.0],
+   ['s5_5','Apropiación comercial de vías residenciales fuera del muro de cerramiento',6093.0,2745.6]]},
+ {id:'n6',corto:'Acumulación de residuos y transporte pesado',full:'Acumulación de residuos y transporte pesado sobre la red ecológica',c:'#ff8a3d',ico:'residuo',x:6480.0,y:2220.0,
+  causas:[['s6_1','Acumulación de basura orgánica superando la capacidad de los contenedores',6163.3,2183.0],
+   ['s6_2','Estacionamiento prolongado de camiones de gran tonelaje en calles residenciales',5999.0,3425.2],
+   ['s6_3','Derrame de lixiviados sobre el pavimento a la intemperie',5996.5,2353.4],
+   ['s6_4','Bloqueo de puntos de recolección de basura con vehículos parqueados',6875.5,2245.9],
+   ['s6_5','Generación de malos olores y focos sanitarios junto a las zonas de vivienda',6678.0,2583.5]]}];
+// relaciones dentro de cada problemática (causa -> causa, refuerzo +)
+const REL=[['s1_5','s1_2'],['s1_2','s1_1'],['s1_1','s1_4'],['s1_4','s1_3'],
+ ['s2_11','s2_1'],['s2_4','s2_1'],['s2_1','s2_7'],['s2_7','s2_8'],['s2_2','s2_9'],['s2_9','s2_3'],['s2_8','s2_3'],
+ ['s3_1','s3_5'],['s3_5','s3_8'],['s3_8','s3_3'],['s3_8','s3_7'],['s3_3','s3_6'],
+ ['s4_1','s4_7'],['s4_6','s4_7'],['s4_7','s4_8'],['s4_8','s4_9'],['s4_4','s4_3'],
+ ['s5_1','s5_3'],['s5_2','s5_5'],
+ ['s6_1','s6_4'],['s6_4','s6_5'],['s6_2','s6_3'],['s6_3','s6_5']];
+// relaciones entre problemáticas
+const INTER=[
+ ['s1_1','s3_5','+','La llegada constante de camiones regionales satura de manera crítica la trama barrial circundante'],
+ ['s4_1','s3_1','+','La alta densidad poblacional nueva exige un mayor volumen de abastecimiento de alimentos'],
+ ['s3_3','s4_1','-','La hipercomercialización descontrolada desincentiva la inversión en vivienda formal de calidad'],
+ ['s6_2','s2_1','+','La acumulación de basuras y escombros obstruye los canales provocando vertimientos sin tratamiento'],
+ ['s2_5','s6_1','+','La degradación de la red hídrica reduce el control sanitario aumentando la generación desordenada de residuos'],
+ ['s2_1','s1_5','+','El deterioro ambiental de las calzadas favorece la presencia de cargadores informales y tracción humana'],
+ ['s2_2','s5_3','+','El desborde de lixiviados en áreas públicas atrae ventas informales de desperdicios y acopio en vía'],
+ ['s5_2','s1_2','+','Las maniobras de carga y descarga en vía pública reducen drásticamente la capacidad de la red vial'],
+ ['s1_4','s6_2','+','El parqueo prolongado de camiones convierte las rondas y andenes en puntos clandestinos de arrojamiento de basuras']];
+
+/* ---------- coordenadas: sistema local del módulo 12 -> lat/lng -> marco de nube.bin ---------- */
+const S=1150/7600,SY=S*3.2;
+const CA=158502.5342667897,CB=11760483.425451731,CC=75875.89881636726,CD=-349119.0227795534;
+const MXg=111320*Math.cos(4.63*Math.PI/180),OX=2095.67,OZ=-109.06,LCx=5341.33,LCy=3161.9,NCX=7188,NCY=2045.46;
+function geo(x,y){const lng=(x-CB)/CA,lat=(y-CD)/CC,gx=(lng+74.149778)*MXg,gy=-(lat-4.640683)*110540,X=gx+OX+LCx,Y=LCy-(gy+OZ);return {lat,lng,x:(X-NCX)*S,z:-(Y-NCY)*S}}
+
+/* ---------- nodos y enlaces ---------- */
+const V3=THREE.Vector3,NODES=[],BY={},EDGES=[];
+PROB.forEach((p,i)=>{const g=geo(p.x,p.y);const n={id:p.id,k:'p',i,p,col:p.c,t:p.corto,full:p.full,g,deg:0,causas:[]};NODES.push(n);BY[n.id]=n;
+ p.causas.forEach(([id,t,x,y])=>{const c={id,k:'c',p,par:n,col:p.c,t,g:geo(x,y),deg:0};NODES.push(c);BY[id]=c;n.causas.push(c)})});
+NODES.filter(n=>n.k==='c').forEach(c=>EDGES.push({a:c.par,b:c,k:'pc'}));
+REL.forEach(([a,b])=>{if(BY[a]&&BY[b])EDGES.push({a:BY[a],b:BY[b],k:'rel',pol:'+'})});
+INTER.forEach(([a,b,pol,v])=>{if(BY[a]&&BY[b])EDGES.push({a:BY[a],b:BY[b],k:'int',pol,verbo:v})});
+EDGES.forEach(e=>{if(e.k!=='pc'){e.a.deg++;e.b.deg++}});
+NODES.forEach(n=>{n.out=EDGES.filter(e=>e.a===n&&e.k!=='pc');n.inn=EDGES.filter(e=>e.b===n&&e.k!=='pc')});
+PROB.forEach((p,i)=>{const n=BY[p.id];n.rel=EDGES.filter(e=>e.k==='rel'&&e.a.par===n).length;n.int=EDGES.filter(e=>e.k==='int'&&(e.a.par===n||e.b.par===n)).length;n.causas.sort((a,b)=>b.deg-a.deg)});
+const nCausas=NODES.filter(n=>n.k==='c').length,nRel=EDGES.filter(e=>e.k!=='pc').length;
+document.getElementById('kC').textContent=nCausas;document.getElementById('kR').textContent=nRel;
+
+/* ---------- disposición de la red (3D, fuerzas con semilla fija) ---------- */
+let seed=7;const rnd=()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const golden=Math.PI*(3-Math.sqrt(5)),RS=135;
+NODES.filter(n=>n.k==='p').forEach((n,i,a)=>{const yy=1-(i+.5)/a.length*2,r=Math.sqrt(1-yy*yy),th=golden*i*1.9;n.s=new V3(Math.cos(th)*r*RS,yy*RS*.72,Math.sin(th)*r*RS)});
+NODES.filter(n=>n.k==='c').forEach(c=>{const d=new V3(rnd()-.5,rnd()-.5,rnd()-.5).normalize();c.s=c.par.s.clone().add(d.multiplyScalar(48+rnd()*22))});
+(function relax(){const v=new V3();
+ for(let it=0;it<420;it++){const cool=1-it/420;
+  for(let i=0;i<NODES.length;i++)for(let j=i+1;j<NODES.length;j++){const A=NODES[i],B=NODES[j];v.subVectors(B.s,A.s);let d=v.length()||.1;const mn=(A.k==='p'||B.k==='p')?62:34;
+   if(d<mn*2.2){const f=Math.min(6,180/(d*d)*mn*.35)*cool;v.multiplyScalar(f/d);A.s.sub(v);B.s.add(v)}}
+  EDGES.forEach(e=>{const L=e.k==='pc'?58:e.k==='rel'?46:110,w=e.k==='int'?.012:.05;v.subVectors(e.b.s,e.a.s);const d=v.length()||.1;v.multiplyScalar((d-L)/d*w*cool);e.a.s.add(v);e.b.s.sub(v)});
+  NODES.forEach(n=>{n.s.multiplyScalar(n.k==='p'?.996:.998);n.s.y*=.997})}})();
+// centro de la red en el origen; escalar para que quepa en un radio fijo
+(function(){const c=new V3();NODES.forEach(n=>c.add(n.s));c.divideScalar(NODES.length);let R=0;NODES.forEach(n=>{n.s.sub(c);R=Math.max(R,n.s.length())});NODES.forEach(n=>n.s.multiplyScalar(210/R))})();
+
+/* ---------- posición real en el territorio (con separación mínima para que no se tapen) ---------- */
+// causas: en su punto real, más altas cuantas más conexiones tienen (con separación mínima para que no se tapen)
+NODES.forEach(n=>{n.l=new V3(n.g.x,16+Math.min(n.deg,6)*9,n.g.z)});
+(function(){const v=new V3(),CS=NODES.filter(n=>n.k==='c');for(let it=0;it<300;it++)for(let i=0;i<CS.length;i++)for(let j=i+1;j<CS.length;j++){const A=CS[i],B=CS[j];
+ v.set(B.l.x-A.l.x,0,B.l.z-A.l.z);let d=v.length();if(d>=20)continue;if(d<.01){v.set(Math.cos(i*2.1+j),0,Math.sin(i*2.1+j));d=1}
+ v.multiplyScalar((20-d)/2/d);A.l.sub(v);B.l.add(v)}})();
+// problemáticas: todas se concentran alrededor de Corabastos, así que flotan en una corona sobre ese punto
+// (conservando el orden de sus direcciones reales) y un tallo baja hasta su coordenada real en el suelo
+const MP=NODES.filter(n=>n.k==='p'),MC=new V3();MP.forEach(n=>MC.add(new V3(n.g.x,0,n.g.z)));MC.divideScalar(MP.length);
+MP.map(n=>({n,a:Math.atan2(n.g.z-MC.z,n.g.x-MC.x)})).sort((p,q)=>p.a-q.a).forEach((o,i,arr)=>{const a=arr[0].a+i/arr.length*Math.PI*2;
+ o.n.l=new V3(MC.x+Math.cos(a)*190,150+(i%2)*26,MC.z+Math.sin(a)*190)});
+NODES.forEach(n=>n.gp=n.k==='p'?new V3(n.g.x,0,n.g.z):new V3(n.l.x,0,n.l.z));
+const LB={x0:1e9,x1:-1e9,z0:1e9,z1:-1e9};NODES.forEach(n=>{LB.x0=Math.min(LB.x0,n.l.x);LB.x1=Math.max(LB.x1,n.l.x);LB.z0=Math.min(LB.z0,n.l.z);LB.z1=Math.max(LB.z1,n.l.z)});
+const LC=new V3((LB.x0+LB.x1)/2,0,(LB.z0+LB.z1)/2);
+// la red flota sobre el centro de los lugares
+const C=LC.clone().add(new V3(0,250,0));NODES.forEach(n=>n.s.add(C));
+
+/* ---------- escena ---------- */
+const cv=document.getElementById('c'),MOB=matchMedia('(max-width:760px)').matches,RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+const PIX=Math.min(devicePixelRatio,MOB?1.6:2);renderer.setPixelRatio(PIX);renderer.setClearColor(0x000000,0);
+const scene=new THREE.Scene();scene.fog=new THREE.Fog(0x0b0d10,900,2600);
+const cam=new THREE.PerspectiveCamera(40,1,1,8000);
+const ctl=new THREE.OrbitControls(cam,cv);ctl.enableDamping=true;ctl.dampingFactor=.07;ctl.autoRotate=!RM;ctl.autoRotateSpeed=.55;ctl.rotateSpeed=.6;ctl.zoomSpeed=.8;ctl.minDistance=120;ctl.maxDistance=2600;ctl.maxPolarAngle=Math.PI*.495;
+function fitRed(){const a=innerWidth/innerHeight,d=(a<.6?1320:a<.8?1050:a<1.2?760:640);return {p:C.clone().add(new V3(.42,.34,1).normalize().multiplyScalar(d)),t:C.clone()}}
+function fitLand(){const w=Math.max(LB.x1-LB.x0,LB.z1-LB.z0)+260,a=innerWidth/innerHeight,d=w*(a<.6?2.6:a<.8?2.2:a<1.2?1.6:1.18)+200;return {p:LC.clone().add(new V3(.32,.92,.78).normalize().multiplyScalar(d)),t:LC.clone().add(new V3(0,20,0))}}
+{const f=fitRed();cam.position.copy(f.p);ctl.target.copy(f.t)}
+
+/* texturas de las esferas */
+const TEX={};
+function texNodo(col,macro,ico){const k=col+macro+ico;if(TEX[k])return TEX[k];const cnv=document.createElement('canvas');cnv.width=cnv.height=256;const x=cnv.getContext('2d'),c=new THREE.Color(col),rgb=`${c.r*255|0},${c.g*255|0},${c.b*255|0}`;
+ if(macro){const g=x.createRadialGradient(128,128,60,128,128,128);g.addColorStop(0,`rgba(${rgb},.38)`);g.addColorStop(1,`rgba(${rgb},0)`);x.fillStyle=g;x.fillRect(0,0,256,256);
+  x.beginPath();x.arc(128,128,74,0,7);x.fillStyle='#0d1013';x.fill();
+  const g2=x.createRadialGradient(128,100,10,128,128,74);g2.addColorStop(0,`rgba(${rgb},.32)`);g2.addColorStop(1,`rgba(${rgb},.05)`);x.fillStyle=g2;x.fill();
+  x.lineWidth=8;x.strokeStyle=col;x.stroke();x.beginPath();x.arc(128,128,88,0,7);x.lineWidth=2;x.strokeStyle=`rgba(${rgb},.6)`;x.stroke();
+  x.save();x.translate(128-12*3.9,128-12*3.9);x.scale(3.9,3.9);x.strokeStyle='#fff';x.lineWidth=1.75;x.lineCap='round';x.lineJoin='round';x.stroke(new Path2D(ICO[ico]));x.restore()}
+ else{const g=x.createRadialGradient(128,128,40,128,128,128);g.addColorStop(0,`rgba(${rgb},.5)`);g.addColorStop(1,`rgba(${rgb},0)`);x.fillStyle=g;x.fillRect(0,0,256,256);
+  x.beginPath();x.arc(128,128,64,0,7);const g2=x.createRadialGradient(104,100,6,128,128,66);g2.addColorStop(0,'rgba(255,255,255,.85)');g2.addColorStop(.35,col);g2.addColorStop(1,`rgba(${rgb},.9)`);x.fillStyle=g2;x.fill();
+  x.lineWidth=3;x.strokeStyle='rgba(255,255,255,.55)';x.stroke();
+  x.save();x.translate(128-12*3.4,128-12*3.4);x.scale(3.4,3.4);x.strokeStyle='rgba(8,10,12,.82)';x.lineWidth=2.1;x.lineCap='round';x.lineJoin='round';x.stroke(new Path2D(ICO[ico]));x.restore()}
+ const t=new THREE.CanvasTexture(cnv);t.anisotropy=4;return TEX[k]=t}
+const SPR=[];
+NODES.forEach(n=>{const m=new THREE.SpriteMaterial({map:texNodo(n.col,n.k==='p',n.p.ico),transparent:true,depthWrite:false,depthTest:false,fog:false});
+ const s=new THREE.Sprite(m);n.size=n.k==='p'?40:13+Math.min(n.deg,6)*2.4;s.scale.set(n.size,n.size,1);s.renderOrder=n.k==='p'?11:10;s.userData.n=n;scene.add(s);n.spr=s;SPR.push(s);n.a=1;n.ta=1;n.pos=n.s.clone()});
+
+/* enlaces: curvas con color por vértice y alfa propio */
+const SEG=18,LINE_V=`attribute vec3 aCol;attribute float aA;varying vec3 vC;varying float vA;void main(){vC=aCol;vA=aA;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+ LINE_F=`varying vec3 vC;varying float vA;void main(){gl_FragColor=vec4(vC,vA);}`;
+const LIME=new THREE.Color('#cfff5e');
+EDGES.forEach(e=>{e.col=e.k==='int'?LIME.clone():new THREE.Color(e.a.par?e.a.par.col:e.a.col).lerp(new THREE.Color('#fff'),e.k==='rel'?.25:0);e.base=e.k==='pc'?.26:e.k==='rel'?.62:.55;e.a_=1;e.ta=1;e.cp=new V3()});
+const lPos=new Float32Array(EDGES.length*SEG*6),lCol=new Float32Array(EDGES.length*SEG*6),lA=new Float32Array(EDGES.length*SEG*2);
+EDGES.forEach((e,i)=>{for(let s=0;s<SEG*2;s++)lCol.set([e.col.r,e.col.g,e.col.b],(i*SEG*2+s)*3)});
+const lGeo=new THREE.BufferGeometry();lGeo.setAttribute('position',new THREE.BufferAttribute(lPos,3));lGeo.setAttribute('aCol',new THREE.BufferAttribute(lCol,3));lGeo.setAttribute('aA',new THREE.BufferAttribute(lA,1));
+const lines=new THREE.LineSegments(lGeo,new THREE.ShaderMaterial({vertexShader:LINE_V,fragmentShader:LINE_F,transparent:true,depthWrite:false,depthTest:false}));lines.frustumCulled=false;lines.renderOrder=6;scene.add(lines);
+
+/* partículas que corren por cada enlace (dirección: causa -> efecto) */
+const FL=[];EDGES.forEach(e=>{const k=e.k==='pc'?2:e.k==='rel'?5:6;for(let j=0;j<k;j++)FL.push({e,t:j/k+rnd()*.1,v:(e.k==='pc'?.16:.24)*(.8+rnd()*.4)})});
+const fPos=new Float32Array(FL.length*3),fCol=new Float32Array(FL.length*3),fA=new Float32Array(FL.length),fS=new Float32Array(FL.length);
+FL.forEach((f,i)=>{const c=f.e.k==='int'?LIME:new THREE.Color('#fff').lerp(f.e.col,.35);fCol.set([c.r,c.g,c.b],i*3);fS[i]=f.e.k==='pc'?3.2:4.4});
+const fGeo=new THREE.BufferGeometry();fGeo.setAttribute('position',new THREE.BufferAttribute(fPos,3));fGeo.setAttribute('aCol',new THREE.BufferAttribute(fCol,3));fGeo.setAttribute('aA',new THREE.BufferAttribute(fA,1));fGeo.setAttribute('aS',new THREE.BufferAttribute(fS,1));
+const flow=new THREE.Points(fGeo,new THREE.ShaderMaterial({uniforms:{uPix:{value:PIX}},transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending,
+ vertexShader:`attribute vec3 aCol;attribute float aA;attribute float aS;uniform float uPix;varying vec3 vC;varying float vA;void main(){vC=aCol;vA=aA;vec4 mv=modelViewMatrix*vec4(position,1.);gl_Position=projectionMatrix*mv;gl_PointSize=aS*uPix*(340./-mv.z);}`,
+ fragmentShader:`varying vec3 vC;varying float vA;void main(){vec2 q=gl_PointCoord*2.-1.;float d=dot(q,q);if(d>1.)discard;float a=exp(-d*3.2);gl_FragColor=vec4(vC*a*vA*1.5,a*vA);}`}));
+flow.frustumCulled=false;flow.renderOrder=7;scene.add(flow);
+
+/* tallos y anillos en el suelo: aparecen al materializar */
+const sPos=new Float32Array(NODES.length*6),sCol=new Float32Array(NODES.length*6),sA=new Float32Array(NODES.length*2);
+NODES.forEach((n,i)=>{const c=new THREE.Color(n.col);sCol.set([c.r,c.g,c.b,c.r,c.g,c.b],i*6)});
+const sGeo=new THREE.BufferGeometry();sGeo.setAttribute('position',new THREE.BufferAttribute(sPos,3));sGeo.setAttribute('aCol',new THREE.BufferAttribute(sCol,3));sGeo.setAttribute('aA',new THREE.BufferAttribute(sA,1));
+const stems=new THREE.LineSegments(sGeo,new THREE.ShaderMaterial({vertexShader:LINE_V,fragmentShader:LINE_F,transparent:true,depthWrite:false,depthTest:false}));stems.frustumCulled=false;stems.renderOrder=5;scene.add(stems);
+NODES.forEach(n=>{const r=n.k==='p'?9:4.2;const m=new THREE.Mesh(new THREE.RingGeometry(r*.72,r,40),new THREE.MeshBasicMaterial({color:new THREE.Color(n.col),transparent:true,opacity:0,depthWrite:false,depthTest:false,side:THREE.DoubleSide,fog:false}));
+ m.rotation.x=-Math.PI/2;m.position.set(n.gp.x,1.5,n.gp.z);m.renderOrder=4;m.visible=false;scene.add(m);n.ring=m});
+
+/* ---------- territorio: nube de puntos de Kennedy (nube.bin) ---------- */
+const NU={uM:{value:0},uT:{value:0},uA:{value:0},uPix:{value:PIX},uSize:{value:MOB?2.1:2.4},uC:{value:C}};
+let nube=null;
+fetch('nube.bin').then(r=>{if(!r.ok)throw new Error('nube');return r.arrayBuffer()}).then(buf=>{
+ const dv=new DataView(buf),N=dv.getUint32(4,true),step=MOB?3:2,n=Math.floor(N/step);
+ const pos=new Float32Array(n*3),sw=new Float32Array(n*3),tp=new Float32Array(n),rn=new Float32Array(n);
+ for(let k=0;k<n;k++){const o=16+k*step*7;pos[k*3]=dv.getInt16(o,true)/2*S;pos[k*3+1]=dv.getInt16(o+2,true)/2*SY;pos[k*3+2]=dv.getInt16(o+4,true)/2*S;tp[k]=dv.getUint8(o+6);rn[k]=Math.random();
+  // polvo en forma de disco alrededor de la red (no envuelve la cámara)
+  const a=Math.random()*6.2832,r=250+Math.pow(Math.random(),.7)*230,hy=(Math.random()+Math.random()-1)*(70-(r-250)*.15);sw[k*3]=C.x+Math.cos(a)*r;sw[k*3+1]=C.y-30+hy;sw[k*3+2]=C.z+Math.sin(a)*r}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('aSw',new THREE.BufferAttribute(sw,3));g.setAttribute('aTipo',new THREE.BufferAttribute(tp,1));g.setAttribute('aRnd',new THREE.BufferAttribute(rn,1));
+ nube=new THREE.Points(g,new THREE.ShaderMaterial({uniforms:NU,transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending,
+  vertexShader:`attribute vec3 aSw;attribute float aTipo;attribute float aRnd;uniform float uM,uT,uPix,uSize;uniform vec3 uC;varying vec3 vC;varying float vA;
+   void main(){
+    float m=clamp(uM*1.7-aRnd*.7,0.,1.);m=m*m*(3.-2.*m);float bl=sin(m*3.14159);
+    vec3 s=aSw-uC;float an=uT*(.035+aRnd*.05)*(aRnd>.5?1.:-1.),ca=cos(an),sa=sin(an);s=vec3(ca*s.x-sa*s.z,s.y+sin(uT*.6+aRnd*30.)*4.,sa*s.x+ca*s.z);
+    vec3 dir=normalize(s+vec3(.001));s+=uC;
+    vec3 p=mix(s,position,m)+dir*bl*(70.+aRnd*120.);
+    vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;
+    float big=aTipo>2.5&&aTipo<3.5?1.4:1.;
+    gl_PointSize=min(uSize*big*uPix*(520./-mv.z)*(1.+bl*.8),7.*uPix);
+    float h=clamp(position.y/34.,0.,1.);
+    vec3 b=aTipo<.5?vec3(mix(.3,.95,pow(h,.7))):aTipo<1.5?vec3(.24):aTipo<2.5?vec3(.42,.56,.6):aTipo<3.5?vec3(.82):vec3(.36);
+    vC=mix(vec3(.55,.6,.58),b,m);vA=mix(.16,.55,m)+bl*.25;}`,
+  fragmentShader:`uniform float uA;varying vec3 vC;varying float vA;void main(){vec2 q=gl_PointCoord*2.-1.;float d=dot(q,q);if(d>1.)discard;float a=exp(-d*3.);gl_FragColor=vec4(vC*a*vA*uA,a*vA*uA);}`}));
+ nube.frustumCulled=false;nube.renderOrder=1;scene.add(nube);
+ listo();
+}).catch(e=>{console.warn('nube:',e);listo()});
+function listo(){const b=document.getElementById('go');b.disabled=false;document.getElementById('goT').textContent='Materializar';document.getElementById('load').style.opacity=0}
+
+/* vías y límite: se cargan aparte, aparecen al aterrizar */
+const TU={uA:{value:0},uT:{value:0}};
+fetch('vias.json').then(r=>r.json()).then(Vj=>{const P=[],J=[];for(const v of Vj.vias){const j=v[0];for(let i=1;i+3<v.length;i+=2){P.push(v[i]*S,.4,v[i+1]*S,v[i+2]*S,.4,v[i+3]*S);J.push(j,j)}}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('aJ',new THREE.Float32BufferAttribute(J,1));
+ const m=new THREE.LineSegments(g,new THREE.ShaderMaterial({uniforms:TU,transparent:true,depthWrite:false,depthTest:false,
+  vertexShader:`attribute float aJ;varying float vJ;void main(){vJ=aJ;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+  fragmentShader:`uniform float uA;varying float vJ;void main(){float a=uA*(vJ>=4.?.5:vJ>=3.?.32:vJ>=2.?.18:.08);gl_FragColor=vec4(vec3(.8,.83,.86),a);}`}));
+ m.frustumCulled=false;m.renderOrder=2;scene.add(m)}).catch(e=>console.warn('vías:',e));
+fetch('limite.json').then(r=>r.json()).then(Lm=>{const pts=Lm.pts.map(([x,z])=>new V3(x*S,1,z*S));pts.push(pts[0].clone());
+ [[1,.75],[22,.14]].forEach(([y,op])=>{const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map(p=>new V3(p.x,y,p.z))),new THREE.ShaderMaterial({uniforms:TU,transparent:true,depthWrite:false,depthTest:false,
+  vertexShader:`void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`uniform float uA;void main(){gl_FragColor=vec4(.81,1.,.37,uA*${op.toFixed(2)});}`}));l.frustumCulled=false;l.renderOrder=3;scene.add(l)})}).catch(e=>console.warn('límite:',e));
+
+/* ---------- etiquetas (HTML) ---------- */
+const LBL=document.getElementById('lbl');
+NODES.forEach(n=>{const d=document.createElement('div');d.className='lb '+n.k;d.style.setProperty('--c',n.col);
+ const corto=n.t.length>64?n.t.slice(0,62).replace(/\s+\S*$/,'')+'…':n.t;
+ d.innerHTML=n.k==='p'?'<b>'+esc(n.t)+'</b><small>'+ico(n.p.ico)+String(n.i+1).padStart(2,'0')+' · '+n.causas.length+' causas</small>':'<b>'+esc(corto)+'</b>';LBL.appendChild(d);n.el=d;n.lo=0});
+function ico(k){return '<svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="'+ICO[k]+'"/></svg>'}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+/* ---------- leyenda de problemáticas ---------- */
+const CH=document.getElementById('chips');
+NODES.filter(n=>n.k==='p').forEach(n=>{const b=document.createElement('button');b.type='button';b.className='pb';b.style.setProperty('--c',n.col);
+ b.innerHTML='<svg viewBox="0 0 24 24"><path d="'+ICO[n.p.ico]+'"/></svg><span>'+esc(n.t)+'</span><em>'+n.causas.length+'</em>';b.onclick=()=>selecciona(ST.sel===n?null:n);CH.appendChild(b);n.chip=b});
+
+/* ---------- estado, selección y panel ---------- */
+const ST={e:0,anim:null,land:false,sel:null,hov:null};
+const PANEL=document.getElementById('panel');
+function relacionados(n){const s=new Set([n]);if(n.k==='p'){n.causas.forEach(c=>{s.add(c);c.out.concat(c.inn).forEach(e=>{s.add(e.a);s.add(e.b)})})}else{s.add(n.par);n.out.concat(n.inn).forEach(e=>{s.add(e.a);s.add(e.b)})}return s}
+function selecciona(n){ST.sel=n;const R=n?relacionados(n):null;
+ NODES.forEach(m=>m.ta=!R||R.has(m)?1:.13);
+ EDGES.forEach(e=>{let on;if(!n)on=true;else if(n.k==='p')on=e.k==='pc'?e.a===n:(e.a.par===n||e.b.par===n);else on=e.k==='pc'?e.b===n:(e.a===n||e.b===n);e.ta=on?1:.06});
+ CH.classList.toggle('sel',!!n);NODES.forEach(m=>m.chip&&m.chip.classList.toggle('on',n===m||(n&&n.par===m)));
+ if(n){if(!EMB)panel(n);ctl.autoRotate=false}else{PANEL.classList.remove('open');ctl.autoRotate=!RM&&!ST.land}}
+function chipC(c,extra){return '<button type="button" class="ch" data-id="'+c.id+'" style="--k:'+c.col+'">'+(extra||'')+esc(c.t)+'</button>'}
+function geoTxt(n){return n.g.lat.toFixed(5)+'° N · '+Math.abs(n.g.lng).toFixed(5)+'° O'}
+function panel(n){PANEL.style.setProperty('--c',n.col);let h;
+ if(n.k==='p'){
+  h='<div class="ph"><div class="mono"><svg viewBox="0 0 24 24"><path d="'+ICO[n.p.ico]+'"/></svg>Problemática '+String(n.i+1).padStart(2,'0')+'</div><h2>'+esc(n.full)+'</h2><button type="button" class="x" aria-label="Cerrar">×</button></div><div class="pbody">'+
+  '<div class="kg"><div class="kp"><b>'+n.causas.length+'</b><span>causas ubicadas</span></div><div class="kp"><b>'+n.rel+'</b><span>cadenas internas</span></div><div class="kp"><b>'+n.int+'</b><span>enlaces con otras</span></div></div>'+
+  '<div class="gh mono">Causas · de más a menos conectada</div>'+n.causas.map(c=>chipC(c,'<span class="m">'+c.deg+' conexiones</span>')).join('');
+  const rel=EDGES.filter(e=>e.k==='rel'&&e.a.par===n);
+  if(rel.length)h+='<div class="gh mono">Cómo se encadenan</div>'+rel.map(e=>'<div class="arrow">'+esc(corta(e.a.t))+' <i>→</i> '+esc(corta(e.b.t))+'</div>').join('');
+  const it=EDGES.filter(e=>e.k==='int'&&(e.a.par===n||e.b.par===n));
+  if(it.length)h+='<div class="gh mono">Se conecta con otras problemáticas</div>'+it.map(e=>{const o=e.a.par===n?e.b:e.a;return '<button type="button" class="ch" data-id="'+o.id+'" style="--k:'+o.col+'"><span class="m"><i'+(e.pol==='-'?' class="neg"':'')+'>'+(e.pol==='-'?'− reduce':'+ refuerza')+'</i>'+esc(o.par.t)+'</span>'+esc(e.verbo)+'</button>'}).join('');
+  h+='<p class="note">'+(ST.land?'Cada esfera pequeña está en el lugar real donde ocurre esa causa; su altura indica cuántas conexiones tiene. La problemática flota en la corona sobre la ciudad y su tallo baja a su punto de referencia.':'Materializa la red para ver dónde ocurre cada causa en Kennedy.')+'</p></div>'}
+ else{
+  h='<div class="ph"><div class="mono"><svg viewBox="0 0 24 24"><path d="'+ICO[n.p.ico]+'"/></svg>Causa · '+esc(n.par.t)+'</div><h2 class="lg">'+esc(n.t)+'</h2><button type="button" class="x" aria-label="Cerrar">×</button></div><div class="pbody">'+
+  '<div class="kg"><div class="kp"><b>'+n.deg+'</b><span>conexiones</span></div><div class="kp"><b>'+n.out.length+'</b><span>provoca</span></div><div class="kp"><b>'+n.inn.length+'</b><span>la provocan</span></div></div>'+
+  '<div class="loc">'+geoTxt(n)+'</div>';
+  const fila=(e,o)=>'<button type="button" class="ch" data-id="'+o.id+'" style="--k:'+o.col+'"><span class="m"><i'+(e.pol==='-'?' class="neg"':'')+'>'+(e.pol==='-'?'− reduce':'+ refuerza')+'</i>'+(o.par!==n.par?esc(o.par.t):'misma problemática')+'</span>'+esc(o.t)+(e.verbo?'<small>'+esc(e.verbo)+'</small>':'')+'</button>';
+  if(n.out.length)h+='<div class="gh mono">Provoca</div>'+n.out.map(e=>fila(e,e.b)).join('');
+  if(n.inn.length)h+='<div class="gh mono">La provocan</div>'+n.inn.map(e=>fila(e,e.a)).join('');
+  if(!n.out.length&&!n.inn.length)h+='<p class="note">Esta causa no tiene relaciones registradas con otras causas; se conecta solo con su problemática.</p>';
+  h+='<div class="gh mono">Pertenece a</div><button type="button" class="ch" data-id="'+n.par.id+'" style="--k:'+n.col+'">'+esc(n.par.full)+'</button></div>'}
+ PANEL.innerHTML=h;PANEL.scrollTop=0;PANEL.classList.add('open');
+ PANEL.querySelector('.x').onclick=()=>selecciona(null);
+ PANEL.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>selecciona(BY[b.dataset.id]))}
+function corta(t){return t.length>58?t.slice(0,56).replace(/\s+\S*$/,'')+'…':t}
+const EMB=document.documentElement.classList.contains('embed');
+addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(EMB&&!ST.sel&&parent!==window)parent.postMessage('conectografia:cerrar','*');selecciona(null)});
+
+/* ---------- materializar ---------- */
+const GO=document.getElementById('go'),GOT=document.getElementById('goT'),HINT=document.getElementById('hint');
+GO.onclick=()=>{if(ST.anim)return;const to=ST.land?0:1,f=to?fitLand():fitRed();
+ ST.anim={from:ST.e,to,t0:performance.now(),dur:RM?900:(to?3400:2600),p0:cam.position.clone(),q0:ctl.target.clone(),p1:f.p,q1:f.t};
+ ctl.enabled=false;ctl.autoRotate=false;HINT.style.opacity=0;GO.disabled=true;NODES.forEach(n=>n.ring.visible=true)};
+function finAnim(){const to=ST.anim.to;ST.anim=null;ST.land=to===1;ctl.enabled=true;GO.disabled=false;GO.classList.toggle('land',ST.land);GOT.textContent=ST.land?'Volver a la red':'Materializar';
+ HINT.textContent=ST.land?'Cada causa en su lugar real · altura = conexiones':'Arrastra para girar · toca una esfera';HINT.style.opacity=1;
+ document.getElementById('lead').textContent=ST.land?'Cada causa aterrizó en el lugar real de Kennedy donde ocurre. Las problemáticas flotan sobre la ciudad; las líneas muestran qué provoca qué.':'Seis problemáticas y las causas que las producen, unidas como una sola red. Materializa para verlas aterrizar en el lugar real donde ocurre cada causa.';
+ ctl.autoRotate=!RM&&!ST.land&&!ST.sel;if(!ST.land)NODES.forEach(n=>n.ring.visible=false);if(ST.sel)panel(ST.sel)}
+
+/* ---------- interacción: pasar por encima y tocar ---------- */
+const ray=new THREE.Raycaster(),mp=new THREE.Vector2(),TIP=document.getElementById('tip');let down=null,hovQ=null;
+function pick(x,y){mp.set(x/innerWidth*2-1,-(y/innerHeight)*2+1);ray.setFromCamera(mp,cam);const h=ray.intersectObjects(SPR.filter(s=>s.userData.n.a>.3),false);
+ if(!h.length)return null;h.sort((a,b)=>(b.object.userData.n.k==='p')-(a.object.userData.n.k==='p')||a.distance-b.distance);return h[0].object.userData.n}
+cv.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY}});
+cv.addEventListener('pointerup',e=>{if(!down)return;const mv=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null;if(mv>6)return;const n=pick(e.clientX,e.clientY);selecciona(n&&n!==ST.sel?n:null);tipOff()});
+cv.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;hovQ=[e.clientX,e.clientY]});
+cv.addEventListener('pointerleave',()=>{hovQ=null;tipOff()});
+function tipOff(){ST.hov=null;TIP.style.opacity=0;cv.style.cursor=''}
+function hover(){if(!hovQ)return;const [x,y]=hovQ;hovQ=null;if(down){tipOff();return}const n=pick(x,y);ST.hov=n;cv.style.cursor=n?'pointer':'';
+ if(!n){TIP.style.opacity=0;return}TIP.style.setProperty('--c',n.col);TIP.innerHTML='<span class="mono">'+ico(n.p.ico)+(n.k==='p'?'Problemática · '+n.causas.length+' causas':esc(n.par.t)+' · '+n.deg+' conexiones')+'</span>'+esc(n.k==='p'?n.full:n.t);
+ const w=TIP.offsetWidth,hh=TIP.offsetHeight;TIP.style.transform='translate('+Math.min(innerWidth-w-10,x+16)+'px,'+Math.min(innerHeight-hh-10,y+16)+'px)';TIP.style.opacity=1}
+
+/* ---------- cuadro a cuadro ---------- */
+const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,tmp=new V3(),mid=new V3(),bend=new V3(),pa=new V3(),pb=new V3(),pc=new V3(),UP=new V3(0,1,0);
+const tanF=()=>Math.tan(cam.fov*Math.PI/360);
+function bez(a,c,b,t,o){const u=1-t;o.set(u*u*a.x+2*u*t*c.x+t*t*b.x,u*u*a.y+2*u*t*c.y+t*t*b.y,u*u*a.z+2*u*t*c.z+t*t*b.z);return o}
+function resize(){renderer.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
+addEventListener('resize',resize);resize();
+let last=performance.now();
+function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-last)/1000);last=now;const T=now/1000;
+ if(ST.anim){const A=ST.anim,k=Math.min(1,(now-A.t0)/A.dur),q=ease(k);ST.e=A.from+(A.to-A.from)*q;
+  // la cámara viaja en arco: sube un poco a mitad de camino
+  cam.position.lerpVectors(A.p0,A.p1,q).add(tmp.set(0,Math.sin(q*Math.PI)*120,0));ctl.target.lerpVectors(A.q0,A.q1,q);if(k>=1)finAnim()}
+ const e=ST.e,bl=Math.sin(e*Math.PI),kA=1-Math.exp(-dt*7);
+ NU.uM.value=e;NU.uT.value=T;NU.uA.value+=((nube?1:0)-NU.uA.value)*kA*.5;
+ TU.uA.value+=((ST.land&&!ST.anim?1:e>.85?(e-.85)/.15:0)-TU.uA.value)*kA*.6;TU.uT.value=T;
+ // nodos
+ NODES.forEach((n,i)=>{const de=Math.min(1,Math.max(0,e*1.25-(n.k==='p'?.25:(i%9)*.025)));const d=de*de*(3-2*de);
+  tmp.copy(n.s);if(!RM)tmp.y+=Math.sin(T*1.1+i*1.7)*2.2*(1-d);
+  n.pos.lerpVectors(tmp,n.l,d);if(bl>.01){bend.subVectors(n.s,C).normalize().multiplyScalar(bl*(n.k==='p'?40:70));n.pos.add(bend)}
+  n.a+=(n.ta-n.a)*kA;const hv=(ST.hov===n||ST.sel===n)?1.22:1;n.spr.position.copy(n.pos);n.spr.material.opacity=n.a;const sz=n.size*hv*(1+bl*.25);n.spr.scale.set(sz,sz,1);
+  n.ring.material.opacity=e*e*n.a*(n.k==='p'?.75:.6);n.ring.scale.setScalar(1+(ST.sel===n?.4*Math.sin(T*4)+.4:0));
+  sPos.set([n.gp.x,0,n.gp.z,n.pos.x,n.pos.y,n.pos.z],i*6);const sa=Math.max(0,e-.6)/.4*(n.k==='p'?.7:.55)*n.a;sA[i*2]=sa*(n.k==='p'?.25:.1);sA[i*2+1]=sa});
+ sGeo.attributes.position.needsUpdate=sGeo.attributes.aA.needsUpdate=true;
+ // enlaces curvos
+ EDGES.forEach((ed,i)=>{ed.a_+=(ed.ta-ed.a_)*kA;const A=ed.a.pos,B=ed.b.pos,L=A.distanceTo(B);mid.addVectors(A,B).multiplyScalar(.5);
+  bend.subVectors(mid,C);bend.y*=.3;bend.normalize().multiplyScalar(L*.14*(1-e));mid.add(bend).addScaledVector(UP,L*(ed.k==='pc'?.06:.32)*e);ed.cp.copy(mid);
+  const al=ed.base*ed.a_*(ST.sel&&ed.ta===1?1.5:1);
+  for(let s=0;s<SEG;s++){bez(A,mid,B,s/SEG,pa);bez(A,mid,B,(s+1)/SEG,pb);const o=(i*SEG+s)*6;lPos[o]=pa.x;lPos[o+1]=pa.y;lPos[o+2]=pa.z;lPos[o+3]=pb.x;lPos[o+4]=pb.y;lPos[o+5]=pb.z;lA[(i*SEG+s)*2]=lA[(i*SEG+s)*2+1]=al}});
+ lGeo.attributes.position.needsUpdate=lGeo.attributes.aA.needsUpdate=true;
+ // partículas por los enlaces
+ FL.forEach((f,i)=>{if(!RM)f.t=(f.t+f.v*dt)%1;const ed=f.e;bez(ed.a.pos,ed.cp,ed.b.pos,f.t,pc);fPos.set([pc.x,pc.y,pc.z],i*3);fA[i]=Math.min(1,ed.a_*1.2)*Math.sin(f.t*Math.PI)*(ed.k==='pc'?.6:1)});
+ fGeo.attributes.position.needsUpdate=fGeo.attributes.aA.needsUpdate=true;
+ ctl.update();
+ // etiquetas
+ const H=innerHeight,W=innerWidth,tf=tanF(),PL=[];
+ NODES.forEach(n=>{let want=0;if(n.k==='p')want=n.ta===1?1:.12;else if(ST.sel&&ST.sel.k==='c'&&n.ta===1&&!ST.anim)want=1;
+  tmp.copy(n.pos).project(cam);if(tmp.z>1||Math.abs(tmp.x)>1.2||Math.abs(tmp.y)>1.2)want=0;
+  n.lo+=(want-n.lo)*kA;if(n.lo<.02&&want===0){if(n.el.style.opacity!=='0')n.el.style.opacity='0';return}
+  const dist=cam.position.distanceTo(n.pos),rpx=(n.size/2)/(dist*tf)*(H/2);
+  const sx=(tmp.x+1)/2*W,sy=(1-tmp.y)/2*H;n.el.style.opacity=n.lo.toFixed(2);
+  if(n.k==='p'){PL.push({n,sx,sy,rpx});return}
+  n.el.style.transform='translate('+sx.toFixed(1)+'px,'+(sy+rpx*.8+4).toFixed(1)+'px) translate(-50%,0)'});
+ // si dos etiquetas de problemáticas se tocan, la del disco más alto en pantalla pasa arriba de su disco
+ PL.sort((a,b)=>a.sy-b.sy);PL.forEach(o=>{o.h=o.n.elH||(o.n.elH=o.n.el.offsetHeight||40);o.w=o.n.elW||(o.n.elW=o.n.el.offsetWidth||170);o.up=0});
+ for(let i=0;i<PL.length;i++)for(let j=i+1;j<PL.length;j++){const a=PL[i],b=PL[j],ta=a.sy+a.rpx*.8+4,tb=b.sy+b.rpx*.8+4;
+  if(Math.abs(a.sx-b.sx)<(a.w+b.w)/2&&ta<tb+b.h&&tb<ta+a.h)a.up=1}
+ PL.forEach(o=>{const n=o.n;n.fu=(n.fu||0)+(o.up-(n.fu||0))*kA;const top=o.sy+o.rpx*.8+4,alt=o.sy-o.rpx*.8-4-o.h;
+  n.el.style.transform='translate('+o.sx.toFixed(1)+'px,'+(top+(alt-top)*n.fu).toFixed(1)+'px) translate(-50%,0)'});
+ hover();
+ renderer.render(scene,cam)}
+requestAnimationFrame(frame);
+// atajo: conectografia.html#materializar abre directo en el territorio
+if(location.hash==='#materializar'){const t=setInterval(()=>{if(!GO.disabled){clearInterval(t);GO.click()}},200)}
+})();
+</script>
+</body>
+</html>

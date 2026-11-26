@@ -8,3 +8,5 @@ import './problemas.js';
 import './picos.js';
 import './cruces.js';
 import './red.js';
+import './redag.js';
+import './humedalburro.js';

@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Abastecer sin centralizar · Propuesta Bavaria Común</title>
+<meta name="description" content="Cómo la propuesta Bavaria Común responde a los seis problemas de Kennedy: una malla de plazas de abasto, un centro de consolidación, un ciclo de orgánicos y suelo común, con análisis de uso del suelo y sintaxis espacial.">
+<link rel="icon" type="image/png" sizes="32x32" href="icono-32.png"><link rel="icon" type="image/png" sizes="64x64" href="icono-64.png"><link rel="apple-touch-icon" href="icono-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500&family=Geist:wght@300..600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#050607;--bg2:#080a0b;--fg:#eaefed;--mut:#a9b3af;--mut2:#7a8480;--line:rgba(214,228,222,.12);--line2:rgba(214,228,222,.22);--pr:#cfff5e;
+ --letra-titulo:'Barlow Condensed','Arial Narrow',ui-sans-serif,sans-serif;--letra-dato:'Geist Mono',ui-monospace,monospace;
+ --A:#a3b845;--B:#f2c879;--C:#dba73a;--D:#d4553f;--E:#a77b5a;--F:#ee8a45;
+ --k0:#5fb3a1;--k1:#8cc084;--k2:#d9c36a;--k3:#e0935a;--k4:#c4574f}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 Geist,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+a{color:inherit}
+h1,h2,h3,h4{margin:0;font-weight:500;letter-spacing:-.015em}
+/* visual Salento: títulos en condensada fina mayúscula, rótulos en mono, esquinas rectas */
+h1,h2,h3{font-family:var(--letra-titulo);font-weight:300;text-transform:uppercase;letter-spacing:.01em!important;line-height:.95!important;text-wrap:balance}
+h4{font-family:var(--letra-dato);font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.eyebrow,.k{font-family:var(--letra-dato);font-size:11px!important;letter-spacing:.14em!important;text-transform:uppercase}
+.stat b{font-family:var(--letra-titulo);font-weight:300!important;letter-spacing:.01em!important}
+::selection{background:#cfff5e;color:#050607}
+:focus-visible{outline:1px solid #cfff5e;outline-offset:3px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 clamp(18px,4vw,40px)}
+#bar{position:fixed;left:0;top:0;height:2px;width:100%;background:var(--pr);transform-origin:0 50%;transform:scaleX(0);z-index:60}
+nav.top{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:22px;padding:14px clamp(18px,4vw,40px);background:#050607d9;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);font-size:13px}
+nav.top .back{color:var(--mut);text-decoration:none;white-space:nowrap}
+nav.top .back:hover{color:var(--fg)}
+nav.top .links{display:flex;gap:18px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+nav.top .links a{color:var(--mut);text-decoration:none;white-space:nowrap;padding:2px 0;border-bottom:1px solid transparent}
+nav.top .links a:hover,nav.top .links a.on{color:var(--fg);border-color:var(--pr)}
+/* animación de entrada */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}.rv.d4{transition-delay:.4s}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}*{animation-duration:.01s!important}}
+/* hero */
+.hero{position:relative;min-height:92vh;display:flex;align-items:flex-end;overflow:hidden;border-bottom:1px solid var(--line)}
+#hmap{position:absolute;inset:0;width:100%;height:100%;opacity:.9}
+.hero:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#05060700 30%,#050607 96%),radial-gradient(ellipse at 20% 80%,#050607cc,transparent 60%);pointer-events:none}
+.hero .wrap{position:relative;z-index:2;padding-bottom:9vh;padding-top:120px}
+.eyebrow{font-size:12.5px;color:var(--pr);letter-spacing:.02em;margin-bottom:14px}
+.hero h1{font-size:clamp(42px,8vw,98px);line-height:.98;letter-spacing:-.035em;max-width:11ch}
+.hero .lead{max-width:600px;margin:22px 0 0;font-size:clamp(16px,1.7vw,19px);color:#c9c9d0;line-height:1.55}
+.stats{display:flex;flex-wrap:wrap;gap:clamp(22px,5vw,64px);margin-top:44px}
+.stat b{display:block;font-size:clamp(30px,4.2vw,50px);font-weight:500;letter-spacing:-.02em;line-height:1}
+.stat b small{font-size:.5em;color:var(--mut);font-weight:400;margin:0 .15em}
+.stat>span{display:block;margin-top:8px;font-size:12.5px;color:var(--mut);max-width:190px;line-height:1.4}
+/* secciones */
+section.s{padding:clamp(64px,10vw,120px) 0;border-bottom:1px solid var(--line)}
+.sh{max-width:760px;margin-bottom:40px}
+.k{font-size:12.5px;color:var(--pr);margin-bottom:10px}
+.sh h2{font-size:clamp(28px,4.4vw,46px);line-height:1.08}
+.sh p{color:#c1c1c9;margin:16px 0 0;font-size:16.5px}
+.tag{display:inline-block;font-size:10.5px;color:var(--mut);border:1px solid var(--line2);border-radius:99px;padding:0 7px;margin-left:6px;white-space:nowrap;vertical-align:1px;line-height:1.6}
+.tag.p{color:var(--pr);border-color:#cfff5e55}
+.cite{color:var(--pr);text-decoration:none;font-size:10.5px;font-weight:600;vertical-align:super;line-height:0;margin-left:1px}
+.cite:hover{text-decoration:underline}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--bg2);padding:20px 22px}
+.card h3{font-size:18px;margin-bottom:6px}
+.card .t{font-size:12.5px;color:var(--mut);margin-bottom:14px;line-height:1.45}
+.big{font-size:clamp(30px,3.6vw,42px);font-weight:500;letter-spacing:-.02em;line-height:1.05}
+.note{font-size:12.5px;color:var(--mut);line-height:1.55;border-left:2px solid var(--line2);padding-left:14px;margin-top:22px;max-width:820px}
+/* matriz */
+.mx{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--bg2)}
+.mx table{border-collapse:collapse;width:100%;min-width:860px;font-size:13px}
+.mx th,.mx td{border-bottom:1px solid var(--line);padding:0}
+.mx thead th{font-weight:500;font-size:12px;color:var(--mut);padding:14px 8px;text-align:center;vertical-align:bottom;line-height:1.3;width:110px}
+.mx thead th:first-child{width:auto;text-align:left;padding-left:20px}
+.mx tbody tr{cursor:pointer;transition:background .2s}
+.mx tbody tr:hover,.mx tbody tr.on{background:#ffffff08}
+.mx tbody th{text-align:left;font-weight:500;padding:14px 8px 14px 20px;font-size:14px}
+.mx tbody th i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:10px}
+.mx tbody th small{display:block;color:var(--mut);font-weight:400;font-size:11.5px;margin:2px 0 0 19px}
+.mx td{text-align:center}
+.dotm{display:inline-block;border-radius:50%;background:var(--c);transition:transform .3s}
+.dotm.s2{width:16px;height:16px}.dotm.s1{width:8px;height:8px;opacity:.7}
+.mx tr:hover .dotm,.mx tr.on .dotm{transform:scale(1.2)}
+#mxd{margin-top:16px;min-height:150px}
+#mxd .it{display:grid;grid-template-columns:150px 1fr;gap:6px 18px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px;animation:up .5s both}
+#mxd .it b{font-weight:500}
+#mxd .it span{color:#c1c1c9}
+#mxd .hint{color:var(--mut);font-size:14px;padding:30px 0}
+@keyframes up{from{opacity:0;transform:translateY(10px)}}
+@media(max-width:640px){#mxd .it{grid-template-columns:1fr}}
+/* barras de uso del suelo */
+.sb{margin:18px 0}
+.sb .h{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
+.sb .h span{color:var(--mut)}
+.stk{display:flex;height:26px;border-radius:4px;overflow:hidden;background:#17171b}
+.stk i{display:block;height:100%;width:0;transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.lg{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px;font-size:12px;color:var(--mut)}
+.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:7px;vertical-align:-1px}
+.bar1{height:8px;background:#1a1a1f;border-radius:4px;overflow:hidden;margin-top:6px}
+.bar1 i{display:block;height:100%;width:0;border-radius:4px;background:var(--pr);transition:width 1.3s cubic-bezier(.2,.8,.2,1)}
+/* tablas */
+.tb{width:100%;border-collapse:collapse;font-size:13.5px}
+.tb th{font-weight:500;font-size:12px;color:var(--mut);text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid var(--line2)}
+.tb td{padding:10px 10px 10px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.tb td.n{white-space:nowrap}
+.tb .up{color:var(--k0)}.tb .dn{color:var(--k3)}
+.scroll{overflow-x:auto}
+/* gauges */
+.gz{margin:20px 0 34px}
+.gz .h{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
+.gz .h span{color:var(--mut)}
+.gtrack{position:relative;height:6px;background:linear-gradient(90deg,#3a5a8a,#5fb3a1 50%,#e0935a);border-radius:3px;opacity:.55}
+.gmark{position:absolute;top:-6px;width:3px;height:18px;border-radius:2px;background:var(--fg);left:0;transition:left 1.4s cubic-bezier(.2,.8,.2,1)}
+.gmark b{position:absolute;top:22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600}
+.gscale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mut2);margin-top:12px}
+/* mapa */
+.mapw{position:relative;border:1px solid var(--line);border-radius:12px;background:#0b0b0e;overflow:hidden}
+#map{display:block;width:100%;height:auto}
+.mctl{position:absolute;left:14px;top:14px;display:flex;gap:6px;z-index:2;flex-wrap:wrap}
+.pill{font:500 12.5px Geist,system-ui,sans-serif;color:var(--fg);background:#080a0be6;border:1px solid var(--line2);border-radius:99px;padding:7px 14px;cursor:pointer;transition:all .2s}
+.pill:hover{border-color:var(--pr)}
+.pill[aria-pressed=true]{background:var(--pr);color:#111;border-color:var(--pr)}
+.mleg{position:absolute;left:14px;bottom:14px;background:#080a0be6;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:11.5px;color:var(--mut);z-index:2}
+.mleg div{display:flex;align-items:center;gap:8px;margin:3px 0;color:var(--fg)}
+.mleg i{width:10px;height:10px;border-radius:50%;flex:none}
+.mleg i.sq{border-radius:2px}
+.mleg i.ring{background:none;border:1.5px solid var(--fg)}
+.mleg b{display:block;font-weight:500;font-size:11px;color:var(--mut);margin-bottom:4px}
+.mread{position:absolute;right:14px;top:14px;text-align:right;background:#080a0be6;border:1px solid var(--line);border-radius:8px;padding:10px 14px;z-index:2}
+.mread b{display:block;font-size:30px;font-weight:500;letter-spacing:-.02em;line-height:1.1}
+.mread span{font-size:11.5px;color:var(--mut);display:block;max-width:150px;line-height:1.35}
+#mtip{position:absolute;pointer-events:none;z-index:3;display:none;max-width:240px;background:#080a0b;border:1px solid var(--line2);border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.45}
+#mtip b{display:block;font-size:12.5px;margin-bottom:2px}
+.dd{transition:fill .9s ease}
+.k0{fill:var(--k0)}.k1{fill:var(--k1)}.k2{fill:var(--k2)}.k3{fill:var(--k3)}.k4{fill:var(--k4)}
+.pulse{transform-box:fill-box;transform-origin:center;animation:pl 2.4s ease-out infinite}
+@keyframes pl{0%{transform:scale(.4);opacity:.7}100%{transform:scale(2.6);opacity:0}}
+.newg{transition:opacity .8s}
+@media(max-width:700px){.mread{top:auto;bottom:14px}.mleg{display:none}.mctl{left:10px;top:10px}.pill{padding:6px 11px;font-size:12px}}
+/* gráficas svg */
+.ch svg{display:block;width:100%;height:auto;overflow:visible}
+.ch text{font-family:Geist,system-ui,sans-serif}
+.ch .ax{fill:var(--mut);font-size:11px}
+.ch .gl{stroke:var(--line);stroke-width:1}
+.draw{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+.draw.on{animation:dr 1.6s ease forwards}
+@keyframes dr{to{stroke-dashoffset:0}}
+/* flujo */
+.flow{border:1px solid var(--line);border-radius:12px;background:var(--bg2);padding:clamp(14px,3vw,28px);overflow-x:auto}
+.flow svg{display:block;min-width:900px;width:100%;height:auto}
+.flow text{font-family:Geist,system-ui,sans-serif;fill:var(--fg)}
+.fl{fill:none;stroke-width:1.6;stroke-dasharray:3 7;animation:fd 1.1s linear infinite}
+@keyframes fd{to{stroke-dashoffset:-20}}
+.fn rect{fill:#111114;stroke:var(--line2);rx:8;transition:stroke .2s}
+.fn:hover rect{stroke:var(--pr)}
+/* decisiones */
+.dec{border:1px solid var(--line);border-radius:10px;background:var(--bg2);margin-bottom:12px;overflow:hidden}
+.dec summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:16px;padding:18px 22px}
+.dec summary::-webkit-details-marker{display:none}
+.dec .no{font-size:12px;color:var(--pr);border:1px solid #cfff5e55;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;flex:none}
+.dec summary h3{font-size:18px;flex:1}
+.dec summary em{font-style:normal;font-size:12.5px;color:var(--mut)}
+.dec summary:after{content:'';flex:none;width:8px;height:8px;border:solid var(--mut);border-width:0 1.5px 1.5px 0;transform:rotate(45deg);transition:transform .3s;margin:-4px 4px 0 0}
+.dec[open] summary:after{transform:rotate(225deg);margin-top:4px}
+.dec summary:hover{background:#ffffff05}
+.dec .bd{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px 32px;padding:4px 22px 24px 66px}
+.dec .bd h4{font-size:12px;color:var(--pr);font-weight:500;margin-bottom:5px}
+.dec .bd p{margin:0;font-size:14px;color:#c1c1c9;line-height:1.6}
+@media(max-width:640px){.dec .bd{padding-left:22px}}
+/* problema por problema */
+.pc{border:1px solid var(--line);border-left:3px solid var(--c);border-radius:10px;background:var(--bg2);padding:clamp(18px,3vw,30px);margin-bottom:18px;scroll-margin-top:80px}
+.pc header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.pc header i{font-style:normal;font-size:12px;color:var(--c);border:1px solid var(--c);border-radius:50%;width:24px;height:24px;display:grid;place-items:center;flex:none;transform:translateY(-2px)}
+.pc h3{font-size:clamp(20px,2.6vw,26px)}
+.pc header a{margin-left:auto;font-size:12.5px;color:var(--mut);text-decoration:none}
+.pc header a:hover{color:var(--c)}
+.pc .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:22px 36px;margin-top:18px}
+.pc h4{font-size:12px;color:var(--c);font-weight:500;margin-bottom:6px}
+.pc p{margin:0 0 8px;font-size:14.5px;color:#c8c8d0;line-height:1.6}
+.ind{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ind span{color:#c1c1c9}
+.ind b{font-weight:500;white-space:nowrap}
+.ind b em{font-style:normal;color:var(--mut);font-weight:400;margin:0 5px}
+.ind small{grid-column:1/3;color:var(--mut);font-size:11.5px}
+/* federación */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg2)}
+.stp{padding:20px 22px;border-right:1px solid var(--line);position:relative}
+.stp:last-child{border-right:0}
+.stp .n{font-size:12px;color:var(--pr);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.stp .n i{display:block;width:22px;height:22px;border:1px solid #cfff5e55;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11.5px}
+.stp h3{font-size:16px;margin-bottom:6px}
+.stp p{margin:0;font-size:13.5px;color:#b9b9c2;line-height:1.55}
+@media(max-width:700px){.stp{border-right:0;border-bottom:1px solid var(--line)}.stp:last-child{border-bottom:0}}
+.fed{border:1px solid var(--line);border-radius:12px;background:#0b0b0e;overflow:hidden}
+.fbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
+.fbar label{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--mut);margin-left:auto}
+.fbar label b{color:var(--fg);font-weight:500;min-width:1.4em}
+input[type=range]{accent-color:var(--pr);width:min(190px,34vw);cursor:pointer}
+.fbody{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr)}
+.fbody svg{display:block;width:100%;height:auto;align-self:center}
+.fside{border-left:1px solid var(--line);padding:18px 20px;background:var(--bg2)}
+.fside h4{font-size:12px;color:var(--pr);font-weight:500;margin:20px 0 8px}
+.fside h4:first-child{margin-top:0}
+.fsem{display:flex;align-items:baseline;gap:10px}
+.fsem b{font-size:26px;font-weight:500;letter-spacing:-.02em}
+.fsem span{font-size:12.5px;color:var(--mut)}
+.fm{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin-top:14px}
+.fm b{display:block;font-size:22px;font-weight:500;letter-spacing:-.01em;line-height:1.1}
+.fm span{font-size:11.5px;color:var(--mut);line-height:1.35;display:block;margin-top:3px}
+.wb{display:grid;grid-template-columns:96px 1fr 28px;gap:8px;align-items:center;font-size:11.5px;margin:5px 0;color:#b9b9c2}
+.wb i{display:block;height:6px;border-radius:3px;background:#a98bd6;width:0;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.wb b{font-weight:500;text-align:right;color:var(--fg)}
+.wb span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fpar{display:grid;gap:8px;font-size:12.5px;color:#b9b9c2}
+.fpar label{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.fpar label b{font-weight:500;color:var(--fg)}
+.fpar input{grid-column:1/3;width:100%}
+.fleg{display:flex;flex-wrap:wrap;gap:6px 18px;padding:12px 16px;border-top:1px solid var(--line);font-size:11.5px;color:var(--mut)}
+.fleg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:-1px;box-sizing:border-box}
+#ftip{position:absolute;pointer-events:none;z-index:3;display:none;max-width:250px;background:#080a0b;border:1px solid var(--line2);border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.45}
+#ftip b{display:block;font-size:12.5px;margin-bottom:2px}
+.tbar{display:grid;grid-template-columns:150px 1fr 34px;gap:10px;align-items:center;font-size:12.5px;margin:7px 0;color:#c1c1c9}
+.tbar i{display:block;height:7px;border-radius:4px;background:#f2c879;width:0;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+/* esquinas rectas como Salento (los puntos siguen redondos) */
+.card,.mx,.mapw,.flow,.dec,.pc,.steps,.fed,.mleg,.mread,#mtip,#ftip,.pill,.tag,.stk,.bar1,.bar1 i,.wb i,.tbar i,.gtrack{border-radius:0!important}
+.pill:hover,.pill.on{border-color:#cfff5e;color:#cfff5e}
+.tbar.gap{color:var(--pr)}.tbar.gap i{background:repeating-linear-gradient(135deg,#e6d9b0 0 4px,#232328 4px 8px)}
+.tbar b{font-weight:500;text-align:right;color:var(--fg)}
+@media(max-width:900px){.fbody{grid-template-columns:1fr}.fside{border-left:0;border-top:1px solid var(--line)}.tbar{grid-template-columns:120px 1fr 30px}}
+.pn{fill:#050607;stroke-width:1.6}
+.lk{stroke-width:1.2;fill:none}
+/* fuentes */
+.src{list-style:none;margin:0;padding:0;font-size:13px;line-height:1.55}
+.src li{margin:0 0 10px;padding-left:34px;position:relative;color:var(--mut)}
+.src li b{position:absolute;left:0;color:var(--pr);font-weight:600}
+.src a{color:#b9b9c2;text-decoration:none;word-break:break-word}.src a:hover{color:var(--fg);text-decoration:underline}
+ul.lim{margin:0;padding-left:18px;color:#c1c1c9;font-size:14.5px}
+ul.lim li{margin:9px 0}
+footer{padding:40px 0 70px;color:var(--mut);font-size:13px}
+footer a{color:var(--fg)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<nav class="top">
+  <a class="back" href="index.html">← Red de problemas</a>
+  <div class="links">
+    <a href="#matriz">Respuesta</a><a href="#suelo">Uso del suelo</a><a href="#sintaxis">Sintaxis</a><a href="#acceso">Acceso</a><a href="#sistema">Sistema</a><a href="#federacion">Federación</a><a href="#problemas">Problema por problema</a><a href="#limites">Límites</a><a href="#fuentes">Fuentes</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <svg id="hmap" aria-hidden="true"></svg>
+  <div class="wrap">
+    <div class="eyebrow rv">Propuesta · Kennedy, Bogotá</div>
+    <h1 class="rv d1">Abastecer sin centralizar</h1>
+    <p class="lead rv d2">Bavaria Común convierte un predio cerrado de 71 hectáreas en el nodo mayor de una malla de plazas de abasto. La malla acerca la comida fresca a cada barrio, reduce el peso de una sola central y cierra el ciclo de los residuos orgánicos.</p>
+    <div class="stats rv d3">
+      <div class="stat"><b><span data-n="cov0">22,5</span><small>→</small><span data-n="cov1">95,1</span> %</b><span>de las viviendas de Kennedy a 500 m o menos de una plaza de mercado</span></div>
+      <div class="stat"><b><span data-n="pl0">13</span><small>→</small><span data-n="pl1">32</span></b><span>plazas de mercado en Kennedy, con la malla completa</span></div>
+      <div class="stat"><b><span data-n="med0">832</span><small>→</small><span data-n="med1">317</span> m</b><span>distancia mediana de una vivienda a la plaza más cercana</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 1 MATRIZ ============ -->
+<section class="s" id="matriz"><div class="wrap">
+  <div class="sh rv"><div class="k">01 · La respuesta en una página</div>
+    <h2>De seis problemas a siete decisiones</h2>
+    <p>Cada problema de la red se ataca desde más de un frente. La causa raíz que se encontró en el mapa, la centralización de servicios, recibe las respuestas más fuertes. Toca un problema para ver cómo responde cada decisión.</p></div>
+  <div class="mx rv"><table id="mx"></table></div>
+  <div id="mxd" class="rv"></div>
+</div></section>
+
+<!-- ============ 2 USO DEL SUELO ============ -->
+<section class="s" id="suelo"><div class="wrap">
+  <div class="sh rv"><div class="k">02 · Análisis de uso del suelo</div>
+    <h2>Mucha vivienda, poco comercio y casi nada de lo público</h2>
+    <p>Se unió el uso de cada lote de Kennedy a los edificios del modelo (<span data-n="nuso"></span> edificios con uso asignado dentro del límite de la localidad). El resultado explica por qué hace falta un punto de abasto fuerte alrededor del predio.</p></div>
+  <div class="grid g2">
+    <div class="card rv"><h3>Composición de los edificios</h3><div class="t">Porcentaje de edificios por uso · Kennedy frente a los anillos alrededor del predio</div>
+      <div id="stk"></div><div class="lg" id="stk-lg"></div></div>
+    <div class="grid">
+      <div class="card rv"><div class="big"><span data-n="cm8"></span> <small style="font-size:.45em;color:var(--mut);font-weight:400">edificios comerciales por vivienda</small></div>
+        <p style="margin:10px 0 0;font-size:14.5px;color:#c1c1c9">A menos de 800 m del predio. En Kennedy en conjunto son <b data-n="cmk"></b>: alrededor del predio hay <b data-n="cmdef"></b> menos comercio.</p></div>
+      <div class="card rv d1"><div class="big"><span data-n="dot"></span> %</div>
+        <p style="margin:10px 0 0;font-size:14.5px;color:#c1c1c9">de los edificios de Kennedy son dotacionales (colegios, salud, culto, instituciones). El resto del tejido es vivienda y comercio.</p></div>
+      <div class="card rv d2"><div class="big"><span data-n="ind8"></span> %</div>
+        <p style="margin:10px 0 0;font-size:14.5px;color:#c1c1c9">de industria a 800 m del predio, más del triple del promedio de Kennedy (<b data-n="indk"></b> %): es la huella de la antigua fábrica.</p></div>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card rv"><h3>El predio por dentro</h3><div class="t">71,2 ha · reparto del suelo propuesto</div>
+      <div id="predio"></div></div>
+    <div class="card rv d1"><h3>Qué implica para el programa</h3><div class="t">Del déficit detectado a la decisión de uso</div>
+      <div class="scroll"><table class="tb"><thead><tr><th>Lo que muestra el análisis</th><th>Decisión de uso</th></tr></thead><tbody>
+      <tr><td>Comercio a la mitad del promedio alrededor del predio</td><td>Plaza mayor de abasto en la nave 3 (9.362 m² de huella)</td></tr>
+      <tr><td>Dotacional de apenas 2 %</td><td>Cocina comunitaria, cuidado de niñez y mayores, casa de la federación, formación</td></tr>
+      <tr><td>Industria heredada de la fábrica (2,4 %)</td><td>Reusar las naves 0 y 2 (61.026 m²) como centro de consolidación y transformación, no como torres</td></tr>
+      <tr><td>73 % del tejido es vivienda y el 95 % tiene una tienda a 500 m</td><td>El comercio ya existe: falta el eslabón mayorista local, no más tiendas</td></tr>
+      </tbody></table></div></div>
+  </div>
+  <p class="note">Fuente: lotes de uso de Kennedy (shapefile Usos_kennedy, 50.878 lotes) unidos por centroide a los edificios del modelo, tal como están en el repositorio del simulador<a class="cite" href="#fuentes">[18]</a>. Los porcentajes son sobre número de edificios, no sobre área construida.</p>
+</div></section>
+
+<!-- ============ 3 SINTAXIS ============ -->
+<section class="s" id="sintaxis"><div class="wrap">
+  <div class="sh rv"><div class="k">03 · Análisis de sintaxis espacial</div>
+    <h2>Bavaria entra a la red como destino, no como atajo</h2>
+    <p>La sintaxis espacial mide cómo la forma de la red de calles reparte el movimiento. Hillier y colegas mostraron que los usos que dependen del paso de gente, como el comercio, buscan las calles que concentran movimiento natural<a class="cite" href="#fuentes">[15]</a>. Se recalculó la red con y sin los pasajes de la propuesta.</p></div>
+  <div class="grid g2">
+    <div class="card rv"><h3>Dónde queda el nuevo interior</h3><div class="t">Los <span data-n="nnuevos"></span> tramos de pasaje frente a las calles existentes · percentil</div>
+      <div id="gz"></div>
+      <p style="margin:18px 0 0;font-size:14px;color:#c1c1c9">Los pasajes quedan muy integrados al conjunto de la ciudad, pero no son un atajo. Eso encaja con una plaza mayor: un lugar al que se llega desde todas partes, sin el tráfico de paso que necesita una tienda de esquina.</p></div>
+    <div class="card rv d1"><h3>Cuánto cambia la red alrededor</h3><div class="t">Cambio medio ponderado por longitud de calle, según la distancia al predio</div>
+      <div class="scroll"><table class="tb" id="rings"></table></div>
+      <p style="margin:14px 0 0;font-size:13.5px;color:var(--mut)">El efecto es pequeño porque el predio ya está rodeado de avenidas muy integradas. La propuesta no reordena la ciudad: abre un centro nuevo.</p></div>
+  </div>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card rv"><div class="big" data-n="entr"></div><p style="margin:10px 0 0;font-size:14.5px;color:#c1c1c9">puertas en los cruces existentes del borde, una por sector de barrios</p></div>
+    <div class="card rv d1"><div class="big"><span data-n="pkm"></span> km</div><p style="margin:10px 0 0;font-size:14.5px;color:#c1c1c9">de pasajes peatonales y de bicicleta, sin carros</p></div>
+    <div class="card rv d2"><div class="big"><span data-n="suben"></span> % / <span data-n="bajan"></span> %</div><p style="margin:10px 0 0;font-size:14.5px;color:#c1c1c9">de las calles ganan o pierden integración a 800 m, un cambio de más de 0,5 %</p></div>
+  </div>
+  <div class="card rv" style="margin-top:16px"><h3>Cómo se usó la sintaxis para ubicar las plazas</h3>
+    <p style="margin:8px 0 0;font-size:14.5px;color:#c1c1c9;max-width:860px">Las plazas de barrio se buscaron solo en tramos con integración angular igual o mayor al percentil 45 de Kennedy y con elección igual o menor al percentil 92. El primer criterio asegura que sean calles a las que la gente llega con pocos giros. El segundo evita ponerlas sobre las avenidas y autopistas donde el tráfico domina. Entre los candidatos se eligió, uno a uno, el que cubre más viviendas aún sin plaza, con una separación mínima de 450 m.</p></div>
+  <p class="note">Análisis angular de segmentos (método de DepthmapX) reimplementado sobre la red de OpenStreetMap. NAIN = integración angular normalizada; NACH = elección angular normalizada. Los valores absolutos pueden diferir de un cálculo en DepthmapX porque la red OSM no incluye senderos peatonales lejos del humedal El Burro<a class="cite" href="#fuentes">[18]</a>.</p>
+</div></section>
+
+<!-- ============ 4 ACCESO ============ -->
+<section class="s" id="acceso"><div class="wrap">
+  <div class="sh rv"><div class="k">04 · Acceso al abasto</div>
+    <h2>El comercio llega a todos; el abasto mayorista, a casi nadie</h2>
+    <p>El 95 % de las viviendas tiene una tienda de barrio a 500 m o menos. Pero solo el <span data-n="cov0"></span> % tiene una plaza de mercado a esa distancia, y apenas el 1 % está cerca de Corabastos. Todo lo que no se compra en la tienda depende de ir lejos o de una cadena que pasa por una sola central.</p></div>
+  <div class="mapw rv">
+    <div class="mctl" role="group" aria-label="Escenario">
+      <button class="pill" data-m="0" aria-pressed="true">Hoy</button>
+      <button class="pill" data-m="1" aria-pressed="false">Fase 1 · 8 plazas</button>
+      <button class="pill" data-m="2" aria-pressed="false">Malla completa · 19 plazas</button>
+    </div>
+    <div class="mread"><b id="mr-v">22,5 %</b><span id="mr-t">de las viviendas a 500 m o menos de una plaza de mercado</span></div>
+    <svg id="map" role="img" aria-label="Mapa de Kennedy con viviendas coloreadas según su distancia a la plaza de mercado más cercana"></svg>
+    <div class="mleg"><b>Distancia a la plaza más cercana</b>
+      <div><i style="background:var(--k0)"></i>250 m o menos</div><div><i style="background:var(--k1)"></i>250 a 500 m</div><div><i style="background:var(--k2)"></i>500 a 800 m</div><div><i style="background:var(--k3)"></i>800 a 1.200 m</div><div><i style="background:var(--k4)"></i>más de 1.200 m</div>
+      <div style="margin-top:8px"><i class="ring"></i>Plaza existente</div><div><i style="background:var(--pr)"></i>Plaza nueva</div><div><i class="sq" style="background:#c4574f55;border:1px solid #c4574f"></i>Corabastos</div><div><i class="sq" style="background:#e6d9b033;border:1px solid var(--pr)"></i>Predio Bavaria</div></div>
+    <div id="mtip"></div>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card rv"><h3>Cuántas plazas hacen falta</h3><div class="t">Viviendas cubiertas según las plazas nuevas, con el algoritmo de máxima cobertura</div><div class="ch" id="curva"></div></div>
+    <div class="card rv d1"><h3>Distancia a la plaza más cercana</h3><div class="t">Porcentaje de viviendas por distancia · hoy y con la malla completa</div><div class="ch" id="hist"></div></div>
+  </div>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card rv"><div class="big"><span data-n="tie500"></span> %</div><p style="margin:10px 0 0;font-size:14.5px;color:#c1c1c9">de las viviendas tiene una tienda de barrio a 500 m o menos (<span data-n="ntie"></span> tiendas en OpenStreetMap). El punto de venta ya existe.</p></div>
+    <div class="card rv d1"><div class="big"><span data-n="medcora"></span> m</div><p style="margin:10px 0 0;font-size:14.5px;color:#c1c1c9">es la distancia mediana de una vivienda a Corabastos. Solo el 1 % vive a 500 m o menos: la dependencia no es de caminata sino de cadena de suministro.</p></div>
+    <div class="card rv d2"><div class="big">1 <small style="font-size:.45em;color:var(--mut);font-weight:400">por cada</small> <span data-n="hab0"></span></div><p style="margin:10px 0 0;font-size:14.5px;color:#c1c1c9">habitantes por plaza de mercado hoy. Con la malla completa baja a una por cada <b data-n="hab1"></b>.</p></div>
+  </div>
+  <p class="note">Distancias en línea recta desde el centroide de cada edificio residencial (<span data-n="nres"></span> edificios) hasta la plaza más cercana; el mapa muestra una muestra de 4.200. Plazas de mercado: 13 en el límite de Kennedy (IPES y OpenStreetMap). Los habitantes se reparten proporcionalmente al número de edificios residenciales <span class="tag">est.</span>. Ver límites abajo.</p>
+</div></section>
+
+<!-- ============ 5 SISTEMA ============ -->
+<section class="s" id="sistema"><div class="wrap">
+  <div class="sh rv"><div class="k">05 · La propuesta</div>
+    <h2>Una malla de plazas en lugar de una sola central</h2>
+    <p>La propuesta no elimina Corabastos ni pretende que Kennedy se alimente a sí misma. Reparte las funciones que hoy están en un solo lugar: consolidar, seleccionar, enfriar, vender cerca y recibir lo orgánico de vuelta. Bavaria es el nodo mayor porque es el único predio grande y vacío con buena conexión a la red.</p></div>
+  <div class="flow rv" id="flow"></div>
+  <div style="margin-top:30px">
+    <div id="decs"></div>
+  </div>
+</div></section>
+
+<!-- ============ 6 FEDERACIÓN ============ -->
+<section class="s" id="federacion"><div class="wrap">
+  <div class="sh rv"><div class="k">06 · Federación para la soberanía alimentaria</div>
+    <h2>Que todas las personas pasen por la vocería, y que pese más quien sabe y enseña</h2>
+    <p>Las asambleas de los barrios ya existen y hablan de temas distintos. La federación no crea otra capa de poder: les añade un tema común, la soberanía alimentaria<a class="cite" href="#src-22">[22]</a>, y una regla. La vocería de ese tema rota para que todas las personas la ejerzan alguna vez. Las voceras llegan a la junta del Distrito Bavaria, donde pesa más quien más sabe y más enseña.</p></div>
+
+  <div class="grid g2">
+    <div class="card rv"><h3>Lo que hay hoy</h3><div class="t">Juntas de Acción Comunal de Kennedy y sus comisiones de trabajo<a class="cite" href="#src-21">[21]</a></div>
+      <div class="fm" style="margin:0 0 18px"><div><b id="fx-n"></b><span>juntas registradas en Kennedy</span></div><div><b id="fx-c"></b><span>con comisiones identificadas, de <span id="fx-p"></span> temas en promedio</span></div></div>
+      <div id="fx-bars"></div>
+      <p style="margin:14px 0 0;font-size:13.5px;color:#c1c1c9">Ninguna de las ocho comisiones registradas es de alimentación o abasto. El tema falta justo donde la propuesta quiere decidir.</p></div>
+    <div class="card rv d1"><h3>Lo que se propone</h3><div class="t">Una comisión común y una vocería que rota</div>
+      <ul style="margin:0;padding-left:18px;color:#c1c1c9;font-size:14.5px;line-height:1.6">
+        <li style="margin:8px 0">Cada asamblea abre la comisión de <b>soberanía alimentaria</b>, sin dejar sus otros temas.</li>
+        <li style="margin:8px 0">Su vocería se sortea entre quienes se postulan, en dupla paritaria, con turno de seis meses.</li>
+        <li style="margin:8px 0">Nadie repite hasta que todas las personas postuladas hayan pasado. Así <b>todas llegan a ser voceras</b> alguna vez.</li>
+        <li style="margin:8px 0">Las voceras se coordinan por sector y llegan a la <b>junta del Distrito Bavaria</b>, donde se toman las decisiones.</li>
+        <li style="margin:8px 0">Allí el peso de cada voz crece con lo que sabe y con a cuántas personas enseña. Al terminar el turno vuelven a su asamblea a enseñar.</li></ul></div>
+  </div>
+
+  <div class="steps rv" style="margin-top:16px">
+    <div class="stp"><div class="n"><i>1</i>Asamblea</div><h3>Cada junta abre la comisión</h3><p>Se suma a los temas que ya trabaja. Las juntas mantienen su autonomía y su territorio.</p></div>
+    <div class="stp"><div class="n"><i>2</i>Sorteo y turno</div><h3>La vocería rota</h3><p>Dupla paritaria, seis meses, sorteo entre postulantes. Nadie repite hasta completar el ciclo.</p></div>
+    <div class="stp"><div class="n"><i>3</i>Sector</div><h3>Las voceras se coordinan</h3><p>Ocho sectores agrupan las juntas vecinas. Se coordinan entre sí en anillo, sin nadie arriba.</p></div>
+    <div class="stp"><div class="n"><i>4</i>Junta del Distrito</div><h3>Allí se decide</h3><p>Pesa más quien más sabe y más enseña, con tope. Al volver a su asamblea, enseña.</p></div>
+  </div>
+
+  <div class="fed rv" style="margin-top:16px;position:relative">
+    <div class="fbar" role="group" aria-label="Simulación">
+      <button class="pill" id="f-play" type="button">▶ Reproducir</button>
+      <button class="pill" id="f-step" type="button">Siguiente semestre</button>
+      <button class="pill" id="f-reset" type="button">Reiniciar</button>
+      <label>Semestre <b id="f-tl">0</b><input type="range" id="f-sl" min="0" max="16" value="0" aria-label="Semestre"></label>
+    </div>
+    <div class="fbody">
+      <svg id="fnet" viewBox="0 0 1000 760" role="img" aria-label="Red de las juntas de acción comunal cercanas al predio, agrupadas en ocho sectores, con la junta del Distrito Bavaria al centro"></svg>
+      <aside class="fside">
+        <div class="fsem"><b id="f-sem">Semestre 0</b><span id="f-año">año 0</span></div>
+        <div class="fm">
+          <div><b id="f-served">0 %</b><span>de las personas ya fueron voceras</span></div>
+          <div><b id="f-know">0 %</b><span>recibió formación</span></div>
+          <div><b id="f-del">0</b><span>delegadas hoy en la junta del distrito</span></div>
+          <div><b id="f-top">—</b><span>del peso lo tienen las 6 personas que más enseñan</span></div>
+        </div>
+        <h4>Peso de las delegadas con más enseñanza</h4><div id="f-bars"></div>
+        <h4>Quién ha pasado por la vocería y quién sabe</h4><div class="ch" id="f-chart"></div>
+        <h4>Supuestos (muévelos)</h4>
+        <div class="fpar">
+          <label>Personas que se postulan por junta<b id="f-nv">12</b><input type="range" id="f-n" min="6" max="24" value="12"></label>
+          <label>Personas que enseña cada formadora por semestre<b id="f-mv">1</b><input type="range" id="f-m" min="0" max="4" value="1"></label>
+          <label>Tope del peso por enseñar<b id="f-cv">4</b><input type="range" id="f-c" min="1" max="9" value="4"></label>
+        </div>
+      </aside>
+    </div>
+    <div class="fleg"><span><i style="background:#3b3b43"></i>Sin turno y sin formación</span><span><i style="background:#8cc084"></i>Con formación</span><span><i style="background:#a98bd6"></i>Formadora (enseñó a 3 o más)</span><span><i style="background:#e6d9b0"></i>Vocera este semestre</span><span><i style="background:none;border:1.5px solid #e6d9b0"></i>Ya fue vocera</span><span><i style="background:none;border:1.5px dashed #a98bd6"></i>Mesa de saberes</span></div>
+    <div id="ftip"></div>
+  </div>
+  <p class="note">Las 27 juntas son las de Kennedy a menos de 2 km del predio, con la ubicación de su sede (IDPAC). Las personas que se postulan y las enseñanzas por semestre son supuestos ilustrativos, no mediciones: la simulación muestra el mecanismo, no predice su resultado.</p>
+
+  <div class="grid g3" style="margin-top:34px">
+    <div class="card rv"><h3>Sorteo, turno y paridad</h3><p style="margin:8px 0 0;font-size:14px;color:#c1c1c9">Entre quienes se postulan se sortean dos vocerías por junta, una mujer y un hombre. El turno dura seis meses. Con 12 postulantes por junta, <b id="fr-12"></b> hasta que todas hayan pasado; con 24 serían <b id="fr-24"></b>.</p></div>
+    <div class="card rv d1"><h3>Renovación escalonada</h3><p style="margin:8px 0 0;font-size:14px;color:#c1c1c9">Si las dos vocerías cambian a la vez se pierde la memoria. Ostbelgien, en Bélgica, renueva por lotes su consejo elegido por sorteo: cada vez salen los ocho miembros que más tiempo llevan y entran ocho nuevos<a class="cite" href="#src-23">[23]</a>. Aquí una de las dos vocerías cambia cada trimestre. <span class="tag p">propuesta</span></p></div>
+    <div class="card rv d2"><h3>Escuela de saberes</h3><p style="margin:8px 0 0;font-size:14px;color:#c1c1c9">Cada vocera pasa por el Instituto Bavaria Común durante su turno. Al terminar vuelve a su asamblea y enseña par a par. Sabe más quien enseña a más personas, no quien lleva más años.</p></div>
+    <div class="card rv"><h3>Tope y revocatoria</h3><p style="margin:8px 0 0;font-size:14px;color:#c1c1c9">El peso por enseñar tiene un tope y se pierde si se deja de enseñar. Las asambleas pueden revocar el mandato de su vocera. Así el saber no se vuelve un poder permanente.</p></div>
+    <div class="card rv d1"><h3>Escala territorial y temática</h3><p style="margin:8px 0 0;font-size:14px;color:#c1c1c9">Porto Alegre organizó su presupuesto participativo en asambleas regionales y temáticas que eligen delegados y consejeros<a class="cite" href="#src-24">[24]</a>. Esta propuesta usa la misma lógica: el territorio son las juntas; el tema, la soberanía alimentaria.</p></div>
+    <div class="card rv d2"><h3>Dónde encaja en la ley</h3><p style="margin:8px 0 0;font-size:14px;color:#c1c1c9">Las juntas se rigen por la Ley 2166 de 2021<a class="cite" href="#src-19">[19]</a> y el Decreto 1501 de 2023<a class="cite" href="#src-20">[20]</a>. Se propone empezar como comisión de trabajo con reglamento interno. Si la junta del distrito debe ser una junta nueva, una asociación de juntas u otra figura, debe definirse con el IDPAC. <span class="tag">por estudiar</span></p></div>
+  </div>
+
+  <div class="card rv" style="margin-top:16px"><h3>Qué decide la junta del Distrito Bavaria y quién pesa</h3><div class="t">Se separan dos tipos de decisión para que el saber no mande sobre lo que es de todas</div>
+    <div class="scroll"><table class="tb"><thead><tr><th>Tipo de decisión</th><th>Ejemplos</th><th>Quién pesa</th></tr></thead><tbody>
+      <tr><td><b>De mandato</b></td><td>Presupuesto, uso del suelo del predio, precios justos, qué tiendas y productores entran a las plazas</td><td>Cada asamblea tiene un voto. Las voceras llevan el mandato y no deciden solas.</td></tr>
+      <tr><td><b>Técnicas</b></td><td>Inocuidad, cadena de frío, protocolos de compostaje, criterios de calidad de la compra directa</td><td>El peso crece con lo que se sabe y con a cuántas personas se enseña, hasta el tope.</td></tr>
+      <tr><td><b>De las reglas</b></td><td>Cambios a esta federación, al tope o a los turnos</td><td>Mayoría calificada de las asambleas. <span class="tag p">propuesta</span></td></tr>
+    </tbody></table></div></div>
+</div></section>
+
+<!-- ============ 7 PROBLEMA POR PROBLEMA ============ -->
+<section class="s" id="problemas"><div class="wrap">
+  <div class="sh rv"><div class="k">07 · Problema por problema</div>
+    <h2>Qué cambia, cuánto y cómo se mide</h2>
+    <p>Para cada problema de la red se indica el mecanismo de respuesta y los indicadores de partida y de llegada. Los datos sin etiqueta salen de los análisis anteriores; las metas llevan la etiqueta <span class="tag p">propuesta</span> y las estimaciones <span class="tag">est.</span>.</p></div>
+  <div id="pcs"></div>
+</div></section>
+
+<!-- ============ 7 LÍMITES ============ -->
+<section class="s" id="limites"><div class="wrap">
+  <div class="sh rv"><div class="k">08 · Límites</div>
+    <h2>Lo que este análisis no demuestra</h2></div>
+  <div class="rv"><ul class="lim">
+    <li><b>Distancias en línea recta.</b> Las coberturas se miden sin considerar manzanas, ríos ni vías sin cruce. Con distancia caminada real la cobertura sería menor; el análisis debe repetirse sobre la red peatonal.</li>
+    <li><b>OpenStreetMap es incompleto.</b> Puede faltar alguna plaza o tienda, y el número de tiendas (431) está probablemente subestimado. Conviene cruzarlo con el registro de IPES y de la Cámara de Comercio.</li>
+    <li><b>Población proporcional a edificios.</b> No se tiene población por manzana. Las cifras de personas cubiertas son una estimación.</li>
+    <li><b>La sintaxis es de calles OSM.</b> Sin senderos ni pasajes informales, los valores absolutos pueden diferir de DepthmapX, aunque la comparación antes y después usa la misma red.</li>
+    <li><b>Concentrar también puede dar resiliencia.</b> Hay estudios que defienden consolidar la distribución en pocos nodos para protegerla del clima<a class="cite" href="#fuentes">[17]</a>. Por eso la propuesta es una red mixta: Corabastos se reduce pero se mantiene como mayorista.</li>
+    <li><b>Las metas de compra directa y de separación son supuestos</b> (45 % y 60 %). Hay que concertarlas con productores y hogares antes de tratarlas como compromisos.</li>
+    <li><b>Los instrumentos jurídicos del suelo común</b> (derecho de superficie, fiducia de tierras, declaratoria de uso público) se mencionan como opciones y requieren estudio jurídico.</li>
+    <li><b>El peso por saber puede volverse tecnocracia.</b> Por eso lleva tope, se pierde si se deja de enseñar y no decide sobre presupuesto ni uso del suelo. Aun así, quien enseña más tiene más acceso al saber, y eso hay que vigilarlo.</li>
+    <li><b>La simulación de la federación usa supuestos ilustrativos</b> (12 postulantes por junta, 1 enseñanza por semestre). No se sabe cuántas personas se postularían, ni cuántas comisiones de las juntas siguen activas: los datos son registros de IDPAC.</li>
+    <li><b>La federación depende de que las juntas la adopten.</b> Cada junta es autónoma; la propuesta no puede imponerse y la forma jurídica de la junta del distrito está por definir con el IDPAC.</li>
+    <li><b>La agricultura urbana aporta una fracción mínima</b> del alimento que consume Kennedy y no se presenta como respuesta a la dependencia externa.</li>
+  </ul></div>
+</div></section>
+
+<!-- ============ FUENTES ============ -->
+<section class="s" id="fuentes" style="border-bottom:0"><div class="wrap">
+  <div class="sh rv"><div class="k">Fuentes</div><h2>De dónde sale cada cifra</h2></div>
+  <ul class="src rv" id="src"></ul>
+</div></section>
+<footer><div class="wrap">Parte del proyecto <a href="index.html">Red de problemas</a> · Tesis de Arquitectura y Urbanismo, Kennedy, Bogotá. Propuesta Distrito Bavaria Común: <a href="https://anasoficasca-code.github.io/simulador/bavaria.html" target="_blank" rel="noopener">presentación 3D</a>.</div></footer>
+
+<script src="analisis.js"></script>
+<script>
+(()=>{
+const AN=window.AN,$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const RED=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const fmt=(n,d=0)=>{const q=Math.abs(n).toFixed(d),[i,f]=q.split('.');return (n<0?'−':'')+i.replace(/\B(?=(\d{3})+(?!\d))/g,'.')+(f?','+f:'')};
+const eoc=x=>1-Math.pow(1-x,3),cl=x=>Math.max(0,Math.min(1,x));
+const POP=1037929;
+const SRC=[
+ [1,'Región Metropolitana Bogotá–Cundinamarca. Documento técnico de logística y distribución de alimentos (cifras SIPSA-DANE, 2022).','https://regionmetropolitana.gov.co/sites/default/files/archivos/normatividad/2024-11-19/189_5-logistica-y-distribucion-de-alimentos.pdf'],
+ [3,'Secretaría Distrital de Integración Social. Diagnóstico local de Kennedy 2023.','https://www.integracionsocial.gov.co/images/_docs/2024/Entidad/localidades/04062024-8-Kennedy-Diagnostico-2023.pdf'],
+ [4,'Secretaría Distrital de Salud – SaluData. Caracterización de Kennedy 2024.','https://saludata.saludcapital.gov.co/osb/wp-content/uploads/2024/12/Kennedy_MasBienestar_2024_v1_2.pdf'],
+ [5,'Catastro Bogotá. Censo Inmobiliario 2026, apartado «8 Kennedy».','https://www.catastrobogota.gov.co/sites/default/files/recursos/Documento_Censo_Inmobiliario_Vig_2026_20260331_publicar.pdf'],
+ [7,'UAESP. «Así estamos acabando con los puntos críticos en Bogotá», mayo de 2023.','https://www.uaesp.gov.co/noticias/asi-estamos-acabando-los-puntos-criticos-bogota'],
+ [8,'Secretaría Distrital de Gobierno. Balance de recuperación de espacio público y residuos en Kennedy.','https://www.gobiernobogota.gov.co/noticias/alcaldia-local-de-kennedy-ha-recuperado-mas-de-22-mil-metros-cuadrados-de-espacio-publico-afectados-por-residuos'],
+ [9,'Infobae. «Vivir cerca del metro de Bogotá sería más costoso…» (datos de Fincaraiz), 10 de noviembre de 2026.','https://www.infobae.com/colombia/2026/11/10/vivir-cerca-del-metro-de-bogota-seria-mas-costoso-el-precio-de-la-vivienda-podria-aumentar-cerca-de-12-al-ano/'],
+ [11,'Alcaldía de Bogotá. «Distrito intervendrá 17 Plazas Distritales»: las plazas distritales representan el 5,1 % del abastecimiento de alimentos de la ciudad.','https://bogota.gov.co/mi-ciudad/desarrollo-economico/plazas-de-mercado-de-bogota-distrito-intervendra-17-con-obras'],
+ [12,'Decreto 315 de 2006: Plan Maestro de Abastecimiento de Alimentos y Seguridad Alimentaria para Bogotá (modificado por el Decreto 040 de 2008).','https://www.saludcapital.gov.co/Normo/gsp/decreto_315_de_2006.pdf'],
+ [13,'Corabastos. Diagnóstico del Plan de Regularización y Manejo: propone conformar nodos logísticos urbanos.','https://corabastos.com.co/sites/default/files/2020-09/PRyMPRESENTACION.pdf'],
+ [14,'Instituto Municipal de Mercados de Barcelona. Memoria 2023 (39 mercados alimentarios; 6 de cada 10 personas compran en ellos) y Resumen anual 2020 (ningún barrio sin mercado de referencia).','https://ajuntament.barcelona.cat/mercats/sites/default/files/2024-05/Memoria_IMMB_2023.pdf'],
+ [15,'Hillier, B., Penn, A., Hanson, J., Grajewski, T., Xu, J. (1993). «Natural movement: or, configuration and attraction in urban pedestrian movement». Environment and Planning B, 20(1).','https://econpapers.repec.org/RePEc:sae:envirb:v:20:y:1993:i:1:p:29-66'],
+ [16,'Alcaldía de Bogotá. Obras de mejoramiento vial en los alrededores de Corabastos (más de 280.000 personas se movilizan a diario por el sector).','https://bogota.gov.co/mi-ciudad/movilidad/obras-de-mejoramiento-vial-en-alrededores-corabastos-bogota'],
+ [17,'Harvard GSD. «Food System Resilience: Addressing the Vulnerability of Miami’s Food System Through Distribution Cluster Centralization».','https://www.gsd.harvard.edu/?p=2454202'],
+ [18,'Ana Sofía Casas, Alejandra Gómez, Juan José Trujillo. Distrito Bavaria Común y simulador de Kennedy: datos, sintaxis y usos del suelo (repositorio del simulador, 2026).','https://anasoficasca-code.github.io/simulador/bavaria.html'],
+ [19,'Ley 2166 de 2021, por la cual se regula la acción comunal (deroga la Ley 743 de 2002).','https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=184758'],
+ [20,'Decreto 1501 de 2023, reglamentario de la Ley 2166 de 2021.','https://www1.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=219030'],
+ [21,'IDPAC. Organizaciones comunales de Bogotá D.C. (datos abiertos Bogotá), localidad Kennedy, y dignatarios y comisiones de trabajo activos (2022), procesados en el repositorio del simulador.','https://datosabiertos.bogota.gov.co'],
+ [22,'Declaración de Nyéléni (2007), Sélingué, Malí: soberanía alimentaria, firmada por más de 500 representantes de más de 80 países.','https://nyeleni.org/IMG/pdf/DeclNyeleni-es.pdf'],
+ [23,'Bertelsmann Stiftung. «The Ostbelgien model»: consejo ciudadano permanente de 24 personas, elegido por sorteo y renovado por lotes.','https://www.bertelsmann-stiftung.de/en/our-projects/democracy-and-participation-in-europe/shortcut-archive/shortcut-7-the-ostbelgien-model'],
+ [24,'IDEAS. Presupuesto participativo de Porto Alegre: asambleas regionales y temáticas, delegados y consejo.','https://www.ideassonline.org/public/pdf/br_27_57.pdf']
+];
+const cite=a=>a.map(i=>'<a class="cite" href="#src-'+i+'" title="'+SRC.find(s=>s[0]===i)[1].replace(/"/g,'')+'">['+i+']</a>').join('');
+$('#src').innerHTML=SRC.map(s=>'<li id="src-'+s[0]+'"><b>['+s[0]+']</b><a href="'+s[2]+'" target="_blank" rel="noopener">'+s[1]+'</a></li>').join('');
+// la gente de las citas ancla a #fuentes
+$$('a.cite[href="#fuentes"]').forEach(a=>{const n=a.textContent.replace(/\D/g,'');a.setAttribute('href','#src-'+n)});
+
+/* ---------- valores ---------- */
+const ac=AN.acceso,mixk=AN.mix.kennedy[0],mix8=AN.mix.r800[0];
+const cm8=mix8['Comercio']/mix8['Residencial'],cmk=mixk['Comercio']/mixk['Residencial'];
+const V={cov0:fmt(ac.plaza['500'],1),cov1:fmt(ac.cov2['500'],1),pl0:AN.nPlazas,pl1:AN.nPlazas+AN.sitios.length,med0:fmt(ac.medPlaza),med1:fmt(ac.medPlaza2),
+ nuso:fmt(AN.mix.kennedy[1]),cm8:fmt(cm8,2),cmk:fmt(cmk,2),cmdef:fmt(100*(1-cm8/cmk))+' %',dot:fmt(mixk['Dotacional'],1),ind8:fmt(mix8['Industrial'],1),indk:fmt(mixk['Industrial'],1),
+ nnuevos:AN.sx.nNuevos,entr:AN.bav.entradas,pkm:fmt(AN.bav.pasajes_m/1000,1),suben:fmt(AN.sx.suben),bajan:fmt(AN.sx.bajan),
+ tie500:fmt(ac.tienda['500']),ntie:fmt(AN.nTiendas),medcora:fmt(ac.medCora),hab0:'',
+ hab1:fmt(Math.round(POP/(AN.nPlazas+AN.sitios.length)/100)*100),nres:fmt(AN.n_res)};
+V.hab0=fmt(Math.round(POP/AN.nPlazas/100)*100);
+$$('[data-n]').forEach(e=>{const v=V[e.dataset.n];if(v!==undefined)e.textContent=v});
+
+/* ---------- reveal + contadores + barra ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);e.target.dispatchEvent(new Event('revealed'))}}),{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+$$('.rv').forEach(e=>io.observe(e));
+const bar=$('#bar');const secs=$$('section.s, header.hero');const links=$$('nav.top .links a');
+function onScroll(){const h=document.documentElement;bar.style.transform='scaleX('+(scrollY/(h.scrollHeight-innerHeight||1))+')';
+ let cur=null;secs.forEach(s=>{if(s.id&&s.getBoundingClientRect().top<innerHeight*.35)cur=s.id});links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+cur))}
+addEventListener('scroll',onScroll,{passive:true});onScroll();
+function countIn(el){const t=el.textContent,m=t.match(/[\d.]+(,\d+)?/);if(!m||RED)return;const num=m[0],dec=num.includes(',')?num.split(',')[1].length:0,v=parseFloat(num.replace(/\./g,'').replace(',','.')),t0=performance.now();
+ (function f(n){const q=eoc(cl((n-t0)/1400));el.textContent=t.replace(num,fmt(v*q,dec));if(q<1)requestAnimationFrame(f);else el.textContent=t})(t0)}
+$('.hero .stats').addEventListener('revealed',()=>$$('.hero .stats [data-n]').forEach((e,i)=>setTimeout(()=>countIn(e),i*120)));
+// los números de las tarjetas cuentan al aparecer
+$$('.card').forEach(c=>c.addEventListener('revealed',()=>c.querySelectorAll('.big[data-n], .big [data-n]').forEach(e=>countIn(e))));
+
+/* ---------- matriz ---------- */
+const PR=[['F','Centralización de servicios','Causa raíz del mapa','var(--F)'],['B','Crecimiento poblacional','1.037.929 habitantes','var(--B)'],['C','Valorización del suelo','+33,4 % valor catastral, 2022–2026','var(--C)'],['D','Especulación','Sin cifra directa; precios de oferta al alza','var(--D)'],['A','Dependencia de alimentos externos','Corabastos: 2,2 Mt en 2022','var(--A)'],['E','Gestión de residuos sólidos','77 puntos críticos en 2023','var(--E)']];
+const DE=['Plaza mayor en Bavaria','Malla de 19 plazas de barrio','Centro de consolidación','Corabastos reducido y compra directa','Ciclo de orgánicos','Suelo común y federación','Pasajes que abren el predio'];
+const MX={
+F:{0:[2,'Suma un nodo de servicios de escala distrital justo donde el comercio es '+V.cmdef+' menor que el promedio de Kennedy.'],1:[2,'Reparte el abasto en '+V.pl1+' puntos en vez de '+V.pl0+': la distancia mediana a una plaza baja de '+V.med0+' m a '+V.med1+' m.'],2:[1,'Lleva a Kennedy, en varios puntos, la consolidación, la selección y el frío que hoy se concentran en un solo lugar.'],3:[2,'Quita a una sola central el papel de paso obligado: lo que llega directo a las plazas no pasa por ella.'],6:[1,'Abre '+V.entr+' puertas y '+V.pkm+' km de pasajes: el interior entra a la red.'],5:[1,'Descentraliza también la decisión: las juntas de los barrios deciden con voceras que rotan, no una sola instancia central.']},
+B:{1:[2,'Cada barrio nuevo o densificado cae en una malla que ya tiene punto de abasto: la capacidad crece por plazas, no por una central más grande.'],0:[1,'Absorbe en su propio borde la demanda de la UPZ 113 (40.320 personas).'],4:[1,'El crecimiento de los residuos orgánicos se trata en la fuente, en cada plaza.']},
+C:{5:[2,'El predio sale del mercado de suelo: sin torres y sin lotes en venta.'],6:[1,'Abre el interior sin loteo: la accesibilidad llega con espacio público, no con venta de suelo.'],1:[1,'Distribuye el acceso a servicios, que puede reducir la prima por vivir junto a los centros existentes (hipótesis por verificar).']},
+D:{5:[2,'Sin lotes ni derechos de edificación transables, no hay qué retener para vender más caro.'],0:[1,'Fija un uso comunitario y de abasto en 9.362 m² de nave, que ancla el lugar a lo público.']},
+A:{3:[2,'Compra directa a productores (meta de 45 % en el simulador) en lugar de pasar todo por una central.'],2:[2,'Con selección, frío y empaque en Kennedy, lo que viene de Cundinamarca puede llegar directo a las plazas.'],1:[1,'Puntos de venta cerca de cada hogar sostienen la demanda de producto fresco de origen cercano.'],0:[1,'Una plaza mayor con puestos de productores y comercio de alimentos.'],5:[1,'La comisión de soberanía alimentaria de cada junta decide cómo se compra, se enseña y se distribuye el alimento.']},
+E:{4:[2,'Punto verde en cada plaza: 9,9 t/día separadas en la UPZ y 5 t/día de Corabastos van al compostaje de Bavaria.'],1:[1,'Cada plaza es punto de entrega de orgánicos con recolección en bicicarga.'],2:[1,'Empaques y mermas se clasifican donde se consolida la carga.']}};
+$('#mx').innerHTML='<thead><tr><th>Problema de la red</th>'+DE.map((d,i)=>'<th><span style="color:var(--pr)">D'+(i+1)+'</span><br>'+d+'</th>').join('')+'</tr></thead><tbody>'+
+ PR.map(p=>'<tr data-p="'+p[0]+'" tabindex="0"><th><i style="background:'+p[3]+'"></i>'+p[1]+'<small>'+p[2]+'</small></th>'+DE.map((d,i)=>{const m=MX[p[0]][i];return '<td>'+(m?'<span class="dotm s'+m[0]+'" style="--c:'+p[3]+'"></span>':'')+'</td>'}).join('')+'</tr>').join('')+'</tbody>';
+function pickRow(id){$$('#mx tbody tr').forEach(r=>r.classList.toggle('on',r.dataset.p===id));
+ const p=PR.find(x=>x[0]===id),m=MX[id];
+ $('#mxd').innerHTML=Object.keys(m).sort((a,b)=>m[b][0]-m[a][0]||a-b).map(k=>'<div class="it"><b style="color:'+(m[k][0]===2?p[3]:'var(--fg)')+'">D'+(+k+1)+' · '+DE[k]+'</b><span>'+m[k][1]+(m[k][0]===2?'':' <span class="tag">apoyo</span>')+'</span></div>').join('')}
+$$('#mx tbody tr').forEach(r=>{r.onclick=()=>pickRow(r.dataset.p);r.onkeydown=e=>{if(e.key==='Enter')pickRow(r.dataset.p)}});
+$('#mxd').innerHTML='<div class="hint">Toca un problema de la tabla para ver cómo responde cada decisión. Los círculos grandes son las respuestas principales y los pequeños son apoyos.</div>';
+pickRow('F');
+
+/* ---------- uso del suelo ---------- */
+const UC={'Residencial':'#f2c879','Comercio':'#dba73a','Dotacional':'#ee8a45','Industrial':'#c4574f','Otros':'#5d5d66'};
+function stkRow(lbl,sub,d){const t=Object.values(d).reduce((a,b)=>a+b,0),parts={};for(const k in d){const kk=UC[k]&&k!=='Parqueadero'&&k!=='Recreacional'?k:'Otros';parts[kk]=(parts[kk]||0)+d[k]}
+ return '<div class="sb"><div class="h"><b style="font-weight:500">'+lbl+'</b><span>'+sub+'</span></div><div class="stk">'+Object.keys(UC).map(k=>'<i data-w="'+(parts[k]||0)+'" style="background:'+UC[k]+'" title="'+k+' '+fmt(parts[k]||0,1)+' %"></i>').join('')+'</div></div>'}
+$('#stk').innerHTML=stkRow('Kennedy','toda la localidad',AN.mix.kennedy[0])+stkRow('A 1,5 km del predio','radio de 1.500 m',AN.mix.r1500[0])+stkRow('A 800 m del predio','radio de 800 m',AN.mix.r800[0]);
+$('#stk-lg').innerHTML=Object.keys(UC).map(k=>'<span><i style="background:'+UC[k]+'"></i>'+k+'</span>').join('');
+$('#stk').closest('.card').addEventListener('revealed',()=>setTimeout(()=>$$('#stk .stk i').forEach(i=>i.style.width=i.dataset.w+'%'),200));
+// predio
+{const B=AN.bav,tot=B.area_ha,cons=B.edif_m2/10000,otros=tot-B.bosque_ha-B.libre_ha-cons;
+ const rows=[['Bosque que se conserva',B.bosque_ha,'#5f8a4f'],['Suelo libre y plazas',B.libre_ha,'#f2c879'],['Huella de edificios recuperados',cons,'#dba73a'],['Patios, vías internas y resto',otros,'#5d5d66']];
+ $('#predio').innerHTML=rows.map(r=>'<div class="sb" style="margin:14px 0"><div class="h"><span style="color:var(--fg)">'+r[0]+'</span><b style="font-weight:500">'+fmt(r[1],1)+' ha <span style="color:var(--mut);font-weight:400">· '+fmt(100*r[1]/tot)+' %</span></b></div><div class="bar1"><i data-w="'+(100*r[1]/tot)+'" style="background:'+r[2]+'"></i></div></div>').join('')+'<p style="margin:14px 0 0;font-size:13px;color:var(--mut)">El bosque no se toca y ningún pasaje lo atraviesa. Las naves se recuperan en lugar de demolerlas.</p>';
+ $('#predio').closest('.card').addEventListener('revealed',()=>setTimeout(()=>$$('#predio .bar1 i').forEach(i=>i.style.width=i.dataset.w+'%'),200))}
+
+/* ---------- sintaxis ---------- */
+{const g=[['Integración global (n)',AN.sx.nuevoNain,'Más integrados que el '+AN.sx.nuevoNain+' % de las calles existentes'],['Integración local (800 m)',AN.sx.nuevoNain8,'Más integrados que el '+AN.sx.nuevoNain8+' %'],['Elección (paso de recorridos)',AN.sx.nuevoNach,'Más elección que el '+AN.sx.nuevoNach+' %']];
+ $('#gz').innerHTML=g.map(x=>'<div class="gz"><div class="h"><b style="font-weight:500">'+x[0]+'</b><span>'+x[2]+'</span></div><div class="gtrack"><div class="gmark" data-l="'+x[1]+'"><b>'+x[1]+'</b></div></div></div>').join('')+'<div class="gscale"><span>0 · menos que casi todas</span><span>percentil</span><span>100 · más que casi todas</span></div>';
+ $('#gz').closest('.card').addEventListener('revealed',()=>setTimeout(()=>$$('#gz .gmark').forEach(m=>m.style.left=m.dataset.l+'%'),250));
+ const cell=a=>{const c=a[2];return '<b class="'+(c>0.05?'up':c<-0.05?'dn':'')+'" style="font-weight:500">'+(c>0?'+':'')+fmt(c,2)+' %</b><br><span style="color:var(--mut);font-size:11.5px">'+fmt(a[0],3)+' → '+fmt(a[1],3)+'</span>'};
+ $('#rings').innerHTML='<thead><tr><th>Distancia al predio</th><th>Integración n</th><th>Integración 800 m</th><th>Elección</th></tr></thead><tbody>'+AN.sx.rings.map(r=>'<tr><td class="n">'+fmt(r.lo)+'–'+fmt(r.hi)+' m<br><span style="color:var(--mut);font-size:11.5px">'+fmt(r.km,1)+' km de calle</span></td><td class="n">'+cell(r.nain)+'</td><td class="n">'+cell(r.nain8)+'</td><td class="n">'+cell(r.nach)+'</td></tr>').join('')+'</tbody>'}
+
+/* ---------- mapa ---------- */
+const M=AN.map,L=M.lim;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;L.forEach(p=>{x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1])});
+function mkMap(svg,W,opts){const S=(W-60)/(x1-x0),H=(y1-y0)*S+60,px=x=>(x-x0)*S+30,py=y=>(y1-y)*S+30;svg.setAttribute('viewBox','0 0 '+W+' '+H);return{S,H,px,py,W}}
+const cls=d=>d<=250?0:d<=500?1:d<=800?2:d<=1200?3:4;
+const NEW=AN.sitios;
+function distTo(P,pts){let m=1e9;for(const q of pts){const d=Math.hypot(P[0]-q[0],P[1]-q[1]);if(d<m)m=d}return m}
+{ // mapa principal
+ const svg=$('#map'),G=mkMap(svg,1000),{px,py,S}=G;
+ let h='<path d="M'+L.map(p=>px(p[0]).toFixed(1)+' '+py(p[1]).toFixed(1)).join('L')+'Z" fill="#101014" stroke="#2c2c33" stroke-width="1.2"/>';
+ h+='<g id="dots">'+M.res.map(r=>'<circle class="dd k'+cls(r[2])+'" cx="'+px(r[0]).toFixed(1)+'" cy="'+py(r[1]).toFixed(1)+'" r="1.9" data-x="'+r[0]+'" data-y="'+r[1]+'"/>').join('')+'</g>';
+ const poly=(P,f,s)=>'<path d="M'+P.map(p=>px(p[0]).toFixed(1)+' '+py(p[1]).toFixed(1)).join('L')+'Z" fill="'+f+'" stroke="'+s+'" stroke-width="1.4"/>';
+ h+=poly(M.coraPoly,'#c4574f44','#c4574f')+poly(M.bavPoly,'#e6d9b033','#e6d9b0');
+ const cx=px(M.cora[0]),cy=py(M.cora[1]);h+='<text x="'+(cx-8)+'" y="'+(cy+26)+'" fill="#e08a82" font-size="13" font-weight="500" text-anchor="end">Corabastos</text>';
+ h+='<text x="'+(px(M.bav[0])+26)+'" y="'+(py(M.bav[1])+4)+'" fill="#e6d9b0" font-size="13" font-weight="500">Predio Bavaria</text>';
+ h+='<g id="newc">'+NEW.map((s,i)=>'<circle class="nc" data-i="'+i+'" cx="'+px(s.x).toFixed(1)+'" cy="'+py(s.y).toFixed(1)+'" r="'+(500*S).toFixed(1)+'" fill="#e6d9b00d" stroke="#cfff5e55" stroke-width=".8" style="opacity:0;transition:opacity .8s"/>').join('')+'</g>';
+ h+=M.plazas.map(p=>'<circle cx="'+px(p[0]).toFixed(1)+'" cy="'+py(p[1]).toFixed(1)+'" r="5" fill="#050607" stroke="#ececee" stroke-width="1.6"/>').join('');
+ h+='<g id="newp">'+NEW.map((s,i)=>'<g class="newg" data-i="'+i+'" style="opacity:0" tabindex="0"><circle class="pulse" cx="'+px(s.x).toFixed(1)+'" cy="'+py(s.y).toFixed(1)+'" r="6" fill="none" stroke="#e6d9b0" stroke-width="1.4"/><circle cx="'+px(s.x).toFixed(1)+'" cy="'+py(s.y).toFixed(1)+'" r="'+(i<8?6.5:5)+'" fill="#e6d9b0" stroke="#050607" stroke-width="1.5"/><text x="'+px(s.x).toFixed(1)+'" y="'+(py(s.y)+3.6).toFixed(1)+'" font-size="9" font-weight="600" text-anchor="middle" fill="#111" pointer-events="none">'+(i+1)+'</text></g>').join('')+'</g>';
+ svg.innerHTML=h;
+ const dots=$$('#dots circle');dots.forEach((d,i)=>{d.style.transitionDelay=(Math.random()*500|0)+'ms'});
+ const pts0=M.plazas;
+ const D=[M.res.map(r=>r[2]),null,M.res.map(r=>r[3])];
+ D[1]=M.res.map(r=>Math.min(r[2],distTo([r[0],r[1]],NEW.slice(0,8).map(s=>[s.x,s.y]))));
+ const TXT=['de las viviendas a 500 m o menos de una plaza de mercado','con 8 plazas nuevas, a 500 m o menos de una plaza','con las 19 plazas nuevas, a 500 m o menos de una plaza'];
+ const VAL=[ac.plaza['500'],AN.curva.r500[8],ac.cov2['500']];
+ let cur=0;
+ function setMode(m){cur=m;$$('.mctl .pill').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.m===m)));
+  dots.forEach((d,i)=>{d.setAttribute('class','dd k'+cls(D[m][i]))});
+  $$('#newp .newg').forEach(g=>g.style.opacity=m===2||(m===1&&+g.dataset.i<8)?1:0);
+  $$('#newc .nc').forEach(c=>c.style.opacity=m===2||(m===1&&+c.dataset.i<8)?1:0);
+  const el=$('#mr-v'),v=VAL[m],t0=performance.now(),from=parseFloat(el.dataset.v||VAL[0]);el.dataset.v=v;
+  (function f(n){const q=RED?1:eoc(cl((n-t0)/900));el.textContent=fmt(from+(v-from)*q,1)+' %';if(q<1)requestAnimationFrame(f)})(t0);
+  $('#mr-t').textContent=TXT[m]}
+ const AUTO=[];
+ $$('.mctl .pill').forEach(b=>b.onclick=()=>{AUTO.forEach(clearTimeout);setMode(+b.dataset.m)});
+ {const w=$('.mapw');w.addEventListener('revealed',()=>{if(RED)return;AUTO.push(setTimeout(()=>setMode(1),1600),setTimeout(()=>setMode(2),3600))},{once:true})}
+ // tooltip plazas nuevas
+ const tip=$('#mtip'),mw=$('.mapw');
+ $$('#newp .newg').forEach(g=>{const i=+g.dataset.i,s=NEW[i];const show=ev=>{const r=mw.getBoundingClientRect(),c=g.getBoundingClientRect();tip.innerHTML='<b>Plaza de abasto nueva '+(i+1)+(i<8?' · fase 1':' · fase 2')+'</b>Cubre '+fmt(s.gain)+' viviendas que hoy no tienen plaza a 500 m (≈ '+fmt(Math.round(s.gain/AN.n_res*POP/100)*100)+' personas <span class="tag">est.</span>). Está en una calle con integración en el percentil '+s.pI+' y elección en el '+s.pC+'.';tip.style.display='block';
+  tip.style.left=Math.min(c.left-r.left+16,r.width-260)+'px';tip.style.top=Math.max(8,c.top-r.top-4)+'px'};
+  g.addEventListener('mouseenter',show);g.addEventListener('focus',show);g.addEventListener('click',show);g.addEventListener('mouseleave',()=>tip.style.display='none');g.addEventListener('blur',()=>tip.style.display='none')});
+ mw.addEventListener('click',e=>{if(!e.target.closest('.newg'))tip.style.display='none'})
+}
+// mapa del hero (suave, de fondo)
+{const svg=$('#hmap'),W=1200,G=mkMap(svg,W),{px,py}=G;svg.setAttribute('preserveAspectRatio','xMaxYMid slice');
+ let h='<g opacity=".95">'+M.res.filter((_,i)=>i%2===0).map((r,i)=>'<circle cx="'+px(r[0]).toFixed(1)+'" cy="'+py(r[1]).toFixed(1)+'" r="1.5" fill="#6d6d78" style="opacity:0;animation:fi 1.4s '+(0.3+(i%40)*.03).toFixed(2)+'s forwards"/>').join('')+'</g>';
+ h+='<path d="M'+M.coraPoly.map(p=>px(p[0]).toFixed(1)+' '+py(p[1]).toFixed(1)).join('L')+'Z" fill="#c4574f33" stroke="#c4574f" stroke-width="1.2"/>';
+ const c=[px(M.cora[0]),py(M.cora[1])];
+ NEW.forEach((s,i)=>{const x=px(s.x),y=py(s.y);h+='<path d="M'+c[0]+' '+c[1]+' Q'+((c[0]+x)/2)+' '+((c[1]+y)/2-60)+' '+x+' '+y+'" fill="none" stroke="#e6d9b0" stroke-width=".7" stroke-dasharray="1" stroke-dashoffset="1" pathLength="1" style="animation:dr 1.6s '+(1.2+i*.12).toFixed(2)+'s ease forwards;opacity:.35"/><circle cx="'+x+'" cy="'+y+'" r="4" fill="#e6d9b0" style="opacity:0;animation:fi .6s '+(1.4+i*.12).toFixed(2)+'s forwards"/>'});
+ h+=M.plazas.map(p=>'<circle cx="'+px(p[0]).toFixed(1)+'" cy="'+py(p[1]).toFixed(1)+'" r="4" fill="#050607" stroke="#ececee" stroke-width="1.3"/>').join('');
+ svg.innerHTML='<style>@keyframes fi{to{opacity:1}}</style>'+h}
+
+/* ---------- gráficas ---------- */
+{ // curva de cobertura
+ const W=520,H=300,l=40,r=14,t=16,b=36,X=(i,mx)=>l+i*(W-l-r)/mx,Y=v=>t+(1-(v-20)/80)*(H-t-b);
+ const c5=AN.curva.r500.slice(0,26),c8=AN.curva.r800.slice(0,26);
+ let s='<svg viewBox="0 0 '+W+' '+H+'">';
+ [20,40,60,80,100].forEach(v=>s+='<line class="gl" x1="'+l+'" x2="'+(W-r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'"/><text class="ax" x="'+(l-8)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+v+' %</text>');
+ [0,5,10,15,20,25].forEach(i=>s+='<text class="ax" x="'+X(i,25)+'" y="'+(H-14)+'" text-anchor="middle">'+i+'</text>');
+ s+='<text class="ax" x="'+((l+W-r)/2)+'" y="'+(H-0)+'" text-anchor="middle">plazas nuevas</text>';
+ const path=(a,mx)=>a.map((v,i)=>(i?'L':'M')+X(i,mx).toFixed(1)+' '+Y(v).toFixed(1)).join('');
+ s+='<path class="draw" pathLength="1" d="'+path(c5,25)+'" stroke="#e6d9b0" stroke-width="2.2"/><path class="draw" pathLength="1" d="'+path(c8,25)+'" stroke="#8cc084" stroke-width="2.2" style="animation-delay:.3s"/>';
+ [[8,c5,'#e6d9b0'],[19,c5,'#e6d9b0'],[8,c8,'#8cc084']].forEach(([i,c,col])=>{s+='<circle cx="'+X(i,25)+'" cy="'+Y(c[i])+'" r="4.5" fill="#050607" stroke="'+col+'" stroke-width="2"/><text x="'+(X(i,25)+8)+'" y="'+(Y(c[i])+(c===c8?-8:16))+'" font-size="11" font-weight="600" fill="'+col+'">'+fmt(c[i],0)+' %</text>'});
+ s+='<g font-size="11.5" transform="translate(190,168)"><rect x="'+(l+10)+'" y="'+(t+6)+'" width="9" height="9" fill="#e6d9b0" rx="2"/><text x="'+(l+25)+'" y="'+(t+14)+'" fill="#ececee">Alcance de 500 m (6 a 7 minutos a pie)</text><rect x="'+(l+10)+'" y="'+(t+24)+'" width="9" height="9" fill="#8cc084" rx="2"/><text x="'+(l+25)+'" y="'+(t+32)+'" fill="#ececee">Alcance de 800 m (10 minutos a pie)</text></g></svg>';
+ $('#curva').innerHTML=s+'<p style="margin:12px 0 0;font-size:13.5px;color:var(--mut)">A 800 m bastan 8 plazas para llegar al '+fmt(c8[8],0)+' %. A 500 m se necesitan 19 para el '+fmt(c5[19],0)+' %, y a partir de ahí cada plaza suma menos de un punto.</p>';
+ $('#curva').closest('.card').addEventListener('revealed',()=>$$('#curva .draw').forEach(p=>p.classList.add('on')))
+}
+{ // histograma
+ const a=ac.binsPlaza,b=ac.binsPlaza2,W=520,H=300,l=96,r=64,t=8,bt=14,rh=(H-t-bt)/a.length;
+ let s='<svg viewBox="0 0 '+W+' '+H+'">';
+ a.forEach((x,i)=>{const y=t+i*rh,w=v=>v/66*(W-l-r);
+  s+='<text class="ax" x="'+(l-10)+'" y="'+(y+rh/2+4)+'" text-anchor="end">'+x.l+' m</text>'+
+  '<rect x="'+l+'" y="'+(y+6)+'" width="'+w(x.v)+'" height="'+(rh/2-7)+'" rx="2" fill="#5d5d66"/><text class="ax" x="'+(l+w(x.v)+6)+'" y="'+(y+rh/2-1)+'">'+fmt(x.v,1)+' %</text>'+
+  '<rect x="'+l+'" y="'+(y+rh/2+1)+'" width="'+w(b[i].v)+'" height="'+(rh/2-7)+'" rx="2" fill="#e6d9b0"/><text class="ax" x="'+(l+w(b[i].v)+6)+'" y="'+(y+rh-6)+'" style="fill:#e6d9b0">'+fmt(b[i].v,1)+' %</text>'});
+ s+='</svg>';$('#hist').innerHTML=s+'<p style="margin:12px 0 0;font-size:13.5px;color:var(--mut)"><span style="color:#8a8a93">■</span> Hoy &nbsp; <span style="color:var(--pr)">■</span> Con la malla completa. La distancia mediana pasa de '+V.med0+' m a '+V.med1+' m.</p>'}
+
+/* ---------- flujo del sistema ---------- */
+{const nodes=[
+ {x:10,y:130,w:170,h:96,t:'Productores',s:['Cundinamarca 46,25 %','Meta 12,43 %'],c:'#8a8a93',f:1},
+ {x:250,y:60,w:190,h:96,t:'Corabastos reducido',s:['Mayorista y volumen','2,2 Mt en 2022'],c:'#c4574f',f:1},
+ {x:250,y:200,w:190,h:96,t:'Compra directa',s:['Meta 45 % en plazas','supuesto del simulador'],c:'#8cc084'},
+ {x:510,y:128,w:210,h:110,t:'Centro de consolidación',s:['Naves 0 y 2 · 6,1 ha','selección, frío y empaque'],c:'#e6d9b0'},
+ {x:790,y:20,w:210,h:96,t:'Plaza mayor Bavaria',s:['9.362 m² · ≈156 puestos','destino de toda la UPZ'],c:'#e6d9b0'},
+ {x:790,y:150,w:210,h:96,t:'19 plazas de barrio',s:['alcance de 500 m','fase 1: 8 · fase 2: 11'],c:'#e6d9b0'},
+ {x:1070,y:150,w:140,h:96,t:'Tiendas aliadas',s:['431 tiendas OSM','95 % a 500 m'],c:'#f2c879'},
+ {x:1070,y:20,w:140,h:96,t:'Hogares',s:['≈1,04 M personas'],c:'#ececee'},
+ {x:510,y:330,w:210,h:84,t:'Compostaje y hongos',s:['14,9 t/día entran','5,9 t/día de compost'],c:'#b98a57'}];
+ const link=(a,b,col,dy=0)=>{const A=nodes[a],B=nodes[b],x1=A.x+A.w,y1=A.y+A.h/2+dy,x2=B.x,y2=B.y+B.h/2+dy,mx=(x1+x2)/2;return '<path class="fl" d="M'+x1+' '+y1+' C'+mx+' '+y1+' '+mx+' '+y2+' '+x2+' '+y2+'" stroke="'+col+'"/>'};
+ let s='<svg viewBox="0 0 1230 440" role="img" aria-label="Flujo de alimentos y residuos de la propuesta">';
+ s+=link(0,1,'#8a8a93')+link(0,2,'#8cc084')+link(1,3,'#c4574f')+link(2,3,'#8cc084')+link(3,4,'#e6d9b0')+link(3,5,'#e6d9b0')+link(5,6,'#f2c879')+link(4,7,'#e6d9b0');
+ s+='<path class="fl" d="M1140 150 L1140 116" stroke="#f2c879"/>';
+ s+='<path class="fl" d="M615 238 L615 330" stroke="#b98a57"/><text x="627" y="290" font-size="11.5" fill="#b98a57">mermas y empaques</text>';
+ s+='<path class="fl" d="M895 246 C895 330 820 372 720 372" stroke="#b98a57"/><text x="905" y="330" font-size="11.5" fill="#b98a57">orgánicos en bicicarga</text>';
+ nodes.forEach(n=>{s+='<g class="fn"><rect x="'+n.x+'" y="'+n.y+'" width="'+n.w+'" height="'+n.h+'" stroke="'+(n.f?'#34343b':n.c)+'" rx="8"/><rect x="'+n.x+'" y="'+n.y+'" width="3" height="'+n.h+'" fill="'+n.c+'" rx="1.5"/><text x="'+(n.x+16)+'" y="'+(n.y+28)+'" font-size="14" font-weight="500">'+n.t+'</text>'+n.s.map((q,i)=>'<text x="'+(n.x+16)+'" y="'+(n.y+52+i*19)+'" font-size="12" style="fill:#8a8a93">'+q+'</text>').join('')+'</g>'});
+ $('#flow').innerHTML=s+'</svg><p style="margin:12px 0 0;font-size:12.5px;color:var(--mut)">Las líneas en movimiento muestran el sentido del flujo. Las cifras de Corabastos y de origen vienen de la fuente <a class="cite" href="#src-1">[1]</a>; las de plazas y puestos, de los análisis anteriores; la meta de compra directa es un supuesto del simulador y los toneladas de compostaje son una cuenta de la propuesta.</p>'}
+
+/* ---------- decisiones ---------- */
+const DEC=[
+ ['Plaza mayor en Bavaria','9.362 m² de nave',[
+  ['Qué es','Un mercado de escala distrital en la nave 3 del predio, con puestos de productores, comercio de alimentos y una cocina de degustación. Es el destino de abasto de los barrios que rodean el predio.'],
+  ['Dónde','En el borde del predio, junto a una de las '+V.entr+' puertas. Allí la integración global de los pasajes nuevos supera a la del '+AN.sx.nuevoNain+' % de las calles existentes.'],
+  ['Cuánto','≈156 puestos (uno por 60 m² con circulación) y ≈234 empleos (1,5 personas por puesto). <span class="tag p">propuesta</span>'],
+  ['Por qué','A 800 m del predio hay '+V.cm8+' edificios comerciales por vivienda, frente a '+V.cmk+' en Kennedy. Los usos que buscan movimiento se ubican donde la red lo concentra<a class="cite" href="#src-15">[15]</a>.']]],
+ ['Malla de 19 plazas de barrio',V.pl0+' → '+V.pl1+' plazas',[
+  ['Qué es','Plazas de abasto de alcance caminable: puestos de alimentos frescos, punto verde para separar orgánicos, base de reparto en bicicarga a las tiendas del barrio y un salón comunitario.'],
+  ['Dónde','En 19 sitios elegidos por máxima cobertura sobre calles con integración mayor o igual al percentil 45 y elección menor o igual al 92, separados al menos 450 m. Se construyen en dos fases: 8 y 11.'],
+  ['Cuánto','Sube la cobertura a 500 m de '+V.cov0+' % a '+V.cov1+' %. Con las primeras 8 llega al '+fmt(AN.curva.r500[8],0)+' %. La distancia mediana baja de '+V.med0+' a '+V.med1+' m.'],
+  ['Por qué','Barcelona sostiene 39 mercados alimentarios, ningún barrio sin mercado de referencia, y 6 de cada 10 personas compran en ellos<a class="cite" href="#src-14">[14]</a>. En Bogotá las 17 plazas distritales aportan solo el 5,1 % del abasto<a class="cite" href="#src-11">[11]</a>.']]],
+ ['Centro de consolidación','61.026 m² de naves',[
+  ['Qué es','Las naves 0 y 2, dos esqueletos de concreto de 26.340 y 34.686 m² de huella, se reprograman para recibir compra directa, seleccionar, empacar, mantener la cadena de frío y despachar en vehículos eléctricos y bicicargas hacia las plazas. Conservan su retícula de columnas.'],
+  ['Dónde','Dentro del predio, con acceso de carga por el borde y salida peatonal y de bicicleta por los pasajes.'],
+  ['Cuánto','Es el 50 % de la huella construida del predio (121.436 m²). La capacidad de cada función se dimensiona en la siguiente etapa. <span class="tag">por definir</span>'],
+  ['Por qué','Sin consolidación local, las plazas dependen de que todo pase por la central. El plan de regularización de Corabastos ya habla de nodos logísticos urbanos<a class="cite" href="#src-13">[13]</a> y el Plan Maestro de Abastecimiento es el marco normativo<a class="cite" href="#src-12">[12]</a>.']]],
+ ['Corabastos reducido y compra directa','meta 45 %',[
+  ['Qué es','Corabastos sigue siendo el mayorista de volumen, pero deja de ser el paso obligado. Una parte del alimento, de Cundinamarca y de la región, llega directo al centro de consolidación.'],
+  ['Dónde','Entre los productores y las plazas. Cundinamarca aporta el 46,25 % de lo que entra a Corabastos y el Meta el 12,43 %<a class="cite" href="#src-1">[1]</a>.'],
+  ['Cuánto','Meta de 45 % de compra directa en las plazas, la que usa el simulador. <span class="tag p">propuesta</span>'],
+  ['Por qué','Más de 280.000 personas pasan a diario por el sector de Corabastos<a class="cite" href="#src-16">[16]</a>. No se elimina por la razón contraria: consolidar también da resiliencia<a class="cite" href="#src-17">[17]</a>.']]],
+ ['Ciclo de orgánicos','5,9 t/día de compost',[
+  ['Qué es','Cada plaza recibe los orgánicos separados de su barrio. Bicicargas los llevan al compostaje del predio, junto al laboratorio de hongos (4.696 m²), y el compost vuelve a los jardines y viveros.'],
+  ['Dónde','Compostaje en el antiguo patio del predio; puntos verdes en las 19 plazas y en la plaza mayor.'],
+  ['Cuánto','40.320 personas generan 32,3 t/día; 16,5 t son orgánicas (51 %). Con 60 % de separación y 5 t/día de Corabastos entran 14,9 t/día y salen 5,9 t/día de compost. Son unos 66 viajes diarios de 150 kg. <span class="tag p">propuesta</span>'],
+  ['Por qué','Kennedy tuvo 77 puntos críticos de residuos en 2023<a class="cite" href="#src-7">[7]</a>. Intervenirlos sin cerrar el ciclo no cambia la causa.']]],
+ ['Suelo común y federación','sin torres ni lotes',[
+  ['Qué es','El predio se mantiene como bien común. No se lotea ni se construyen torres. Lo gobierna la <a href="#federacion" style="color:var(--pr)">Federación para la soberanía alimentaria</a>: las juntas de los barrios con vocerías que rotan y una junta del Distrito Bavaria donde pesa más quien más sabe y enseña. El Colectivo Salvemos el Bosque Bavaria tiene un asiento propio.'],
+  ['Dónde','Los 71,2 ha del predio. Cada puerta corresponde a un sector de barrios con su asamblea.'],
+  ['Cuánto','El decreto vigente mantiene más de 14.000 viviendas en torres; la propuesta no suma ninguna dentro del predio. <span class="tag p">propuesta</span>'],
+  ['Por qué','Con el precio del suelo en alza<a class="cite" href="#src-5">[5]</a>, un lote vacío bien conectado es objeto de retención. Los instrumentos jurídicos posibles son derecho de superficie, fiducia de tierras o declaratoria de uso público, y requieren estudio. <span class="tag">por estudiar</span>']]],
+ ['Pasajes que abren el predio',V.pkm+' km',[
+  ['Qué es','Se abren '+V.entr+' puertas en los cruces existentes del borde y se unen con un paseo largo, tres calles internas y un anillo. Son peatonales y de bicicleta.'],
+  ['Dónde','Sobre los 18,2 ha de suelo libre, sin tocar el bosque.'],
+  ['Cuánto','Los '+V.nnuevos+' tramos nuevos quedan en el percentil '+AN.sx.nuevoNain+' de integración global. La red a 600 m casi no cambia (+0,2 %): se abre un centro nuevo, no se reordena la ciudad.'],
+  ['Por qué','Un muro de varios kilómetros deja a los barrios vecinos al fondo de la red aunque estén al lado. Los pasajes convierten el borde en entradas.']]]];
+$('#decs').innerHTML=DEC.map((d,i)=>'<details class="dec rv'+(i===0?' d1':'')+'"'+(i===0?' open':'')+'><summary><span class="no">'+(i+1)+'</span><h3>'+d[0]+'</h3><em>'+d[1]+'</em></summary><div class="bd">'+d[2].map(x=>'<div><h4>'+x[0]+'</h4><p>'+x[1]+'</p></div>').join('')+'</div></details>').join('');
+$$('#decs .rv').forEach(e=>io.observe(e));
+
+/* ---------- federación ---------- */
+{
+ const F=AN.fed,ST=F.stats,TM=ST.temas;
+ $('#fx-n').textContent=ST.n;$('#fx-c').textContent=ST.conTemas;$('#fx-p').textContent=fmt(ST.prom,1);
+ const rows=TM.map((t,i)=>[t,ST.cnt[i]]).sort((a,b)=>b[1]-a[1]);rows.push(['Alimentación y abasto',0]);
+ const mxv=Math.max(...rows.map(r=>r[1]));
+ $('#fx-bars').innerHTML=rows.map(r=>'<div class="tbar'+(r[1]===0?' gap':'')+'"><span>'+r[0]+'</span><i data-w="'+(100*r[1]/mxv)+'"></i><b>'+r[1]+'</b></div>').join('');
+ $('#fx-bars').closest('.card').addEventListener('revealed',()=>setTimeout(()=>$$('#fx-bars i').forEach(i=>i.style.width=Math.max(i.dataset.w,i.dataset.w==='0'?0:1)+'%'),250));
+ $('#fr-12').textContent='pasan '+(12/2/2)+' años';$('#fr-24').textContent=(24/2/2)+' años';
+ /* red */
+ const COLS=['#e3a64a','#8fc46a','#5fb3d9','#e0664f','#a98bd6','#e58aa8','#d9c06a','#6fc7b4'];
+ const svg=$('#fnet'),W=1000,NS='http://www.w3.org/2000/svg';
+ const J=F.jac.map(j=>({...j}));
+ const xs=J.map(j=>j.x).concat([0]),ys=J.map(j=>j.y).concat([0]),mnx=Math.min(...xs),mxx=Math.max(...xs),mny=Math.min(...ys),mxy=Math.max(...ys);
+ let sc=(W-170)/(mxx-mnx);if((mxy-mny)*sc+150>1300)sc=(1300-150)/(mxy-mny);
+ const H=Math.round((mxy-mny)*sc+150);svg.setAttribute('viewBox','0 0 '+W+' '+H);
+ const cx=85-mnx*sc,cy=75+mxy*sc;
+ J.forEach(j=>{j.px=cx+j.x*sc;j.py=cy-j.y*sc});
+ for(let it=0;it<120;it++){
+  for(let a=0;a<J.length;a++)for(let b=a+1;b<J.length;b++){const dx=J[b].px-J[a].px,dy=J[b].py-J[a].py,d=Math.hypot(dx,dy)||1,mn=64;if(d<mn){const f=(mn-d)/2/d;J[a].px-=dx*f;J[a].py-=dy*f;J[b].px+=dx*f;J[b].py+=dy*f}}
+  J.forEach(j=>{const dx=j.px-cx,dy=j.py-cy,d=Math.hypot(dx,dy)||1;if(d<150){j.px=cx+dx/d*150;j.py=cy+dy/d*150}j.px=Math.max(40,Math.min(W-40,j.px));j.py=Math.max(40,Math.min(H-40,j.py))})}
+ const SEC=[];for(let s=0;s<8;s++){const m=J.filter(j=>j.s===s);if(!m.length)continue;const mx=m.reduce((t,j)=>t+j.px,0)/m.length,my=m.reduce((t,j)=>t+j.py,0)/m.length;SEC.push({s,px:cx+(mx-cx)*.5,py:cy+(my-cy)*.5,ang:Math.atan2(my-cy,mx-cx)})}
+ const secOf={};SEC.forEach(q=>secOf[q.s]=q);
+ const A=J.length;
+ let h='';
+ // anillo entre sectores
+ const ord=[...SEC].sort((a,b)=>a.ang-b.ang);
+ h+='<path d="M'+ord.map(q=>q.px.toFixed(1)+' '+q.py.toFixed(1)).join('L')+'Z" class="lk" stroke="#3a3a42" stroke-dasharray="3 5"/>';
+ J.forEach(j=>{const q=secOf[j.s];h+='<path d="M'+j.px.toFixed(1)+' '+j.py.toFixed(1)+'L'+q.px.toFixed(1)+' '+q.py.toFixed(1)+'" class="lk" stroke="'+COLS[j.s]+'" opacity=".45"/>'});
+ SEC.forEach(q=>{h+='<path d="M'+q.px.toFixed(1)+' '+q.py.toFixed(1)+'L'+cx+' '+cy+'" class="lk" stroke="'+COLS[q.s]+'" opacity=".6" stroke-width="1.8"/>'});
+ h+='<g id="fpulse"></g>';
+ // centro
+ h+='<circle id="fmesa" cx="'+cx+'" cy="'+cy+'" r="60" fill="#a98bd614" stroke="#a98bd6" stroke-width="1.5" stroke-dasharray="4 5"/><circle cx="'+cx+'" cy="'+cy+'" r="40" class="pn" stroke="#e6d9b0"/><text x="'+cx+'" y="'+(cy-3)+'" font-size="12.5" font-weight="500" fill="#ececee" text-anchor="middle">Junta del</text><text x="'+cx+'" y="'+(cy+13)+'" font-size="12.5" font-weight="500" fill="#ececee" text-anchor="middle">Distrito Bavaria</text>';
+ SEC.forEach(q=>{h+='<g><rect x="'+(q.px-14).toFixed(1)+'" y="'+(q.py-14).toFixed(1)+'" width="28" height="28" rx="6" class="pn" stroke="'+COLS[q.s]+'"/><text x="'+q.px.toFixed(1)+'" y="'+(q.py+4).toFixed(1)+'" font-size="11.5" font-weight="600" fill="'+COLS[q.s]+'" text-anchor="middle">S'+(q.s+1)+'</text></g>'});
+ h+='<g id="fdots"></g>';
+ J.forEach((j,a)=>{h+='<g class="fj" data-a="'+a+'" style="cursor:pointer"><circle cx="'+j.px.toFixed(1)+'" cy="'+j.py.toFixed(1)+'" r="26" fill="transparent"/><circle cx="'+j.px.toFixed(1)+'" cy="'+j.py.toFixed(1)+'" r="6" class="pn" stroke="'+COLS[j.s]+'"/></g>'});
+ svg.innerHTML=h;
+ const gD=$('#fdots'),gP=$('#fpulse');
+ let dots=[];
+ function buildDots(N){gD.innerHTML='';dots=[];
+  const rr=N>16?19:N>10?16:13;
+  J.forEach((j,a)=>{const arr=[];for(let i=0;i<N;i++){const an=i/N*Math.PI*2-Math.PI/2,c=document.createElementNS(NS,'circle');c.setAttribute('cx',(j.px+Math.cos(an)*rr).toFixed(1));c.setAttribute('cy',(j.py+Math.sin(an)*rr).toFixed(1));c.setAttribute('r','2.7');c.style.transition='fill .5s, r .4s, stroke .4s';gD.appendChild(c);arr.push(c)}dots.push(arr)})}
+ /* modelo */
+ const mul=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+ function simulate(N,m,cap,T=16){
+  const rnd=mul(11),sv=[],kn=[],tg=[],cy2=[],snaps=[];
+  for(let a=0;a<A;a++){sv.push(new Uint8Array(N));kn.push(new Uint8Array(N));tg.push(new Uint16Array(N));cy2.push(new Uint8Array(N))}
+  const take=(arr)=>arr.splice((rnd()*arr.length)|0,1)[0];
+  const snap=(vo)=>{const dl=[];vo.forEach((p,a)=>p.forEach(i=>dl.push({a,i,t:tg[a][i],w:1+Math.min(tg[a][i],cap>=9?1e9:cap)})));
+   dl.sort((x,y)=>y.w-x.w);const tw=dl.reduce((t,d)=>t+d.w,0),top=dl.slice(0,6).reduce((t,d)=>t+d.w,0);
+   let ns=0,nk=0,nf=0;for(let a=0;a<A;a++)for(let i=0;i<N;i++){ns+=sv[a][i];nk+=kn[a][i];if(tg[a][i]>=3)nf++}
+   const tot=A*N;return{vo,sv:sv.map(x=>Uint8Array.from(x)),kn:kn.map(x=>Uint8Array.from(x)),tg:tg.map(x=>Uint16Array.from(x)),served:100*ns/tot,know:100*nk/tot,form:nf,top:dl.length&&tw?100*top/tw:0,del:dl.length,list:dl.slice(0,8)}};
+  snaps.push(snap(J.map(()=>[])));
+  for(let t=1;t<=T;t++){
+   const k0=kn.map(x=>Uint8Array.from(x)),vo=[];
+   for(let a=0;a<A;a++){let el=[];for(let i=0;i<N;i++)if(!cy2[a][i])el.push(i);if(el.length<2){cy2[a].fill(0);el=[];for(let i=0;i<N;i++)el.push(i)}
+    const i1=take(el),i2=take(el);[i1,i2].forEach(i=>{cy2[a][i]=1;sv[a][i]=1;kn[a][i]=1});vo.push([i1,i2])}
+   for(let a=0;a<A;a++){const te=[];for(let i=0;i<N;i++)if(k0[a][i])te.push(i);
+    te.forEach(ti=>{for(let q=0;q<m;q++){const ln=[];for(let j=0;j<N;j++)if(!kn[a][j])ln.push(j);if(!ln.length)break;kn[a][take(ln)]=1;tg[a][ti]++}})}
+   snaps.push(snap(vo))}
+  return snaps}
+ let N=12,Mm=1,Cap=4,snaps=simulate(N,Mm,Cap),T=0,timer=null;
+ const pulses=[];let pRAF=0;
+ function pulse(){const now=performance.now();let any=false;
+  for(let k=pulses.length-1;k>=0;k--){const p=pulses[k],q=(now-p.t0)/1100;if(q<0){any=true;continue}if(q>=1){p.el.remove();pulses.splice(k,1);continue}any=true;
+   const segs=p.pts,u=q*2,sI=Math.min(1,Math.floor(u)),f=u-sI,a=segs[sI],b=segs[sI+1];p.el.setAttribute('cx',(a[0]+(b[0]-a[0])*f).toFixed(1));p.el.setAttribute('cy',(a[1]+(b[1]-a[1])*f).toFixed(1));p.el.setAttribute('opacity',(q>.9?(1-q)*10:1).toFixed(2))}
+  if(any)pRAF=requestAnimationFrame(pulse);else pRAF=0}
+ function firePulses(vo){if(RED)return;J.forEach((j,a)=>{if(!vo[a]||!vo[a].length)return;const q=secOf[j.s];for(let k=0;k<2;k++){const el=document.createElementNS(NS,'circle');el.setAttribute('r','3.6');el.setAttribute('fill','#e6d9b0');el.setAttribute('opacity','0');gP.appendChild(el);pulses.push({el,t0:performance.now()+k*160,pts:[[j.px,j.py],[q.px,q.py],[cx,cy]]})}});if(!pRAF)pRAF=requestAnimationFrame(pulse)}
+ function view(){const s=snaps[T];$('#f-tl').textContent=T;$('#f-sl').value=T;$('#f-sem').textContent='Semestre '+T;$('#f-año').textContent='año '+fmt(T/2,1);
+  $('#f-served').textContent=fmt(s.served,0)+' %';$('#f-know').textContent=fmt(s.know,0)+' %';$('#f-del').textContent=s.vo.reduce((t,p)=>t+p.length,0);$('#f-top').textContent=T?fmt(s.top,0)+' %':'—';
+  dots.forEach((arr,a)=>arr.forEach((c,i)=>{const now=s.vo[a]&&s.vo[a].indexOf(i)>=0,f=s.tg[a][i]>=3,k=s.kn[a][i];
+   c.setAttribute('fill',now?'#e6d9b0':f?'#a98bd6':k?'#8cc084':'#3b3b43');c.setAttribute('r',now?'3.9':f?'3.2':'2.7');
+   c.setAttribute('stroke',s.sv[a][i]?'#e6d9b0':'none');c.setAttribute('stroke-width',now?'1.6':'1.1')}));
+  $('#fmesa').setAttribute('r',(56+Math.min(26,s.form*1.1)).toFixed(1));
+  const mxw=Math.max(2,...s.list.map(d=>d.w));
+  $('#f-bars').innerHTML=s.list.length&&T?s.list.map(d=>'<div class="wb"><span title="'+J[d.a].n+'">'+J[d.a].n+'</span><i style="width:0" data-w="'+(100*d.w/mxw)+'"></i><b>'+d.w+'</b></div>').join(''):'<p style="font-size:12.5px;color:var(--mut);margin:0">Aún no hay delegadas. Pulsa «Siguiente semestre».</p>';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>$$('#f-bars i').forEach(i=>i.style.width=i.dataset.w+'%')));
+  chart()}
+ function chart(){const Wc=300,Hc=110,l=8,r=8,t=8,b=18,X=i=>l+i*(Wc-l-r)/16,Y=v=>t+(1-v/100)*(Hc-t-b);
+  const ln=k=>snaps.map((s,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(s[k]).toFixed(1)).join('');
+  $('#f-chart').innerHTML='<svg viewBox="0 0 '+Wc+' '+Hc+'">'+[0,50,100].map(v=>'<line class="gl" x1="'+l+'" x2="'+(Wc-r)+'" y1="'+Y(v)+'" y2="'+Y(v)+'"/>').join('')+
+   '<path d="'+ln('know')+'" fill="none" stroke="#8cc084" stroke-width="2"/><path d="'+ln('served')+'" fill="none" stroke="#e6d9b0" stroke-width="2"/>'+
+   '<line x1="'+X(T)+'" x2="'+X(T)+'" y1="'+t+'" y2="'+(Hc-b)+'" stroke="#ececee" stroke-width="1" stroke-dasharray="2 3"/>'+
+   '<text class="ax" x="'+l+'" y="'+(Hc-4)+'">0</text><text class="ax" x="'+(Wc-r)+'" y="'+(Hc-4)+'" text-anchor="end">8 años</text></svg><div style="font-size:11px;color:var(--mut);margin-top:2px"><span style="color:#e6d9b0">■</span> ya fue vocera &nbsp; <span style="color:#8cc084">■</span> con formación</div>'}
+ function go(t,anim){T=Math.max(0,Math.min(16,t));view();if(anim&&T)firePulses(snaps[T].vo)}
+ function stop(){if(timer){clearInterval(timer);timer=null}$('#f-play').textContent='▶ Reproducir'}
+ function recompute(){snaps=simulate(N,Mm,Cap);view()}
+ buildDots(N);view();
+ $('#f-play').onclick=()=>{if(timer){stop();return}if(T>=16)go(0);$('#f-play').textContent='❚❚ Pausar';go(T+1,true);timer=setInterval(()=>{if(T>=16){stop();return}go(T+1,true)},1500)};
+ $('#f-step').onclick=()=>{stop();go(T>=16?0:T+1,true)};
+ $('#f-reset').onclick=()=>{stop();go(0)};
+ $('#f-sl').oninput=e=>{stop();go(+e.target.value,false)};
+ $('#f-n').oninput=e=>{N=+e.target.value;$('#f-nv').textContent=N;buildDots(N);recompute()};
+ $('#f-m').oninput=e=>{Mm=+e.target.value;$('#f-mv').textContent=Mm;recompute()};
+ $('#f-c').oninput=e=>{Cap=+e.target.value;$('#f-cv').textContent=Cap>=9?'sin tope':Cap;recompute()};
+ // al aparecer: arranca solo
+ $('.fed').addEventListener('revealed',()=>{if(RED)return;setTimeout(()=>{if(!timer&&T===0)$('#f-play').click()},1400)},{once:true});
+ // tooltip de juntas
+ const tip=$('#ftip'),fw=$('.fed');
+ $$('.fj').forEach(g=>{const j=J[+g.dataset.a];const show=()=>{const r=fw.getBoundingClientRect(),c=g.getBoundingClientRect();
+  tip.innerHTML='<b>Junta '+j.n+'</b>'+(j.t.length?'Comisiones: '+j.t.map(k=>TM[k]).join(', ')+'.':'Sin comisiones identificadas en el registro.')+'<br><span style="color:var(--pr)">Sin comisión de soberanía alimentaria hoy.</span>';
+  tip.style.display='block';tip.style.left=Math.min(c.left-r.left+24,r.width-270)+'px';tip.style.top=Math.max(48,c.top-r.top-10)+'px'};
+  g.addEventListener('mouseenter',show);g.addEventListener('click',show);g.addEventListener('mouseleave',()=>tip.style.display='none')});
+ fw.addEventListener('click',e=>{if(!e.target.closest('.fj'))tip.style.display='none'});
+}
+
+/* ---------- problema por problema ---------- */
+const hab0=Math.round(POP/AN.nPlazas/100)*100,hab1=Math.round(POP/(AN.nPlazas+NEW.length)/100)*100;
+const PP={
+F:{t:'Centralización de servicios',pr:'La oferta de servicios, entre ellos el abasto, se concentra en pocos puntos. Es la causa raíz dentro del mapa.',re:'Se reparte el abasto en una malla: una plaza mayor, 19 plazas de barrio y un centro de consolidación, y Corabastos pasa de paso obligado a mayorista de volumen.',ind:[['Viviendas a 500 m o menos de una plaza',V.cov0+' %',V.cov1+' %',''],['Distancia mediana a una plaza',V.med0+' m',V.med1+' m',''],['Plazas de mercado en Kennedy',V.pl0,V.pl1,'plazas del IPES y de OpenStreetMap'],['Habitantes por plaza',fmt(hab0),fmt(hab1),'<span class="tag">est.</span> con '+fmt(POP)+' habitantes']],ms:'Repetir el cálculo cada año con el registro de plazas del IPES y la red peatonal real.'},
+B:{t:'Crecimiento poblacional',pr:'Kennedy tiene 1.037.929 habitantes y más gente exige más abasto en los mismos puntos.',re:'La capacidad crece sumando plazas en la malla, no agrandando una central. Cada zona densificada cae dentro del alcance de una plaza.',ind:[['Habitantes por plaza',fmt(hab0),fmt(hab1),'<span class="tag">est.</span>'],['Personas a 500 m o menos de una plaza','≈ '+fmt(Math.round(ac.plaza['500']/100*POP/1000)*1000),'≈ '+fmt(Math.round(ac.cov2['500']/100*POP/1000)*1000),'<span class="tag">est.</span> proporcional a edificios residenciales'],['Población de la UPZ 113 atendida por la plaza mayor','—','40.320','SDS 2021']],ms:'Actualizar con la proyección demográfica y el censo cuando se publique por manzana.'},
+C:{t:'Valorización del suelo',pr:'El valor catastral agregado de Kennedy subió 33,4 % entre 2022 y 2026<a class="cite" href="#src-5">[5]</a>. Más suelo valioso significa más presión sobre los usos populares.',re:'El predio sale del mercado: suelo común, sin torres ni lotes en venta. El acceso mejora con espacio público y pasajes, no con loteo.',ind:[['Hectáreas del predio fuera del mercado de suelo','0','71,2','<span class="tag p">propuesta</span>'],['Viviendas nuevas en torre dentro del predio','>14.000 (decreto vigente)','0','<span class="tag p">propuesta</span>'],['Valor catastral de Kennedy, 2022–2026','+33,4 %','a monitorear','Catastro<a class="cite" href="#src-5">[5]</a>, indicador por sectores a construir']],ms:'Comparar el avalúo y el precio de oferta a 1 km del predio con el resto de Kennedy.'},
+D:{t:'Especulación',pr:'Las expectativas por el metro y las obras atraen compra para retener. Las fuentes no cuantifican cuánto del aumento de precios es especulación; los precios de oferta cerca del trazado subieron cerca de 12 % anual frente a 5 % en el resto de Bogotá<a class="cite" href="#src-9">[9]</a>.',re:'Sin lotes ni derechos de edificación transables en el predio, no hay qué retener. El uso queda anclado a lo público: abasto, cocina, cuidado y federación.',ind:[['Lotes del predio en el mercado','—','0','<span class="tag p">propuesta</span>'],['Precio de oferta a menos de 1 km del trazado, variación anual','≈ 12 %','a monitorear','Fincaraiz<a class="cite" href="#src-9">[9]</a>; mide avisos, no transacciones'],['Uso comunitario y de abasto en las naves recuperadas','—','121.436 m² de huella','<span class="tag p">propuesta</span>']],ms:'Seguimiento semestral del precio de oferta y de las transacciones registradas a 1 km del predio.'},
+A:{t:'Dependencia de alimentos externos',pr:'Corabastos recibió 2.198.118 t en 2022 y solo Cundinamarca aportó el 46,25 %<a class="cite" href="#src-1">[1]</a>. Las plazas distritales representan el 5,1 % del abasto de Bogotá<a class="cite" href="#src-11">[11]</a>.',re:'No se busca autoabastecer: se acorta la cadena. Un centro de consolidación y las plazas permiten que el alimento de la región llegue directo, sin pasar por una sola central.',ind:[['Compra directa a productores en las plazas','0 %','45 %','<span class="tag p">propuesta</span> supuesto del simulador'],['Puntos con selección, frío y empaque en Kennedy','0','1','centro de consolidación, <span class="tag p">propuesta</span>'],['Plazas distritales en el abasto de Bogotá','5,1 %','a monitorear','Alcaldía<a class="cite" href="#src-11">[11]</a>']],ms:'Registrar toneladas que entran por compra directa y por Corabastos al centro de consolidación.'},
+E:{t:'Gestión de residuos sólidos',pr:'Kennedy tuvo 77 puntos críticos en 2023<a class="cite" href="#src-7">[7]</a>. En 2025 y 2026 se atendieron 18 y se recogieron 820 t<a class="cite" href="#src-8">[8]</a>, pero esas cifras no son una serie comparable.',re:'Cada plaza es un punto verde. Los orgánicos separados se llevan en bicicarga al compostaje del predio, que además recibe 5 t/día de Corabastos.',ind:[['Orgánicos que se tratan cerca de su origen','0','14,9 t/día','<span class="tag p">propuesta</span>'],['Compost producido','0','5,9 t/día','40 % de la masa, <span class="tag">est.</span>'],['Separación en la fuente en la UPZ 113','—','60 %','meta <span class="tag p">propuesta</span>'],['Viajes diarios en bicicarga','—','≈ 66','150 kg por viaje']],ms:'Pesar lo que entra al compostaje y contar los puntos críticos con una metodología única.'}};
+$('#pcs').innerHTML=['F','A','B','C','D','E'].map(k=>{const p=PP[k],c=PR.find(x=>x[0]===k)[3];
+ return '<article class="pc rv" id="p-'+k+'" style="--c:'+c+'"><header><i>'+k+'</i><h3>'+p.t+'</h3><a href="index.html#'+k+'">Ver en la red →</a></header>'+
+ '<div class="cols"><div><h4>El problema</h4><p>'+p.pr+'</p><h4 style="margin-top:16px">La respuesta</h4><p>'+p.re+'</p><h4 style="margin-top:16px">Cómo se mide</h4><p>'+p.ms+'</p></div>'+
+ '<div><h4>Indicadores · hoy → propuesta</h4>'+p.ind.map(i=>'<div class="ind"><span>'+i[0]+'</span><b>'+i[1]+'<em>→</em>'+i[2]+'</b>'+(i[3]?'<small>'+i[3]+'</small>':'')+'</div>').join('')+'</div></div></article>'}).join('');
+$$('#pcs .rv').forEach(e=>io.observe(e));
+// los citas generadas dinámicamente
+$$('a.cite[href^="#src-"]').forEach(a=>{const n=+a.getAttribute('href').slice(5),s=SRC.find(x=>x[0]===n);if(s)a.title=s[1]});
+if(location.hash){const e=document.querySelector(location.hash);if(e)setTimeout(()=>e.scrollIntoView(),200)}
+})();
+</script>
+</body>
+</html>

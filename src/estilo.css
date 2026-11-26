@@ -305,3 +305,13 @@ body.con-pagina #carto, body.con-pagina #conv, body.con-pagina #atrib, body.con-
 .ed-capitulo b { font: 600 clamp(44px, 6vw, 110px)/1 var(--ed-t); color: var(--ed-papel); letter-spacing: -.005em; }
 .ed-capitulo .linea { display: block; width: 18vw; height: 3px; margin-top: 26px; background: var(--ed-lima); transform-origin: 0 50%; }
 @media (max-width: 700px) { .ed-pop, .ed-lista, .ed-cifra { width: auto; max-width: 88vw; } .ed-rotulo { max-width: 88vw; } }
+/* señalar un nodo redondo (X.ed.senalar(..., { lado: 'circulo' })) */
+.ed-senal.circulo .marco { border-radius: 50%; }
+/* portadilla fluida: sin números, sin tapar la escena */
+.ed-velo { inset: 0; visibility: visible !important; background: #0b0d10; z-index: 10; }
+.ed-capitulo { inset: auto; left: 5vw; top: 8vh; visibility: visible !important; z-index: 9; }
+.ed-capitulo .cont { position: static; }
+.ed-capitulo b { font: 600 clamp(30px, 3.4vw, 60px)/1.02 var(--ed-t); color: var(--ed-papel); text-shadow: 0 3px 24px rgba(0, 0, 0, .6); }
+.ed-capitulo .linea { width: 10vw; height: 3px; margin-top: 14px; }
+#hud-sec b { display: none !important; }
+.ed-lista .n { min-width: 0; width: 14px; height: 3px; background: var(--ed-lima); align-self: center; flex: 0 0 14px; }
