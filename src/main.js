@@ -8,6 +8,7 @@ import { actualizarCarto, avisoZoom } from './carto.js';
 import { sombraSigue, gobernador } from './realismo.js';
 import { CAPITULOS } from './guion.js';
 import * as PAG from './pagina.js';
+import * as ED from './edicion.js';
 import './paginas/todas.js';
 import './estilo.css';
 
@@ -62,6 +63,8 @@ const X = {
   ...UI, R, D, tw, twf, gsap, W, LUG, COL_P, NOM_P, CAPAS_POT, cam, uTo,
   /** páginas reales de las autoras: X.pagina('red', 'estado', { camara: {x,y,s} }) · X.camPag({x,y,s}) · X.sinPagina() */
   pagina: PAG.pagina, camPag: PAG.camara, sinPagina: PAG.sinPagina, ventana: PAG.ventana, hasta: PAG.hasta,
+  /** edición tipo video (src/edicion.js): X.ed.pop / persona / cifra / rotulo / senalar / capitulo / limpiar */
+  ed: ED,
   capa: (n, on = true, d = 0.9) => capa(n, on, D(d)),
   capas: (lista, on = true) => lista.forEach((n) => capa(n, on, D(0.9))),
   /** edificios: crecen en ola desde un origen */
@@ -116,7 +119,9 @@ function entrarCapitulo(ci) {
   UI.limpiarTodo();
   if (!c.pagina) PAG.sinPagina(true); // los capítulos con página la ponen en su primera frase
   // precarga las páginas de este capítulo y del siguiente para que no haya espera al llegar
-  PAG.precargar(...(c.precarga || []), ...(CAPITULOS[ci + 1]?.precarga || []));
+  const usar = [...(c.precarga || []), ...(CAPITULOS[ci + 1]?.precarga || [])];
+  PAG.liberar(usar); PAG.precargar(...usar);
+  ED.limpiar();
   capa('losa', true, 0); capa('edif', true, 0);
   gsap.killTweensOf(W.capas.edif.userData.u.uSube); W.capas.edif.userData.u.uSube.value = 1;
   c.base?.(X);
@@ -129,9 +134,11 @@ let idx = -1, ocupado = false, gob = null, ultimoCuadro = 0;
 async function correrBeat(n, conTransicion) {
   const b = BEATS[n]; const c = CAPITULOS[b.ci];
   if (b.bi === 0) {
-    if (conTransicion && !R.rapido && n > 0) { UI.limpiar(); await new Promise((r) => setTimeout(r, 260)); await transicion(c.tr || 'pliegue', () => { entrarCapitulo(b.ci); b.a?.(X); }); return; }
+    // portadilla limpia de capítulo (reemplaza las transiciones 3D): tapa, monta la escena debajo y se abre
+    if (conTransicion && !R.rapido && n > 0) { UI.limpiar(); ED.limpiar(); await ED.capitulo(c.n, c.nombre, () => { entrarCapitulo(b.ci); b.a?.(X); }); return; }
     else entrarCapitulo(b.ci);
   }
+  if (!b.mantener) ED.limpiar(); // los gráficos de edición son de cada frase
   b.a?.(X);
 }
 async function ir(n, animado = true) {
@@ -180,8 +187,7 @@ function cuadro() {
   const dt = W.stop ? 1 / 12 : gsap.ticker.deltaRatio() / 60;
   // la cámara nunca se detiene: órbita lenta + respiración alrededor del objetivo
   const rel = camT.p.clone().sub(camT.o);
-  rel.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.sin(t * 0.06) * 0.22 + Math.sin(t * 0.017) * 0.15);
-  rel.multiplyScalar(1 + Math.sin(t * 0.33) * 0.015);
+  rel.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.sin(t * 0.03) * 0.12); // deriva muy lenta y suave, sin vaivén
   W.cam.position.copy(camT.o).add(rel);
   const ob = camT.o.clone();
   if (W.stop) { const k = rel.length() * 0.0009; W.cam.position.x += (Math.random() - .5) * k; W.cam.position.y += (Math.random() - .5) * k; ob.x += (Math.random() - .5) * k; }
@@ -208,7 +214,7 @@ function alternarStop() { W.stop = !W.stop; gsap.ticker.fps(W.stop ? 12 : 60); i
 async function iniciar() {
   texturaGrano();
   await crearMundo(document.getElementById('mundo'));
-  gob = gobernador(W); gsap.ticker.fps(12); gsap.ticker.add(cuadro); modoHUD();
+  gob = gobernador(W); gsap.ticker.fps(60); gsap.ticker.add(cuadro); modoHUD();
   { const c = W.pot.centro, R = W.pot.radio; ESTACIONES.pot = { p: [c.x + R * 0.3, R * 1.45, c.z + R * 1.95], o: [c.x + R * 0.15, 0, c.z - R * 0.15], nom: 'Red del POT sobre Bogotá' }; }
   window.__k = { ir, sig, ant, BEATS, X, W };
   const desde = parseInt(location.hash.slice(1), 10);

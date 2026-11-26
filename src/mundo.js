@@ -9,7 +9,7 @@ import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { cieloYLuz, cerros, suelo, arboles, materialEdificios, colorEdificio } from './realismo.js';
 import { crearGoogle } from './google.js';
 
-export const W = { capas: {}, et: new Map(), t: 0, stop: true };
+export const W = { capas: {}, et: new Map(), t: 0, stop: false };
 const BASE = './';
 const C = { lima: '#C7FF27', marfil: '#F5F3EB', lavanda: '#A99BCB', agua: '#6FA3AF', arcilla: '#B58C78', coral: '#E36C4B', gris: '#898D84', petroleo: '#294E59' };
 export const COL_P = { A: C.arcilla, B: C.lavanda, C: C.agua, D: C.coral, E: C.marfil, F: C.lima };
@@ -103,7 +103,7 @@ function puntos(pts, color, size, y = 8) {
 /* ------------------------------------------------------------------ construcción */
 export async function crearMundo(canvas) {
   const r = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
-  r.setPixelRatio(Math.min(innerWidth < 900 ? 1.25 : 1.5, devicePixelRatio)); r.setSize(innerWidth, innerHeight, false);
+  r.setPixelRatio(Math.min(2, devicePixelRatio)); r.setSize(innerWidth, innerHeight, false);
   // el centro de la escena 3D se corre a la derecha: el texto vive a la izquierda
   // encuadre: en horizontal el centro 3D se corre a la derecha (texto a la izquierda);
   // en vertical (celular) se conserva el ancho de vista de una pantalla 16:9 y no se corre

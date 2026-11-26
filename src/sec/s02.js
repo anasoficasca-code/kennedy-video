@@ -14,7 +14,7 @@ export default /* ==============================================================
       // 2 · «una red»
       { t: 'se reconstruyó como una red', a: (X) => {
         X.pagina('potred', 'red', { entrada: 'barrido', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 44, y: 57, s: 1.85, d: 3.4, ease: 'power3.inOut' });
+        X.camPag({ x: 43.5, y: 59, s: 1.85, d: 3.4, ease: 'power3.inOut' });
       } },
       // 3 · Barabási
       { t: 'a partir de los aportes de Albert-László Barabási,', a: (X) => {
@@ -32,22 +32,22 @@ export default /* ==============================================================
       { t: 'Se identificaron los nodos centrales,', a: (X) => {
         X.quitar('bar');
         X.pagina('potred', 'hubs');
-        X.camPag({ x: 44, y: 57, s: 3.2, d: 2.6, ease: 'power3.inOut' });
+        X.camPag({ x: 43.5, y: 59, s: 3.2, d: 2.6, ease: 'power3.inOut' });
       } },
       // 6 · dependencias: las seis relaciones entre estructuras
       { t: 'las relaciones de dependencia', a: (X) => {
         X.pagina('rapot', 'organiza', { entrada: 'barrido', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 50, y: 52, s: 1.25, d: 3.5, ease: 'sine.inOut' });
+        X.camPag({ x: 68, y: 50, s: 1.4, d: 3.5, ease: 'sine.inOut' });
       } },
       // 7 · jerarquías: el tamaño de cada estructura
       { t: 'y las jerarquías', a: (X) => {
         X.pagina('rapot', 'prioriza');
-        X.camPag({ x: 62, y: 52, s: 1.3, d: 3, ease: 'sine.inOut' });
+        X.camPag({ x: 58, y: 50, s: 1.25, d: 3, ease: 'sine.inOut' });
       } },
       // 8 · la centralidad no equivale a la jerarquía normativa
       { t: 'que estructuran este modelo de ciudad.', a: (X) => {
         X.pagina('potred', 'jerarquia', { entrada: 'barrido', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 74, y: 52, s: 1.5, d: 3, ease: 'sine.inOut' });
+        X.camPag({ x: 76, y: 54, s: 1.3, d: 2.6, ease: 'sine.inOut' });
       } },
       // 9 · Batty
       { t: 'Esta representación se contrastó con el enfoque de Michael Batty,', a: (X) => {
@@ -65,7 +65,7 @@ export default /* ==============================================================
       { t: 'Se comprende que aunque el plan establece relaciones entre sus componentes,', a: (X) => {
         X.quitar('bat');
         X.pagina('potred', 'relaciones', { entrada: 'barrido', camara: { x: 50, y: 50, s: 1, d: 0.01 } });
-        X.camPag({ x: 44, y: 57, s: 2.2, d: 4.5, ease: 'sine.inOut' });
+        X.camPag({ x: 43.5, y: 59, s: 2.2, d: 4.5, ease: 'sine.inOut' });
       } },
       // 12 · lo que el POT no puede explicar
       { t: 'su representación no explica suficientemente', a: (X) => {
@@ -94,4 +94,5 @@ export default /* ==============================================================
       } },
     ],
   };
+
 

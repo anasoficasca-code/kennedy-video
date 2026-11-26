@@ -33,6 +33,10 @@ function crear(nombre) {
   const v = { fr, marco, listo }; vivos.set(nombre, v); return v;
 }
 
+/** descarga las páginas que no están en `quedan` (libera memoria/GPU para que nada se trabe) */
+export function liberar(quedan = []) {
+  for (const [n, v] of [...vivos]) { if (n === actual || quedan.includes(n)) continue; v.fr.src = 'about:blank'; v.marco.remove(); vivos.delete(n); }
+}
 /** precarga páginas en segundo plano (no se muestran) */
 export function precargar(...nombres) { nombres.forEach((n) => { if (!vivos.has(n)) crear(n); }); }
 
@@ -70,6 +74,8 @@ export async function pagina(nombre, clave, o = {}) {
 
 /** "cámara" sobre la página: encuadra un punto (x,y en % de la pantalla) con escala s → zoom/paneo animado */
 export function camara({ x = 50, y = 50, s = 1, rx = 0, ry = 0, d = 2.4, ease = 'power2.inOut' } = {}) {
+  // DESACTIVADO: las autoras no quieren zooms sobre las páginas; la página se ve entera, como grabada.
+  return;
   const v = actual && vivos.get(actual); if (!v) return;
   const tx = (50 - x) * (s - 0) / 100 * innerWidth, ty = (50 - y) * s / 100 * innerHeight;
   gsap.killTweensOf(v.fr);

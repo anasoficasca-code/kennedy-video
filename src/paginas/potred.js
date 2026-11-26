@@ -7,6 +7,7 @@ const CSS = `
   .sidebar, .icon-nav, .topbar, header.top, .app > header { display: none !important; }
   .concept.dim { opacity: .22 !important; transition: opacity .5s; }
   .rel.dim { opacity: .08 !important; transition: opacity .5s; }
+  .zoom-controls { display: none !important; }
   .weak-banner { display: none !important; }
   #networkFinding { position: fixed !important; right: 3vw !important; top: 14vh !important; width: min(30vw, 460px) !important; z-index: 50; }
   .rel.rp-on { stroke-width: 7 !important; opacity: 1 !important; filter: drop-shadow(0 0 10px #fff); }
@@ -18,7 +19,7 @@ const CSS = `
 
 const E = (win, js) => win.eval(js);
 function limpiar(win, doc) {
-  try { E(win, 'resetAll()'); } catch (e) { /* aún no carga */ }
+  try { if (E(win, 'SYS.some(s => !state[s]) || offNodes.size > 0 || selectedRel')) E(win, 'resetAll()'); } catch (e) { /* aún no carga */ }
   const nf = doc.getElementById('networkFinding'); if (nf) { nf.style.setProperty('display', 'none', 'important'); nf.classList.remove('is-open'); nf.setAttribute('aria-hidden', 'true'); }
   doc.querySelectorAll('.dim').forEach((e) => e.classList.remove('dim'));
   doc.querySelectorAll('.rp-on').forEach((e) => e.classList.remove('rp-on'));
@@ -77,5 +78,6 @@ registrar('potred', {
     sinEstructura: async (win, doc, o) => { limpiar(win, doc); win.scrollTo(0, 0); await espera(o.rapido ? 0 : 400); E(win, `toggleSystem('${o.k || 'EEP'}')`); },
   },
 });
+
 
 

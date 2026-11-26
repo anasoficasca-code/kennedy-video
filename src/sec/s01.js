@@ -31,7 +31,7 @@ export default /* ==============================================================
         // transformación del suelo: las axonometrías reales de Kennedy
         c.seq([[5.4, () => {
           X.foto('axo', { src: I('axo_1956.jpg'), right: '5vw', top: '18vh', width: 40, height: '50vh', cap: '<b>1956</b>' });
-          X.flipbook('axo', [I('axo_1956.jpg'), I('axo_1972.jpg'), I('axo_1988.jpg'), I('axo_2024.jpg')], 0.9, ['<b>1956</b>', '<b>1972</b>', '<b>1988</b>', '<b>2024</b>']);
+          X.flipbook('axo', [I('axo_1956.jpg'), I('axo_1972.jpg'), I('axo_1988.jpg'), I('axo_2024.jpg')], 1.4, ['<b>1956</b>', '<b>1972</b>', '<b>1988</b>', '<b>2024</b>']);
         }]]);
       } },
       // "pero sus efectos terminaron entrelazándose,"
@@ -46,7 +46,7 @@ export default /* ==============================================================
         X.camPag({ x: 50, y: 50, s: 1, d: 0 });
         await X.pagina(P, 'relato', { entrada: 'barrido', paso: 0, palabra: 0, camara: { x: 50, y: 50, s: 1, d: 0 } });
         if (!c.vivo()) return;
-        c.seq([[0.9, () => c.nodo('may', 1.7, 1.2)], [2.3, () => c.nodo('res', 1.7, 1.2)], [3.7, () => c.nodo('eco', 1.7, 1.2)], [5.0, () => X.camPag({ x: 50, y: 50, s: 1, d: 0.8 })]]);
+        c.seq([[0.9, () => c.nodo('may', 1.25, 1.2)], [2.3, () => c.nodo('res', 1.25, 1.2)], [3.7, () => c.nodo('eco', 1.25, 1.2)], [5.0, () => X.camPag({ x: 50, y: 50, s: 1, d: 0.8 })]]);
       } },
       // "Problemas que no fueron consecuencia de una sola decisión, sino de múltiples dinámicas que se reforzaron entre sí."
       { t: 'Problemas que no fueron consecuencia de una sola decisión, sino de múltiples dinámicas que se reforzaron entre sí.', a: async (X) => {

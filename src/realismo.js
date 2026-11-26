@@ -186,7 +186,7 @@ export function gobernador(W) {
     const presupuesto = W.stop ? 125 : 40; // intervalo real entre cuadros: 12 fps = 83 ms, 60 fps = 17 ms
     if (prom > presupuesto && G.nivel > 0) {
       G.nivel--;
-      if (G.nivel === 1) { W.r.setPixelRatio(1); W.sol.shadow.mapSize.set(2048, 2048); W.sol.shadow.map?.dispose(); W.sol.shadow.map = null; }
+      if (G.nivel === 1) { /* nunca se baja la resolución (se vería borroso) */ W.sol.shadow.mapSize.set(2048, 2048); W.sol.shadow.map?.dispose(); W.sol.shadow.map = null; }
       if (G.nivel === 0) { W.sol.castShadow = false; W.arboles.grp.children.forEach((m) => (m.castShadow = false)); }
       console.info('calidad reducida a', G.nivel, prom.toFixed(1) + ' ms');
     }

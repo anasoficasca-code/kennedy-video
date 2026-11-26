@@ -76,7 +76,7 @@ function zoom(win, z, rapido, raiz) {
   if (z.sel?.startsWith('nodo:')) p = nodoPct(win, z.sel.slice(5));
   else if (z.sel === 'svg') p = rectPct(win, '#mksvg');
   else if (z.sel) p = rectPct(win, z.sel, raiz);
-  if (!p) p = { x: 50, y: 50, w: 1, h: 1 };
+  if (!p) p = { x: z.x ?? 50, y: z.y ?? 50, w: 1, h: 1 };
   const llena = z.llena ?? 0.78;
   const s = z.s ?? Math.max(1, Math.min(2.4, llena / Math.max(p.w || 0.01, (p.h || 0.01) * 1.0)));
   camara({ x: p.x + (z.dx || 0), y: p.y + (z.dy || 0), s, d: rapido ? 0 : (z.d ?? 2.2), ease: z.ease || 'power3.inOut' });
@@ -87,10 +87,14 @@ function reanimar(win, el) {
   el.classList.add('rp-keep'); el.classList.remove('vis'); void el.offsetWidth;
   setTimeout(() => { el.classList.add('vis'); el.classList.remove('rp-keep'); try { win.contar(el); } catch (e) { /* sin contadores */ } }, 60);
 }
-/** apaga la conectografía si estaba armada */
-function sinConecto(win, rapido) {
+/** la conectografía es el módulo 12 (otra página, pesada): se carga un poco antes de usarla y se descarga al salir */
+function cgCarga(win) { try { ev(win, "cgArma();if(!CG.fr.src||CG.fr.src==='about:blank'){CG.listo=false;CG.fr.src=CGURL}"); } catch (e) { console.warn('[red] conectografía', e); } }
+function cgDescarga(win) { try { ev(win, "if(CG.fr&&CG.fr.src&&CG.fr.src!=='about:blank'&&!CG.to){CG.fr.src='about:blank';CG.listo=false}"); } catch (e) { /* aún no se armó */ } }
+/** apaga la conectografía si estaba armada (y la descarga cuando ya no se ve) */
+function sinConecto(win, rapido, conservar = false) {
   try {
     if (ev(win, 'CG.to')) { ev(win, 'cgIr(false)'); if (rapido) ev(win, 'CG.t0=performance.now()-20000'); }
+    if (!conservar) { clearTimeout(win.__rpCgT); win.__rpCgT = setTimeout(() => cgDescarga(win), rapido ? 0 : 3000); }
   } catch (e) { /* aún no se armó */ }
 }
 /** resalta relaciones reales de la red: on = ['BA','FB'…] (origen+destino), prev = ya dichas (atenuadas), nodos */
@@ -104,6 +108,29 @@ function resaltar(win, on = [], prev = [], nodos = null) {
 }
 const quitarResalte = (win) => { win.__rpRes = null; try { ev(win, 'N').forEach((n) => { n.ts = 1; }); } catch (e) { /* */ } };
 
+/**
+ * cámara 3D de la red (no zoom de pantalla: el lienzo se mantiene nítido). c = { k: nodo al que se acerca o null, f: distancia
+ * relativa a la vista de la red (1 = la de la página), d: segundos }
+ */
+function camRed(win, c = {}, rapido) {
+  try {
+    const cam = ev(win, 'cam'), ctl = ev(win, 'ctl'), V = win.THREE.Vector3;
+    ev(win, 'tw=null;T0=T0===null?performance.now()-3000:Math.min(T0,performance.now()-3000)'); // sin el acercamiento de entrada de la página
+    const L0 = ev(win, 'RED_POS.length()') * (c.f ?? 0.78);
+    const fT = ctl.target.clone(), tT = c.k ? ev(win, `byId['${c.k}'].p.clone()`) : new V();
+    const fL = cam.position.distanceTo(ctl.target);
+    const p = { q: 0 };
+    gsap.killTweensOf(win.__rpCam || {}); win.__rpCam = p;
+    const aplica = () => {
+      const dir = cam.position.clone().sub(ctl.target).normalize();
+      ctl.target.lerpVectors(fT, tT, p.q);
+      cam.position.copy(ctl.target).addScaledVector(dir, fL + (L0 - fL) * p.q);
+    };
+    if (rapido) { p.q = 1; aplica(); return; }
+    gsap.to(p, { q: 1, duration: c.d ?? 2.4, ease: 'power2.inOut', onUpdate: aplica });
+  } catch (e) { console.warn('[red] cámara', e); }
+}
+
 /** coloca la historia en la sección k, con o sin recorrido animado */
 async function irSeccion(win, k, o, d = 1.4) {
   const y = ySec(win, k);
@@ -116,13 +143,14 @@ registrar(NOMBRE, {
   listo: async (win) => {
     pausarOculta(win);
     await hasta(() => win.eval('typeof SECS') !== 'undefined' && win.eval('SECS.length') === 11 && win.eval('!!MK.svg') && typeof win.pasoMapa === 'function', 30000);
+    win.eval('CG.pre=1'); // la conectografía (módulo 12, pesada) se carga cuando el driver lo decide, no al entrar a la red
   },
   preparar: (win, doc) => {
     const st = doc.createElement('style');
     st.textContent = `
       html{scroll-behavior:auto!important;scrollbar-width:none}
       ::-webkit-scrollbar{display:none}
-      header,.legend,#volver,.goconecto,.goprop,#tip,#dv,#cgcarga{visibility:hidden!important;pointer-events:none!important}
+      header,.legend,#volver,.goconecto,.goprop,#tip,#dv,#cgcarga,.al-modelo{visibility:hidden!important;pointer-events:none!important}
       /* la conectografía del módulo 12 debe cargar visible (opacidad 0) para ubicar bien sus burbujas */
       #cgfr{visibility:visible!important}
       /* nombrar los seis problemas uno a uno en la portada */
@@ -179,14 +207,17 @@ registrar(NOMBRE, {
       doc.documentElement.classList.remove('rp-sinrd');
       await espera(60); if (yo !== gen) return; // la página aplica su propio foco al cambiar de sección; después va el resalte
       if (o.on || o.nodos) resaltar(win, o.on || [], o.prev || [], o.nodos); else { quitarResalte(win); ev(win, 'focus(null)'); }
+      camRed(win, o.cam, o.rapido);
       zoom(win, o.zoom, o.rapido);
     },
     /** tarjeta «Centralización: el nodo con más conexiones» (la página enfoca F y sus 5 relaciones) */
     red1: async (win, doc, o) => {
-      const yo = ++gen; sinConecto(win, o.rapido); quitarResalte(win);
+      const yo = ++gen; sinConecto(win, o.rapido, !!o.precargaCG); quitarResalte(win);
+      if (o.precargaCG) { clearTimeout(win.__rpCgT); cgCarga(win); }
       doc.documentElement.classList.remove('rp-sinrd', 'rp-sel');
       await irSeccion(win, 'red1', o, 1.6);
       if (yo !== gen) return;
+      camRed(win, o.cam, o.rapido);
       zoom(win, o.zoom, o.rapido);
     },
     /** tarjeta «De la red a la propuesta · Tres criterios» */
@@ -198,11 +229,14 @@ registrar(NOMBRE, {
         await scrollA(win, ySec(win, 'red2'), o.viaje ?? 3.4, false);
       } else await irSeccion(win, 'red2', o, 1.4);
       if (yo !== gen) return;
+      await espera(o.rapido ? 0 : 400); if (yo !== gen) return;
+      camRed(win, o.cam, o.rapido);
       zoom(win, o.zoom, o.rapido);
     },
     /** conectografía: las esferas estallan y Kennedy se rearma con las 41 causas en los colores de los seis problemas */
     conecto: async (win, doc, o) => {
       const yo = ++gen; quitarResalte(win);
+      clearTimeout(win.__rpCgT); cgCarga(win);
       doc.documentElement.classList.remove('rp-sinrd', 'rp-sel');
       await scrollA(win, ySec(win, 'fin'), 0.9, o.rapido);
       if (yo !== gen) return;
@@ -224,7 +258,7 @@ registrar(NOMBRE, {
       await scrollA(win, y, lejos ? 0 : 1.3, o.rapido || lejos);
       if (yo !== gen) return;
       const card = doc.querySelector(`#story .paso[data-k="${k}"] .card`);
-      card?.classList.add('vis');
+      if (card && !card.classList.contains('vis')) { card.classList.add('vis'); try { win.contar(card); } catch (e) { /* */ } }
       doc.querySelectorAll('#story .frase.rp-marca').forEach((f) => f.classList.remove('rp-marca'));
       if (o.marca && card) card.querySelector(o.marca)?.classList.add('rp-marca');
       await espera(o.rapido ? 0 : 40); if (yo !== gen) return;
