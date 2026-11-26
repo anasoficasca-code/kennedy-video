@@ -158,9 +158,10 @@ registrar('picos', {
       e.style.transform = `translate(${r.left + (v.x + 1) / 2 * r.width}px,${r.top + (1 - v.y) / 2 * r.height}px)`;
     };
     const pCora = aEscena(win, CORA[0], CORA[1], 2), pSect = aEscena(win, SECTOR[0], SECTOR[1] + SECTOR_R * 0.55, 2);
+    const IND = win.eval('ind');
     win.renderFrame = () => {
       if (marco && !marco.classList.contains('on')) return;
-      const nv = win.__nombres ?? 1; win.eval('ind').forEach((o) => { if (o.label) o.label.material.opacity = nv; });
+      const nv = win.__nombres ?? 1; IND.forEach((o) => { if (o.label) o.label.material.opacity = nv; });
       const A = win.__anillo; if (A) { A.r.material.opacity = A.a.a; A.relleno.material.opacity = A.a.a * 0.13; A.r.scale.setScalar(A.a.s); A.relleno.scale.setScalar(A.a.s); A.r.visible = A.relleno.visible = A.a.a > 0.001; }
       rf(); seguir(cora, pCora); seguir(sect, pSect);
     };
@@ -205,9 +206,9 @@ registrar('picos', {
     /** «sectores donde coinciden presiones»: la cámara se desplaza despacio al sector CCL alto · SE bajo y se marca */
     coinciden: async (win, doc, o) => {
       const t = nuevo(win); nombres(win, false, true); selec(win, ['SE', 'CCL'], true); mostrar(doc.getElementById('pin-cora'), true, o.rapido);
-      if (o.rapido) { crecidos(win); mover(win, { x: SECTOR[0] * 0.6, y: SECTOR[1] * 0.6, zoom: 1.4, rapido: true }); verAnillo(win, true, true); mostrar(doc.getElementById('pin-sector'), true, true); ocultarCursor(win, true); return; }
+      if (o.rapido) { crecidos(win); mover(win, { x: SECTOR[0] * 0.6, y: SECTOR[1] * 0.6, zoom: 1.28, rapido: true }); verAnillo(win, true, true); mostrar(doc.getElementById('pin-sector'), true, true); ocultarCursor(win, true); return; }
       ocultarCursor(win);
-      mover(win, { x: SECTOR[0] * 0.6, y: SECTOR[1] * 0.6, zoom: 1.4, d: 3.2 });
+      mover(win, { x: SECTOR[0] * 0.6, y: SECTOR[1] * 0.6, zoom: 1.28, d: 3.2 });
       await esp(900); if (win.__tok !== t) return;
       verAnillo(win, true); await esp(500); if (win.__tok !== t) return;
       mostrar(doc.getElementById('pin-sector'), true); o.alSector?.();
