@@ -79,7 +79,7 @@ export default /* ==============================================================
         const c = ctx(X, 'Actualmente se valora por el acceso a servicios y transporte, pero nuestro modelo ecocéntrico propone valorarlo por su biodiversidad, interacciones bióticas y conectividad ecológica.');
         paso(X, 'C2', { d: 1.6 });
         c.seq([[0.6, () => X.ed.pop({ t: 'se valora por el acceso a *servicios y transporte*', x: CX, y: CY, ancho: 30, cls: 'oscuro' })],
-          [4.2, () => X.ed.lista({ titulo: 'nuestro modelo ecocéntrico', items: ['*biodiversidad*', '*interacciones bióticas*', '*conectividad ecológica*'], x: CX, y: CY + 17, ancho: 30, paso: 1.0 })]]);
+          [4.2, () => X.ed.lista({ titulo: 'nuestro modelo ecocéntrico', items: ['*biodiversidad*', '*interacciones bióticas*', '*conectividad ecológica*'], x: CX, y: CY + 12, ancho: 30, paso: 1.0 })]]);
       } },
       // especulación · la frase real de la página (hipótesis)
       { t: 'En especulación inmobiliaria, los precios anunciados cerca del metro aumentan aproximadamente un 12 % anual.', a: (X) => {
@@ -118,14 +118,14 @@ export default /* ==============================================================
       { t: 'Proponemos Estaciones Circulares para reducir estas acumulaciones y aprovechar la materia orgánica, con la meta de disminuir las toneladas acumuladas y aumentar las aprovechadas.', a: (X) => {
         const c = ctx(X, 'Proponemos Estaciones Circulares para reducir estas acumulaciones y aprovechar la materia orgánica, con la meta de disminuir las toneladas acumuladas y aumentar las aprovechadas.');
         paso(X, 'E2', { d: 1.6 });
-        c.seq([[0.8, () => X.ed.pop({ t: 'Estaciones Circulares', d: 'para reducir estas acumulaciones y aprovechar la materia orgánica', x: CX, y: CY, ancho: 30 })],
-          [5.6, () => X.ed.lista({ items: ['disminuir las toneladas *acumuladas*', 'aumentar las *aprovechadas*'], x: CX, y: CY + 22, ancho: 30, paso: 1.4 })]]);
+        c.seq([[0.8, () => X.ed.pop({ t: 'Estaciones Circulares', d: 'para reducir estas acumulaciones y aprovechar la materia orgánica', x: CX, y: CY, ancho: 30, cls: 'oscuro' })],
+          [5.6, () => X.ed.lista({ items: ['disminuir las toneladas *acumuladas*', 'aumentar las *aprovechadas*'], x: CX, y: CY + 15, ancho: 30, paso: 1.4 })]]);
       } },
       // «Qué cambia el diseño en cada problema»: diagnóstico → criterio → propuesta → comprobación
       { t: 'De esta manera, los indicadores se convierten en criterios de localización, dimensionamiento y funcionamiento de las intervenciones.', a: (X) => {
         const c = ctx(X, 'De esta manera, los indicadores se convierten en criterios de localización, dimensionamiento y funcionamiento de las intervenciones.');
-        X.pagina(P, 'criterios', { sec: 'cr-seis', dy: -40, recorre: 420, pausa: 400, d: 6 });
-        c.seq([[2.8, () => X.ed.lista({ titulo: 'criterios de', items: ['*localización*', '*dimensionamiento*', '*funcionamiento*'], x: 64, y: 12, ancho: 28, paso: 0.9 })]]);
+        X.pagina(P, 'criterios', { sec: 'cr-seis', dy: -40, recorre: 110, pausa: 400, d: 4 });
+        c.seq([[2.8, () => X.ed.lista({ titulo: 'criterios de', items: ['*localización*', '*dimensionamiento*', '*funcionamiento*'], x: 64, y: 8, ancho: 28, paso: 0.9 })]]);
       } },
     ],
   };

@@ -24,11 +24,13 @@ function ctx(X, t) {
 /** marca el rectángulo alrededor de un nodo de la red 3D (en % de pantalla) */
 function marcaNodo(X, pag, k, o = {}) {
   const w = X.ventana(pag); if (!w) return;
-  let p; try { p = JSON.parse(w.eval(`(()=>{const v=byId['${k}'].p.clone().project(cam);const r=byId['${k}'].r*1.25;const c=cam.position.distanceTo(byId['${k}'].p);const h=r/ (c*Math.tan(cam.fov*Math.PI/360))*50;return JSON.stringify({x:(v.x+1)/2*100,y:(1-v.y)/2*100,h})})()`)); } catch (e) { return; }
-  const hh = Math.max(9, p.h * 2), ww = hh * innerHeight / innerWidth;
-  X.ed.senalar(pag, { x: p.x - ww / 2, y: p.y - hh / 2, w: ww, h: hh }, o);
-}
-let lista = null;
+  // el rectángulo se recalcula en cada cuadro (la red gira sola): sigue al nodo
+  let p = { x: 50, y: 50, h: 10 };
+  const calc = () => { try { p = JSON.parse(w.eval(`(()=>{const n=byId['${k}'],v=n.p.clone().project(cam),c=cam.position.distanceTo(n.p),h=n.r*0.85/(c*Math.tan(cam.fov*Math.PI/360))*50;return JSON.stringify({x:(v.x+1)/2*100,y:(1-v.y)/2*100,h})})()`)); } catch (e) { /* */ } return p; };
+  if (!calc()) return;
+  const hh = () => Math.max(9, p.h * 2), ww = () => hh() * innerHeight / innerWidth;
+  X.ed.senalar(pag, { get x() { calc(); return p.x - ww() / 2; }, get y() { return p.y - hh() / 2; }, get w() { return ww(); }, get h() { return hh(); } }, o);
+}let lista = null;
 /** cambio de página con fundido cruzado (la anterior sigue debajo ~1 s): sin cortes ni barridos */
 export function fundido(X, pag, mostrar) {
   const r = mostrar();
@@ -130,8 +132,8 @@ export default /* ==============================================================
       { t: 'Esto nos permitió reconocer dónde se manifiestan y establecer criterios de intervención a partir de sus indicadores.', a: (X) => {
         const c = ctx(X, 'Esto nos permitió reconocer dónde se manifiestan y establecer criterios de intervención a partir de sus indicadores.');
         X.pagina(AG, 'capas', { desde: 0.36, p: 0.46, d: 2.0, entrada: 'corte' });
-        c.seq([[3.4, () => X.pagina(AG, 'capas', { p: 0.74, d: 2.2 })],
-          [6.0, () => X.ed.senalar(AG, '#kcap .kc-fin a', { texto: 'criterios de intervención', pad: 8 })]]);
+        c.seq([[2.8, () => X.pagina(AG, 'capas', { p: 0.9, d: 2.2 })],
+          [5.8, () => X.ed.senalar(AG, '#kcap .kc-fin a', { texto: 'criterios de intervención', pad: 8 })]]);
       } },
     ],
   };
