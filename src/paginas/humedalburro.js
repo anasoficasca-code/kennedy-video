@@ -48,7 +48,7 @@ function cursor(doc) {
   if (!c) {
     c = doc.createElement('div'); c.id = 'hb-cur';
     c.innerHTML = '<i></i><svg viewBox="0 0 24 24"><path d="M4 2.5 L4 19 L8.6 14.8 L11.7 21.5 L14.5 20.3 L11.4 13.7 L17.6 13.4 Z" fill="#f3f4ee" stroke="#0b0d10" stroke-width="1.4" stroke-linejoin="round"/></svg>';
-    doc.body.appendChild(c); c._x = innerWidth * 0.62; c._y = innerHeight * 0.7;
+    doc.body.appendChild(c); c._x = doc.defaultView.innerWidth * 0.62; c._y = doc.defaultView.innerHeight * 0.7;
   }
   return c;
 }
@@ -95,9 +95,9 @@ function bucleAnclas(win) {
     for (const [id, a] of anclas) {
       const s = a._s; if (!s || !s.visible) { a.style.display = 'none'; continue; }
       s.getWorldPosition(v); const dist = camera.position.distanceTo(v); v.project(camera);
-      const px = innerHeight / 2 / (dist * Math.tan(camera.fov * Math.PI / 360));
+      const px = win.innerHeight / 2 / (dist * Math.tan(camera.fov * Math.PI / 360));
       const r = Math.max(10, s.scale.x * 0.5 * px * 0.92);
-      Object.assign(a.style, { display: 'block', left: ((v.x + 1) / 2 * innerWidth - r) + 'px', top: ((1 - v.y) / 2 * innerHeight - r) + 'px', width: 2 * r + 'px', height: 2 * r + 'px' });
+      Object.assign(a.style, { display: 'block', left: ((v.x + 1) / 2 * win.innerWidth - r) + 'px', top: ((1 - v.y) / 2 * win.innerHeight - r) + 'px', width: 2 * r + 'px', height: 2 * r + 'px' });
     }
     win.requestAnimationFrame(f);
   };
@@ -256,7 +256,7 @@ registrar(NOMBRE, {
       nuevo(win); base(win, doc, o, { capas: POT, vista: 'degree' });
       const btn = [...doc.querySelectorAll('.top-header .btn-flat')].find((b) => /M[eé]tricas/.test(b.textContent));
       await clic(win, doc, btn, () => win.openWelcomeModal(), o, 650);
-      if (!o.rapido) { await esp(300); await mover(win, doc, { x: innerWidth * 0.4, y: innerHeight * 0.62 }, 900); }
+      if (!o.rapido) { await esp(300); await mover(win, doc, { x: win.innerWidth * 0.4, y: win.innerHeight * 0.62 }, 900); }
     },
     // jerarquías: clic en «Ejes radiales» (un eje por capa, los más conectados al centro)
     jerarquia: async (win, doc, o) => {

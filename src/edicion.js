@@ -1,138 +1,155 @@
-// EDICIÓN TIPO VIDEO (motion graphics encima de las páginas y del 3D).
-// Todo entra con resortes limpios (sin desenfoques ni temblores) y se va solo al cambiar de frase.
+// EDICIÓN TIPO VIDEO (motion graphics encima de las páginas y del 3D) — estilo de los referentes de la autora:
+// letra fina y pequeña que entra palabra por palabra (la palabra clave en lima), tarjetas claras compactas,
+// avatares en cuadro redondeado con pop, líneas finas que conectan el texto con lo señalado.
+// Todo se va solo al cambiar de frase. Sin títulos ni números de sección: solo palabras de la voz.
 // API (en el guion: X.ed.*):
-//   rotulo(texto, {kick, lado})                 → zócalo inferior (lower third)
-//   pop({t, d, img, icono, x, y, ancho, delay}) → tarjeta que aparece con rebote
-//   persona({nombre, rol, img, credito, x, y})  → foto circular + nombre (cuando se menciona a alguien)
-//   cifra({v, desde, dec, pre, suf, texto, x, y, delay}) → número grande que cuenta
-//   lista({titulo, items, x, y, paso})          → enumeración que va saliendo ítem por ítem
-//   senalar(nombrePagina, selector|rect, {texto, lado, delay}) → marco que señala un elemento de la página
-//   frase(texto con *énfasis*, {y})             → frase clave centrada, palabra por palabra
-//   capitulo(n, titulo) → Promise              → portadilla de capítulo a pantalla completa
-//   limpiar()                                   → saca todo
-// Posiciones x/y en % de pantalla (esquina superior izquierda del elemento salvo que se diga otra cosa).
+//   rotulo(texto, {lado, delay, dur})                   → texto de la voz, abajo
+//   pop({t, d, img, x, y, ancho, delay, cls:'oscuro'})  → tarjeta compacta
+//   persona({nombre, rol, img, credito, x, y})          → foto + nombre cuando se menciona a alguien
+//   cifra({v, desde, dec, pre, suf, texto, x, y, miles}) → número que cuenta
+//   lista({items, x, y, paso, ancho})                   → filas compactas que van saliendo
+//   senalar(nombrePagina, selector|rect, {texto, lado:'arriba'|'izq'|'der', delay}) → marco fino + etiqueta con línea
+//   frase(texto con *énfasis*, {y})                     → frase centrada palabra por palabra
+//   capitulo(n, titulo, durante) → Promise             → fundido corto entre capítulos (sin título)
+//   limpiar()
 import gsap from 'gsap';
 import { R } from './ui.js';
 import { ventana } from './pagina.js';
 
 const capa = () => document.getElementById('edicion');
 const vivos = new Set();
-const SPRING = 'back.out(1.6)', SUAVE = 'expo.out';
+const POP = 'back.out(1.7)', SUAVE = 'expo.out';
 
 function h(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
 function poner(e, x, y) { if (x != null) e.style.left = typeof x === 'number' ? x + 'vw' : x; if (y != null) e.style.top = typeof y === 'number' ? y + 'vh' : y; capa().appendChild(e); vivos.add(e); return e; }
-const enfasis = (s) => String(s).replace(/\*([^*]+)\*/g, '<em>$1</em>');
+/** texto con *énfasis* → palabras sueltas (span.w), las enfatizadas en <em> */
+function palabras(s) {
+  // respeta HTML en línea (p.ej. <span style=…>): solo envuelve las palabras, nunca parte las etiquetas
+  const html = String(s).replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  return html.replace(/(<[^>]+>)|([^\s<]+)/g, (m, tag, w) => (tag ? tag : `<span class="w">${w}</span>`));
+}
+/** entrada palabra por palabra (enfoque suave, sin rebote) */
+function escribir(tl, raiz, en = 0, paso = 0.055) {
+  const ws = raiz.querySelectorAll('.w'); if (!ws.length) return tl;
+  return tl.fromTo(ws, { autoAlpha: 0, y: 8, filter: 'blur(5px)' }, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'power3.out', stagger: paso, clearProps: 'filter' }, en);
+}
 
 export function limpiar() {
-  for (const e of [...vivos]) { vivos.delete(e); e._sal?.(); gsap.killTweensOf(e); gsap.to(e, { autoAlpha: 0, y: '-=12', duration: R.rapido ? 0 : 0.35, ease: 'power2.in', onComplete: () => e.remove() }); }
+  for (const e of [...vivos]) { vivos.delete(e); e._sal?.(); gsap.killTweensOf(e); gsap.to(e, { autoAlpha: 0, y: '-=8', duration: R.rapido ? 0 : 0.3, ease: 'power2.in', onComplete: () => e.remove() }); }
 }
-function salir(e, dur) { if (dur) gsap.delayedCall(dur, () => { if (!vivos.has(e)) return; vivos.delete(e); gsap.to(e, { autoAlpha: 0, y: '-=12', duration: 0.35, onComplete: () => e.remove() }); }); }
+function salir(e, dur) { if (dur) gsap.delayedCall(dur, () => { if (!vivos.has(e)) return; vivos.delete(e); gsap.to(e, { autoAlpha: 0, y: '-=8', duration: 0.3, onComplete: () => e.remove() }); }); }
 
-/** zócalo inferior */
+/** texto de la voz, abajo */
 export function rotulo(texto, o = {}) {
   if (R.rapido) return;
-  const e = h('div', 'ed-rotulo' + (o.lado === 'der' ? ' der' : ''), `<i class="barra"></i><div class="txt">${o.kick ? `<span class="kick">${o.kick}</span>` : ''}<span class="mask"><b>${enfasis(texto)}</b></span></div>`);
+  const e = h('div', 'ed-rotulo' + (o.lado === 'der' ? ' der' : ''), `<i class="punto"></i><span class="txt">${palabras(texto)}</span>`);
   poner(e);
   const tl = gsap.timeline({ delay: o.delay || 0 });
-  tl.set(e, { autoAlpha: 1 }, 0) // el contenedor arranca oculto (#edicion > *)
-    .fromTo(e.querySelector('.barra'), { scaleY: 0 }, { scaleY: 1, duration: 0.45, ease: SUAVE })
-    .fromTo(e.querySelector('.kick'), { autoAlpha: 0, x: -14 }, { autoAlpha: 1, x: 0, duration: 0.4, ease: SUAVE }, 0.15)
-    .fromTo(e.querySelector('.mask b'), { yPercent: 105 }, { yPercent: 0, duration: 0.7, ease: SUAVE }, 0.22);
+  tl.set(e, { autoAlpha: 1 }, 0)
+    .fromTo(e, { clipPath: 'inset(0 100% 0 0 round 12px)' }, { clipPath: 'inset(0 0% 0 0 round 12px)', duration: 0.55, ease: 'power3.inOut' }, 0)
+    .fromTo(e.querySelector('.punto'), { scale: 0 }, { scale: 1, duration: 0.4, ease: POP }, 0.2);
+  escribir(tl, e, 0.25);
   salir(e, o.dur); return e;
 }
 
-/** tarjeta con rebote */
+/** tarjeta compacta */
 export function pop(o = {}) {
   if (R.rapido) return;
   const img = o.img ? `<div class="img" style="background-image:url('${o.img}')"></div>` : '';
-  const ic = o.icono ? `<span class="ic">${o.icono}</span>` : '';
-  const e = h('div', 'ed-pop' + (o.img ? ' con-img' : '') + (o.cls ? ' ' + o.cls : ''), `${img}<div class="cuerpo">${o.kick ? `<span class="kick">${ic}${o.kick}</span>` : ic}<b>${enfasis(o.t || '')}</b>${o.d ? `<p>${enfasis(o.d)}</p>` : ''}${o.fuente ? `<small>${o.fuente}</small>` : ''}</div>`);
+  const e = h('div', 'ed-pop' + (o.img ? ' con-img' : '') + (o.cls ? ' ' + o.cls : ''), `${img}<div class="cuerpo"><b>${palabras(o.t || '')}</b>${o.d ? `<p>${palabras(o.d)}</p>` : ''}${o.fuente ? `<small>${o.fuente}</small>` : ''}</div>`);
   if (o.ancho) e.style.width = o.ancho + 'vw';
   poner(e, o.x ?? 6, o.y ?? 14);
-  gsap.fromTo(e, { autoAlpha: 0, scale: 0.86, y: 18 }, { autoAlpha: 1, scale: 1, y: 0, duration: 0.6, ease: SPRING, delay: o.delay || 0 });
+  const tl = gsap.timeline({ delay: o.delay || 0 });
+  tl.fromTo(e, { autoAlpha: 0, scale: 0.92, y: 10 }, { autoAlpha: 1, scale: 1, y: 0, duration: 0.5, ease: POP });
+  escribir(tl, e, 0.12, 0.04);
   salir(e, o.dur); return e;
 }
 
-/** foto de una persona mencionada */
+/** foto de una persona mencionada (cuadro redondeado con pop) */
 export function persona(o = {}) {
   if (R.rapido) return;
-  const e = h('div', 'ed-persona', `<div class="foto"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="57"/></svg><div class="img" style="background-image:url('${o.img}')"></div></div><div class="nom"><span class="kick">${o.rol || ''}</span><span class="mask"><b>${o.nombre}</b></span>${o.credito ? `<small>${o.credito}</small>` : ''}</div>`);
-  poner(e, o.x ?? 6, o.y ?? 62);
-  const c = e.querySelector('circle'), L = 2 * Math.PI * 57; c.style.strokeDasharray = L;
+  const e = h('div', 'ed-persona', `<div class="img" style="background-image:url('${o.img}')"></div><div class="nom"><b>${palabras(o.nombre)}</b>${o.rol ? `<span class="rol">${o.rol}</span>` : ''}${o.credito ? `<small>${o.credito}</small>` : ''}</div>`);
+  poner(e, o.x ?? 6, o.y ?? 64);
   const tl = gsap.timeline({ delay: o.delay || 0 });
   tl.set(e, { autoAlpha: 1 }, 0)
-    .fromTo(e.querySelector('.img'), { scale: 0.4, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.7, ease: SPRING })
-    .fromTo(c, { strokeDashoffset: L }, { strokeDashoffset: 0, duration: 0.9, ease: 'power2.inOut' }, 0.05)
-    .fromTo(e.querySelector('.kick'), { autoAlpha: 0, x: -10 }, { autoAlpha: 1, x: 0, duration: 0.4, ease: SUAVE }, 0.35)
-    .fromTo(e.querySelector('.mask b'), { yPercent: 105 }, { yPercent: 0, duration: 0.7, ease: SUAVE }, 0.4)
-    .fromTo(e.querySelector('small'), { autoAlpha: 0 }, { autoAlpha: 0.7, duration: 0.5 }, 0.8);
+    .fromTo(e.querySelector('.img'), { scale: 0.3, autoAlpha: 0, rotation: -6 }, { scale: 1, autoAlpha: 1, rotation: 0, duration: 0.65, ease: POP })
+    .fromTo(e.querySelector('.nom'), { autoAlpha: 0, x: -10 }, { autoAlpha: 1, x: 0, duration: 0.45, ease: SUAVE }, 0.25);
+  escribir(tl, e.querySelector('.nom'), 0.3);
+  tl.fromTo(e.querySelectorAll('.rol, small'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, stagger: 0.1 }, 0.6);
   salir(e, o.dur); return e;
 }
 
-/** número grande que cuenta */
+/** número que cuenta */
 export function cifra(o = {}) {
   if (R.rapido) return;
-  const e = h('div', 'ed-cifra' + (o.cls ? ' ' + o.cls : ''), `<div class="num"><span class="pre">${o.pre || ''}</span><b>0</b><span class="suf">${o.suf || ''}</span></div><i class="linea"></i><p>${enfasis(o.texto || '')}</p>${o.fuente ? `<small>${o.fuente}</small>` : ''}`);
+  const e = h('div', 'ed-cifra' + (o.cls ? ' ' + o.cls : ''), `<div class="num">${o.pre ? `<span class="pre">${o.pre}</span>` : ''}<b>0</b>${o.suf ? `<span class="suf">${o.suf}</span>` : ''}</div><p>${palabras(o.texto || '')}</p>${o.fuente ? `<small>${o.fuente}</small>` : ''}`);
   poner(e, o.x ?? 6, o.y ?? 50);
-  const b = e.querySelector('b'), dec = o.dec ?? 0, fmt = (v) => v.toLocaleString('es-CO', { minimumFractionDigits: dec, maximumFractionDigits: dec, useGrouping: o.miles !== false }); // miles:false para años (1972)
+  const b = e.querySelector('.num b'), dec = o.dec ?? 0, fmt = (v) => v.toLocaleString('es-CO', { minimumFractionDigits: dec, maximumFractionDigits: dec, useGrouping: o.miles !== false });
   const p = { v: o.desde ?? 0 }; b.textContent = fmt(p.v);
   const tl = gsap.timeline({ delay: o.delay || 0 });
-  tl.fromTo(e, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: SUAVE })
-    .to(p, { v: o.v, duration: o.dur_conteo ?? 1.4, ease: 'power3.out', onUpdate: () => (b.textContent = fmt(p.v)) }, 0.1)
-    .fromTo(e.querySelector('.linea'), { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: SUAVE }, 0.3)
-    .fromTo(e.querySelector('p'), { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: SUAVE }, 0.5);
+  tl.fromTo(e, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: SUAVE })
+    .to(p, { v: o.v, duration: o.dur_conteo ?? 1.3, ease: 'power3.out', onUpdate: () => (b.textContent = fmt(p.v)) }, 0.05);
+  escribir(tl, e.querySelector('p'), 0.35, 0.045);
   salir(e, o.dur); return e;
 }
 
-/** enumeración que va saliendo (paso = segundos entre ítems, para ir con la voz) */
+/** filas compactas que van saliendo (paso = segundos entre filas, para ir con la voz) */
 export function lista(o = {}) {
   if (R.rapido) return;
-  const e = h('div', 'ed-lista', `${o.titulo ? `<span class="kick">${o.titulo}</span>` : ''}<ol>${o.items.map((t, i) => `<li><span class="n"></span><span>${enfasis(t)}</span></li>`).join('')}</ol>`);
+  const e = h('div', 'ed-lista', `<ol>${o.items.map((t) => `<li><i class="n"></i><span>${palabras(t)}</span></li>`).join('')}</ol>`);
   if (o.ancho) e.style.width = o.ancho + 'vw';
   poner(e, o.x ?? 6, o.y ?? 18);
   gsap.set(e, { autoAlpha: 1, delay: o.delay || 0 });
-  if (o.titulo) gsap.fromTo(e.querySelector('.kick'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, delay: o.delay || 0 });
-  gsap.fromTo(e.querySelectorAll('li'), { autoAlpha: 0, x: -24 }, { autoAlpha: 1, x: 0, duration: 0.55, ease: SPRING, stagger: o.paso ?? 0.6, delay: (o.delay || 0) + 0.15 });
+  const paso = o.paso ?? 0.6;
+  e.querySelectorAll('li').forEach((li, i) => {
+    const tl = gsap.timeline({ delay: (o.delay || 0) + 0.1 + i * paso });
+    tl.fromTo(li, { autoAlpha: 0, y: 10, scale: 0.97 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.45, ease: POP });
+    escribir(tl, li, 0.1, 0.035);
+  });
   salir(e, o.dur); return e;
 }
 
-/** frase clave centrada, palabra por palabra */
+/** frase centrada, palabra por palabra */
 export function frase(texto, o = {}) {
   if (R.rapido) return;
-  const e = h('div', 'ed-frase', String(texto).split(/(\*[^*]+\*)/).filter(Boolean).map((p) => p.startsWith('*') ? `<em>${p.slice(1, -1).split(' ').map((w) => `<span class="w">${w}</span>`).join(' ')}</em>` : p.split(' ').filter(Boolean).map((w) => `<span class="w">${w}</span>`).join(' ')).join(' '));
+  const e = h('div', 'ed-frase', palabras(texto));
   if (o.y != null) e.style.top = o.y + 'vh';
   poner(e);
-  gsap.set(e, { autoAlpha: 1, delay: o.delay || 0 });
-  gsap.fromTo(e.querySelectorAll('.w'), { autoAlpha: 0, yPercent: 60 }, { autoAlpha: 1, yPercent: 0, duration: 0.55, ease: SUAVE, stagger: o.paso ?? 0.07, delay: o.delay || 0 });
+  const tl = gsap.timeline({ delay: o.delay || 0 }); tl.set(e, { autoAlpha: 1 }, 0);
+  escribir(tl, e, 0, o.paso ?? 0.08);
   salir(e, o.dur); return e;
 }
 
-/** marco que señala un elemento de una página (sigue al elemento si la página se mueve) */
+/** marco fino que señala un elemento de una página + etiqueta unida por una línea con nodo cuadrado */
 export function senalar(nombre, objetivo, o = {}) {
   if (R.rapido) return;
-  const e = h('div', 'ed-senal' + (o.lado ? ' ' + o.lado : ''), `<i class="marco"></i>${o.texto ? `<span class="et">${enfasis(o.texto)}</span>` : ''}`);
+  const lado = o.lado || 'abajo';
+  const e = h('div', 'ed-senal ' + lado, `<i class="marco"></i>${o.texto ? `<i class="linea"></i><i class="nodo"></i><span class="et">${palabras(o.texto)}</span>` : ''}`);
   poner(e, 0, 0);
   const fr = [...document.querySelectorAll('#paginas .pag-marco')].find((m) => m.dataset.p === nombre)?.querySelector('iframe');
   const rectDe = () => {
-    if (typeof objetivo === 'object' && objetivo && 'w' in objetivo) return { left: objetivo.x * innerWidth / 100, top: objetivo.y * innerHeight / 100, width: objetivo.w * innerWidth / 100, height: objetivo.h * innerHeight / 100 };
+    if (typeof objetivo === 'object' && objetivo && 'w' in objetivo) { const f = fr?.getBoundingClientRect() || { left: 0, top: 0, width: innerWidth, height: innerHeight }; return { left: f.left + objetivo.x * f.width / 100, top: f.top + objetivo.y * f.height / 100, width: objetivo.w * f.width / 100, height: objetivo.h * f.height / 100 }; } // {x,y,w,h} en % de la página
     const w = ventana(nombre); const el = typeof objetivo === 'string' ? w?.document.querySelector(objetivo) : objetivo; if (!el || !fr) return null;
-    const r = el.getBoundingClientRect(), f = fr.getBoundingClientRect(); const pad = o.pad ?? 10;
-    return { left: f.left + r.left - pad, top: f.top + r.top - pad, width: r.width + pad * 2, height: r.height + pad * 2 };
+    const r = el.getBoundingClientRect(), f = fr.getBoundingClientRect(); const pad = o.pad ?? 8;
+    const k = f.width / (fr.offsetWidth || f.width); // la página puede estar dentro de una ventana escalada
+    return { left: f.left + r.left * k - pad, top: f.top + r.top * k - pad, width: r.width * k + pad * 2, height: r.height * k + pad * 2 };
   };
   let vivo = true; e._sal = () => (vivo = false);
   const seguir = () => { if (!vivo) return; const r = rectDe(); if (r) Object.assign(e.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }); requestAnimationFrame(seguir); };
   seguir();
   const tl = gsap.timeline({ delay: o.delay || 0 });
-  tl.set(e, { autoAlpha: 1 }, 0).fromTo(e.querySelector('.marco'), { autoAlpha: 0, scale: 1.25 }, { autoAlpha: 1, scale: 1, duration: 0.55, ease: SPRING });
-  if (o.texto) tl.fromTo(e.querySelector('.et'), { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: SUAVE }, 0.25);
+  tl.set(e, { autoAlpha: 1 }, 0).fromTo(e.querySelector('.marco'), { autoAlpha: 0, scale: 1.08 }, { autoAlpha: 1, scale: 1, duration: 0.45, ease: SUAVE });
+  if (o.texto) {
+    tl.fromTo(e.querySelector('.linea'), { scaleX: 0, scaleY: 0 }, { scaleX: 1, scaleY: 1, duration: 0.4, ease: 'power3.inOut' }, 0.25)
+      .fromTo(e.querySelector('.nodo'), { scale: 0 }, { scale: 1, duration: 0.3, ease: POP }, 0.55)
+      .fromTo(e.querySelector('.et'), { autoAlpha: 0, scale: 0.94 }, { autoAlpha: 1, scale: 1, duration: 0.4, ease: POP }, 0.6);
+    escribir(tl, e.querySelector('.et'), 0.65, 0.04);
+  }
   salir(e, o.dur); return e;
 }
 
-/** portadilla de capítulo: cubre la pantalla, ejecuta `durante` (montar la escena) y se abre */
+/** fundido corto entre capítulos (sin título: en pantalla solo va texto de lo que dice la voz) */
 export function capitulo(n, titulo, durante) {
-  // Fluido: sin números y sin tapar la pantalla. Un fundido corto a oscuro monta la escena nueva,
-  // y el título aparece encima mientras la escena ya corre; se va solo, sin detener nada.
-  // Sin título: en pantalla solo sale texto de lo que dice la voz. Solo un fundido corto monta la escena nueva.
   const velo = h('div', 'ed-velo'); capa().appendChild(velo);
   return new Promise((res) => {
     gsap.timeline()

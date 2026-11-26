@@ -317,3 +317,78 @@ body.con-pagina #carto, body.con-pagina #conv, body.con-pagina #atrib, body.con-
 #hud-sec b { display: none !important; }
 .ed-lista .n { min-width: 0; width: 14px; height: 3px; background: var(--ed-lima); align-self: center; flex: 0 0 14px; }
 #hud-sec { display: none !important; } /* sin títulos: solo texto de lo que dice la voz */
+
+/* =====================================================================
+   ESTILO DE LOS REFERENTES (2026-11-26): letra fina y pequeña, palabra por palabra,
+   tarjetas claras compactas, avatares redondeados, líneas finas con nodo cuadrado,
+   páginas como ventanas flotando sobre un fondo de luz verde/lima.
+   (sobrescribe los estilos anteriores de #edicion)
+   ===================================================================== */
+#edicion { --ed-t: 'Geist', 'DM Sans', sans-serif; --ed-b: 'Geist', 'DM Sans', sans-serif; }
+#edicion .w { display: inline-block; will-change: transform, opacity; }
+#edicion em { font-style: normal; color: var(--ed-lima); font-weight: 500; }
+#edicion .kick { display: none !important; }
+
+/* texto de la voz, abajo: cápsula de vidrio, punto lima */
+.ed-rotulo { left: 50% !important; right: auto !important; bottom: 7vh; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; max-width: 70vw;
+  background: rgba(11, 13, 16, .62); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, .09); border-radius: 12px; padding: 11px 20px 12px 16px; }
+.ed-rotulo.der { left: auto !important; right: 5vw !important; transform: none; }
+.ed-rotulo .barra { display: none; }
+.ed-rotulo .punto { flex: 0 0 7px; height: 7px; border-radius: 50%; background: var(--ed-lima); box-shadow: 0 0 10px var(--ed-lima); }
+.ed-rotulo .txt { background: none; padding: 0; font: 300 clamp(17px, 1.45vw, 24px)/1.3 var(--ed-b); color: var(--ed-papel); letter-spacing: .005em; }
+.ed-rotulo b { font: inherit; }
+
+/* tarjeta compacta clara */
+.ed-pop { width: auto; min-width: 0; max-width: 24vw; padding: 11px 15px 12px; gap: 12px; border-radius: 10px; background: rgba(243, 244, 238, .96); box-shadow: 0 10px 30px rgba(0, 0, 0, .28); align-items: center; }
+.ed-pop b { font: 400 clamp(14px, 1.08vw, 18px)/1.3 var(--ed-b); color: #14171a; }
+.ed-pop em { color: #3f5200 !important; font-weight: 600; background: linear-gradient(transparent 62%, rgba(207, 255, 94, .75) 62%); }
+.ed-pop p { margin: 4px 0 0; font: 300 13px/1.4 var(--ed-b); color: #4a4f49; }
+.ed-pop small { font-size: 10px; margin-top: 5px; }
+.ed-pop .img { flex: 0 0 64px; height: 64px; border-radius: 10px; }
+.ed-pop.oscuro { background: rgba(11, 13, 16, .66); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, .1); }
+.ed-pop.oscuro b { color: var(--ed-papel); font-weight: 300; }
+.ed-pop.oscuro em { color: var(--ed-lima) !important; background: none; font-weight: 500; }
+.ed-pop.oscuro p { color: #b9beb5; }
+
+/* persona: avatar en cuadro redondeado */
+.ed-persona { gap: 14px; align-items: center; }
+.ed-persona .foto, .ed-persona svg { display: none; }
+.ed-persona > .img { width: 76px; height: 76px; flex: 0 0 76px; border-radius: 20px; background: center/cover no-repeat #2a2e2a; box-shadow: 0 0 0 2px rgba(207, 255, 94, .9), 0 10px 26px rgba(0, 0, 0, .4); }
+.ed-persona .nom { background: rgba(11, 13, 16, .62); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, .09); border-radius: 12px; padding: 10px 16px 11px; }
+.ed-persona b { display: block; font: 500 clamp(17px, 1.4vw, 23px)/1.15 var(--ed-b); color: var(--ed-papel); }
+.ed-persona .rol { display: block; margin-top: 3px; font: 300 13px/1.3 var(--ed-b); color: var(--ed-lima); }
+.ed-persona small { margin-top: 5px; font-size: 9.5px; color: #8b9089; }
+
+/* cifra: número fino */
+.ed-cifra { background: rgba(11, 13, 16, .62); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, .09); border-radius: 12px; padding: 12px 18px 13px; max-width: 26vw; }
+.ed-cifra .num { gap: 4px; font: 300 clamp(38px, 3.6vw, 64px)/1 var(--ed-b); letter-spacing: -.02em; color: var(--ed-lima); }
+.ed-cifra .pre, .ed-cifra .suf { font-size: .5em; font-weight: 300; letter-spacing: 0; }
+.ed-cifra .linea { display: none; }
+.ed-cifra p { margin-top: 6px; font: 300 clamp(13px, 1vw, 16px)/1.35 var(--ed-b); color: var(--ed-papel); }
+
+/* lista: filas claras compactas */
+.ed-lista { width: auto; min-width: 0; max-width: 30vw; background: none; padding: 0; }
+.ed-lista ol { gap: 7px; }
+.ed-lista li { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: 9px; background: rgba(243, 244, 238, .95); box-shadow: 0 8px 22px rgba(0, 0, 0, .25); font: 400 clamp(13px, 1vw, 16px)/1.25 var(--ed-b); color: #14171a; }
+.ed-lista li em { color: #3f5200 !important; font-weight: 600; background: linear-gradient(transparent 62%, rgba(207, 255, 94, .75) 62%); }
+.ed-lista .n { flex: 0 0 6px; width: 6px; height: 6px; min-width: 0; border-radius: 2px; background: #9bc21e; align-self: center; }
+
+/* frase centrada */
+.ed-frase { top: 42vh; font: 300 clamp(24px, 2.6vw, 44px)/1.2 var(--ed-b); letter-spacing: -.005em; text-shadow: 0 2px 18px rgba(0, 0, 0, .5); }
+
+/* señalar: marco fino + línea + nodo cuadrado + etiqueta clara */
+.ed-senal .marco { border: 1.5px solid var(--ed-lima); border-radius: 8px; box-shadow: 0 0 18px rgba(207, 255, 94, .22); }
+.ed-senal .linea { position: absolute; left: 50%; top: 100%; width: 1px; height: 26px; background: var(--ed-lima); transform-origin: 50% 0; }
+.ed-senal .nodo { position: absolute; left: calc(50% - 3.5px); top: calc(100% + 24px); width: 7px; height: 7px; background: var(--ed-lima); border-radius: 1px; }
+.ed-senal .et { left: 50%; top: calc(100% + 36px); transform-origin: 50% 0; translate: -50% 0; white-space: nowrap; background: rgba(243, 244, 238, .96); color: #14171a; font: 400 14px/1 var(--ed-b); letter-spacing: 0; padding: 8px 12px; border-radius: 8px; box-shadow: 0 8px 22px rgba(0, 0, 0, .3); }
+.ed-senal .et em { color: #3f5200; font-weight: 600; }
+.ed-senal.arriba .linea { top: auto; bottom: 100%; transform-origin: 50% 100%; }
+.ed-senal.arriba .nodo { top: auto; bottom: calc(100% + 24px); }
+.ed-senal.arriba .et { top: auto; bottom: calc(100% + 36px); }
+.ed-senal.circulo .marco { border-radius: 50%; }
+
+/* páginas como ventanas flotando sobre luz verde/lima (como los referentes) */
+body.con-pagina #paginas { background: radial-gradient(60vw 50vh at 18% 105%, rgba(207, 255, 94, .16), transparent 70%), radial-gradient(55vw 55vh at 92% -8%, rgba(46, 140, 96, .28), transparent 70%), #0a0d0c; }
+.pag-marco { inset: 3.2vh 2.6vw; border-radius: 16px; background: #0b0d10; box-shadow: 0 0 0 1px rgba(255, 255, 255, .07), 0 30px 80px rgba(0, 0, 0, .55); }
+.pag-marco iframe { border-radius: 16px; }
+@media (max-width: 700px) { .pag-marco { inset: 1.5vh 2vw; border-radius: 12px; } .ed-pop, .ed-lista, .ed-cifra { max-width: 86vw; } .ed-rotulo { max-width: 92vw; } }
