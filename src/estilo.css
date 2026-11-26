@@ -247,7 +247,8 @@ body.con-pagina #carto, body.con-pagina #conv, body.con-pagina #atrib, body.con-
   --ed-t: 'Barlow Condensed', 'Geist', sans-serif; --ed-b: 'Geist', 'DM Sans', sans-serif; }
 #edicion > * { position: absolute; visibility: hidden; }
 #edicion em { font-style: normal; color: var(--ed-lima); }
-#edicion .kick { display: block; font: 500 13px/1 var(--ed-b); letter-spacing: .18em; text-transform: uppercase; color: var(--ed-lima); margin-bottom: 10px; }
+#edicion .kick { position: static; display: block; font: 500 13px/1 var(--ed-b); letter-spacing: .18em; text-transform: uppercase; color: var(--ed-lima); margin-bottom: 10px; }
+#edicion .kick::before { display: none; } /* la clase .kick vieja (ui.js) no debe mover los kicks de la edición */
 #edicion .mask { display: block; overflow: hidden; padding-bottom: .06em; }
 #edicion .mask b { display: block; }
 

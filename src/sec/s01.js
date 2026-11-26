@@ -42,27 +42,30 @@ export function agregar(X, lista, texto, delay = 0) {
   X.gsap.fromTo(li, { autoAlpha: 0, x: -24 }, { autoAlpha: 1, x: 0, duration: 0.55, ease: 'back.out(1.6)', delay });
 }
 
-const TRES = ['Modernización del *abastecimiento*', 'Crecimiento *urbano*', 'Transformación del *suelo*'];
-const PROYECTO = ['Análisis del *POT de Bogotá*', 'Diagnóstico y formulación de los *problemas de Kennedy*', 'Construcción de un *modelo propio* de ciudad', 'Exploración de consecuencias mediante *simulaciones*'];
-const listaProyecto = (X, n, delay = 0) => X.ed.lista({ titulo: 'Modelamiento Dinámico y Simulación', items: PROYECTO.slice(0, n), x: 62, y: 40, ancho: 33, paso: 0.5, delay });
-const AXO = ['1956', '1972', '1988', '2024'];
+const TRES = ['la modernización del *abastecimiento*', 'el crecimiento *urbano*', 'la transformación del *suelo*'];
+const PROYECTO = ['el análisis del *POT de Bogotá*', 'el diagnóstico y la formulación de los *problemas de Kennedy*', 'la construcción de un *modelo propio* de ciudad', 'la exploración de sus posibles consecuencias mediante *simulaciones*'];
+const listaProyecto = (X, n, delay = 0) => X.ed.lista({ items: PROYECTO.slice(0, n), x: 62, y: 45, ancho: 33, paso: 0.5, delay });
+const AXO = ['1956', '1972', '1988', '2024']; // axonometrías reales de Kennedy (public/img)
+
+/** cada frase anula lo diferido o asíncrono de la anterior (saltos: las frases async no pintan tarde) */
+export const conGuardia = (beats) => beats.map((b) => ({ ...b, a: (X) => { gen++; return b.a(X); } }));
 
 export default /* ===================================================================== 01 INTRODUCCIÓN */
   {
     n: '01', nombre: 'Introducción', cam: 'alto', precarga: [H],
     base: (X) => { X.capa('agua', true, 0); },
-    beats: [
+    beats: conGuardia([
       // 3D: Corabastos (abastecimiento) → los edificios crecen (crecimiento urbano) → axonometrías reales 1956-2024 (suelo)
       { t: 'La modernización del abastecimiento, el crecimiento urbano y la transformación del suelo', a: (X) => {
         const c = ctx(X);
         X.sinPagina(); X.W.capas.edif.userData.u.uSube.value = 0.15;
         X.cam('cora', 3.2); X.capa('corabastos'); X.foco(X.LUG.corabastos, 900, '#cfff5e');
-        guardar('tres', X.ed.lista({ titulo: 'Tres procesos', items: TRES, x: 5, y: 16, ancho: 30, paso: 1.45, delay: 0.1 }));
+        guardar('tres', X.ed.lista({ items: TRES, x: 5, y: 16, ancho: 30, paso: 1.45, delay: 0.1 }));
         c.seq([[1.6, () => { X.sinFoco(); X.sube(1, X.LUG.corabastos, 3.2); }],
           [3.0, () => {
-            const e = guardar('axo', X.ed.pop({ img: I('axo_1956.jpg'), kick: 'Kennedy · axonometría', t: AXO[0], cls: 'oscuro hb-axo', x: 63, y: 16, ancho: 31 }));
-            if (!e) return; const im = e.querySelector('.img'); Object.assign(im.style, { flex: '0 0 62%', height: '24vh' });
-            AXO.slice(1).forEach((a, i) => X.gsap.delayedCall(0.9 + i * 0.85, () => { if (!e.isConnected) return; im.style.backgroundImage = `url('${I('axo_' + a + '.jpg')}')`; e.querySelector('b').textContent = a; }));
+            const e = guardar('axo', X.ed.pop({ img: I('axo_1956.jpg'), t: '', cls: 'oscuro hb-axo', x: 66, y: 16, ancho: 26 }));
+            if (!e) return; const im = e.querySelector('.img'); Object.assign(im.style, { flex: '1 1 auto', height: '30vh' }); e.querySelector('.cuerpo').style.display = 'none';
+            AXO.slice(1).forEach((a, i) => X.gsap.delayedCall(0.9 + i * 0.85, () => { if (!e.isConnected) return; im.style.backgroundImage = `url('${I('axo_' + a + '.jpg')}')`; }));
           }]]);
         if (X.R.rapido) { X.sube(1, X.LUG.corabastos, 0); X.sinFoco(0); }
       } },
@@ -71,43 +74,43 @@ export default /* ==============================================================
         X.sinPagina(); X.sinFoco(); X.capa('corabastos', false); X.W.capas.edif.userData.u.uSube.value = 1;
         X.cam('alto', 3);
         soltar(X, 'axo');
-        seguir(X, 'tres', () => X.ed.lista({ titulo: 'Tres procesos', items: TRES, x: 5, y: 16, ancho: 30 }));
-        X.ed.rotulo('Necesidades *diferentes*', { kick: 'Cada proceso, por su lado', lado: 'der' });
+        seguir(X, 'tres', () => X.ed.lista({ items: TRES, x: 5, y: 16, ancho: 30 }));
+        X.ed.rotulo('buscaban responder a *necesidades diferentes*', { lado: 'der' });
       } },
       // la red causal real: sus relaciones se encienden una a una (se entrelazan)
       { t: 'pero sus efectos terminaron entrelazándose,', a: (X) => {
         X.pagina(H, 'entrelaza', { entrada: 'barrido' });
-        X.ed.rotulo('Sus efectos terminaron *entrelazándose*', { kick: 'Red causal · 3 niveles + POT', lado: 'der', delay: 0.6 });
+        X.ed.rotulo('sus efectos terminaron *entrelazándose*', { lado: 'der', delay: 0.6 });
       } },
       // los tres problemas, señalados sobre sus nodos en la red
       { t: 'intensificando la dependencia alimentaria, la acumulación de residuos y la degradación de los ecosistemas.', a: async (X) => {
         const c = ctx(X);
         await X.pagina(H, 'red');
         if (!c.vivo()) return;
-        X.ed.lista({ titulo: 'Se intensificaron', items: ['Dependencia *alimentaria*', 'Acumulación de *residuos*', 'Degradación de los *ecosistemas*'], x: 4, y: 16, ancho: 27, paso: 1.5, delay: 0.5 });
-        c.seq([[0.8, () => X.ed.senalar(H, anclaNodo('N3-HIP'), { lado: 'circulo', texto: 'Hipercentralización alimentaria', pad: 6 })],
-          [2.3, () => X.ed.senalar(H, anclaNodo('N1-RES'), { lado: 'circulo', texto: 'Acumulación de residuos', pad: 6 })],
-          [3.8, () => X.ed.senalar(H, anclaNodo('N2-HEB'), { lado: 'circulo', texto: 'Humedal El Burro', pad: 6 })]]);
+        X.ed.lista({ items: ['la dependencia *alimentaria*', 'la acumulación de *residuos*', 'la degradación de los *ecosistemas*'], x: 4, y: 16, ancho: 27, paso: 1.5, delay: 0.5 });
+        c.seq([[0.8, () => X.ed.senalar(H, anclaNodo('N3-HIP'), { lado: 'circulo arriba', texto: 'dependencia alimentaria', pad: 6 })],
+          [2.3, () => X.ed.senalar(H, anclaNodo('N1-RES'), { lado: 'circulo', texto: 'residuos', pad: 6 })],
+          [3.8, () => X.ed.senalar(H, anclaNodo('N2-HEB'), { lado: 'circulo', texto: 'ecosistemas', pad: 6 })]]);
       } },
       // Niveles 3D de la página: no hay una sola causa, la red sube por niveles
       { t: 'Problemas que no fueron consecuencia de una sola decisión,', a: (X) => {
         X.pagina(H, 'niveles', { paso: 0 });
-        X.ed.frase('No fueron consecuencia de *una sola decisión*', { y: 11, delay: 0.3 });
+        X.ed.frase('no fueron consecuencia de *una sola decisión*', { y: 15, delay: 0.3 });
       } },
       // el cursor recorre Nivel 1 → Nivel 2 → Nivel 3 (cada nivel refuerza al siguiente)
       { t: 'sino de múltiples dinámicas que se reforzaron entre sí.', a: (X) => {
         X.pagina(H, 'niveles', { pasos: [1, 2, 3], entre: 700 });
-        X.ed.pop({ kick: 'Red causal · de abajo hacia arriba', t: 'Múltiples dinámicas que *se reforzaron* entre sí', cls: 'oscuro', x: 4, y: 12, ancho: 30, delay: 0.3 });
+        X.ed.pop({ t: 'múltiples dinámicas que *se reforzaron entre sí*', cls: 'oscuro', x: 4, y: 16, ancho: 30, delay: 0.3 });
       } },
       // la red completa con el filtro abierto: capas y tipos de relación
       { t: 'Precisamente, estas dinámicas y las relaciones son el punto central', a: (X) => {
         X.pagina(H, 'cajon', { sobre: [0, 7] });
-        X.ed.rotulo('Las *dinámicas* y las *relaciones*', { kick: 'El punto central', lado: 'der', delay: 0.3 });
-        X.ed.senalar(H, '#relGridHost', { texto: 'Tipos de relación', lado: 'arriba', delay: 0.9, pad: 8 });
+        X.ed.rotulo('estas *dinámicas* y las *relaciones*', { lado: 'der', delay: 0.3 });
+        X.ed.senalar(H, '#relGridHost', { texto: 'las relaciones', lado: 'arriba', delay: 0.9, pad: 8 });
       } },
       { t: 'del proyecto de Modelamiento Dinámico y Simulación.', a: (X) => {
         X.pagina(H, 'cajon');
-        X.ed.rotulo('Modelamiento Dinámico y Simulación', { kick: 'Proyecto', lado: 'der' });
+        X.ed.rotulo('Modelamiento *Dinámico* y *Simulación*', { lado: 'der' });
       } },
       // montaje del proyecto: 01 POT (el cursor apaga la red causal y queda el POT)
       { t: 'Su desarrollo comprende el análisis del POT de Bogotá,', a: (X) => {
@@ -118,12 +121,12 @@ export default /* ==============================================================
       // 02 problemas de Kennedy (página «Problemáticas de Kennedy»)
       { t: 'el diagnóstico y la formulación de los problemas de Kennedy,', mantener: true, a: (X) => {
         Promise.resolve().then(() => X.pagina('problemas', null, { entrada: 'barrido' })).catch(() => {});
-        precargar('red');
+        precargar('propuesta');
         const L = seguir(X, 'proyecto', () => listaProyecto(X, 1)); agregar(X, L, PROYECTO[1], 0.4);
       } },
-      // 03 modelo propio de ciudad (página «Red de problemas»)
+      // 03 modelo propio de ciudad (página «Propuesta» de red-de-problemas)
       { t: 'la construcción de un modelo propio de ciudad', mantener: true, a: (X) => {
-        Promise.resolve().then(() => X.pagina('red', null, { entrada: 'barrido' })).catch(() => {});
+        Promise.resolve().then(() => X.pagina('propuesta', null, { entrada: 'barrido' })).catch(() => {});
         ctx(X).seq([[1.4, () => liberar([H])]]); // una sola página pesada viva
         const L = seguir(X, 'proyecto', () => listaProyecto(X, 2)); agregar(X, L, PROYECTO[2], 0.4);
       } },
@@ -133,5 +136,5 @@ export default /* ==============================================================
         X.cam('cora', 3); X.capa('agentes'); X.capa('flujos'); X.uTo('flujos', 'uV', 900, 2);
         const L = seguir(X, 'proyecto', () => listaProyecto(X, 3)); agregar(X, L, PROYECTO[3], 0.4);
       } },
-    ],
+    ]),
   };

@@ -70,7 +70,7 @@ export function camRed(win, c = {}, rapido) {
   try {
     const cam = ev(win, 'cam'), ctl = ev(win, 'ctl'), V = win.THREE.Vector3;
     ev(win, 'tw=null;T0=T0===null?performance.now()-3000:Math.min(T0,performance.now()-3000)'); // sin el acercamiento de entrada
-    const L0 = ev(win, 'RED_POS.length()') * (c.f ?? 1);
+    const L0 = ev(win, '(typeof baseLen!=="undefined"&&baseLen)||(typeof BASE0!=="undefined"&&BASE0)||RED_POS.length()/1.85') * (c.f ?? 1);
     const fT = ctl.target.clone(), tT = c.k ? ev(win, `byId['${c.k}'].p.clone().multiplyScalar(${c.m ?? 0.35})`) : new V();
     const fL = cam.position.distanceTo(ctl.target);
     const p = { q: 0 };
@@ -92,10 +92,10 @@ export const CSS_FORMATO = `
   body{color:#f3f4ee}
   header,.legend,#volver,.goconecto,.goprop,#tip,#cgcarga,.al-modelo,.mdl-ir,a.sig,.bajar{visibility:hidden!important;pointer-events:none!important}
   #cgfr{visibility:visible!important}
-  #story .card,#story .hcard,.rd .card{background-color:rgba(11,13,16,.9)!important}
+  .hero .hud,.hero .hmaq-n{visibility:hidden!important}
   h1,h2,h3{font-family:'Barlow Condensed','Geist',sans-serif!important}
   /* sin numeración de tarjetas ni de nodos («06 · 5 conex») */
-  #lbls small,.cpb .n,#criterios .ey>b:first-child{display:none!important}
+  #lbls small,.cpb .n,#criterios .ey>b:first-child,#panel .gh::before,#panel .gh>b:first-child{display:none!important}
 `;
 /**
  * sin numeración de capítulo/tarjeta en la página («01 / 06», «06 · 5 conex», «03 · Valorización…»): la autora no la quiere.
@@ -202,6 +202,8 @@ registrar(NOMBRE, {
       if (yo !== gen) return;
       if (!o.rapido) { await espera(o.antes ?? 900); if (yo !== gen) return; }
       ev(win, `if(sel!==byId['${k}'])select(byId['${k}'])`);
+      // la página vuela hacia el nodo: se suaviza (sin acercarse de golpe; la distancia se mantiene)
+      ev(win, 'if(tw){const d=tw.fP.distanceTo(tw.fT),dir=tw.tP.clone().sub(tw.tT).normalize();tw.tT=tw.tT.clone().multiplyScalar(.45);tw.tP=tw.tT.clone().addScaledVector(dir,d*.9);tw.d=2400}');
       if (o.rapido) ev(win, 'if(tw){tw.t0=performance.now()-5000}');
     },
   },

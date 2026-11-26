@@ -90,7 +90,7 @@ async function relato(win, o, mio = ++turno) {
   const yaEsta = SQ.on && SQ.i === n && SQ.ph === 's';
   if (!yaEsta) {
     if (!rapido && SQ.on && SQ.ph === 's') { // fundido continuo: la escena y su panel se desvanecen antes de cambiar
-      const d = win.document; d.querySelector('#sqS')?.classList.remove('show');
+      const d = win.document; d.querySelector('#sqS')?.classList.remove('show'); ocultarCursor(win);
       ['#pl', '#hp', '#pp'].forEach((q) => { const p = d.querySelector(q); if (p) { p.style.transition = 'opacity .35s ease'; p.style.opacity = '0'; } });
       await espera(360); if (!vivo()) return;
       setTimeout(() => ['#pl', '#hp', '#pp'].forEach((q) => { const p = d.querySelector(q); if (p) { p.style.opacity = ''; p.style.transition = ''; } }), 60);
@@ -136,7 +136,9 @@ html,body{background:#0b0d10}
 #bar b,.sq-top b{font:600 22px/1 var(--tit)!important;letter-spacing:.01em}
 .node{font-family:var(--sans)}
 /* edición: sin controles ni ayudas que tapen (la página se ve como grabada, la explicación la pone la voz) */
-#hint,#legend,#mini,#zoom,#tip,.sq-foot,.sq-word,.sq-x,.sq-txt p,.sq-txt .nind,.sq-txt .kk{display:none!important}
+#hint,#legend,#mini,#zoom,#tip,.sq-foot,.sq-word,.sq-x,.sq-txt p,.sq-txt .nind,.sq-txt .kk,.sq-txt h2,.sq-txt .nchips,#brand,#dsearch{display:none!important}
+.sq-txt{width:auto!important;min-width:0!important;padding:0!important}
+#bar{justify-content:flex-end}
 .sq-scene{transition:opacity .38s ease!important}
 body.sq-open #sq{animation:fmtIn .45s ease}@keyframes fmtIn{from{opacity:0}}
 .sq-top{display:none!important}
@@ -158,6 +160,7 @@ body.sq-open #hp,#pl{top:92px!important}
 #hp .hrow{display:none!important}
 #pl{background:#0b0d10!important;border-color:#262c34!important}
 #pl .pl-h i{background:#cfff5e!important}
+.pl-d{fill:#cfff5e!important}.pl-line{stroke:#e6ffb0!important}.pl-p circle:first-child{fill:rgba(207,255,94,.28)!important}.pl-p circle:last-child{fill:#efffc8!important}
 #cur2{border-width:2.5px}
 `;
 

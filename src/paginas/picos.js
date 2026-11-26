@@ -1,4 +1,4 @@
-﻿// Visor «Indicadores en 3D» (picos/index.html): los picos de cada índice sobre el territorio de Kennedy.
+// Visor «Indicadores en 3D» (picos/index.html): los picos de cada índice sobre el territorio de Kennedy.
 // Se usa como una persona: el cursor hace clic en la lista de índices y en «Ver varios a la vez»; la cámara
 // del visor solo orbita despacio (su autoRotate) y se desplaza con suavidad, sin acercamientos bruscos.
 // Estados ABSOLUTOS e idempotentes: ccl · se · cruce · coinciden · relaciones
@@ -24,7 +24,8 @@ const CSS = `
 html,body,#view,#stage,#under{background:#0b0d10!important}
 body{font-family:'Geist',system-ui,sans-serif;color:#f3f4ee}
 aside{background:#0b0d10;border-right:1px solid rgba(214,228,222,.12);padding:22px 18px}
-aside h1{font:400 30px/1 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.01em;color:#f3f4ee;margin:0 0 16px}
+aside h1,.mtitle{display:none!important}
+#list{margin-top:64px}   /* deja libre la marca del video (arriba a la izquierda) */
 .ind button{background:#111418;border:1px solid rgba(214,228,222,.12);border-radius:6px;font:400 13.5px/1.25 'Geist',sans-serif;color:#c9cdc5;transition:border-color .25s,background .25s,color .25s}
 .ind button .code{font:500 12.5px/1 'Geist Mono','Geist',monospace;color:#9aa09a;min-width:38px}
 .ind button.on{background:#161a10;border-color:#cfff5e;color:#f3f4ee;font-weight:500}
@@ -51,6 +52,9 @@ input[type=checkbox]:checked{background:#cfff5e!important;border-color:#cfff5e!i
 .ed-pin.lima i{background:#cfff5e}
 .ed-pin.lima s{background:#cfff5e}
 .ed-pin.lima b{background:#cfff5e}
+.ed-pin.izq b{left:auto;right:-1px}
+.ed-pin.alto s{height:120px}
+.ed-pin.alto b{bottom:120px}
 `;
 
 /** escena del visor a partir de un punto (m) */
@@ -65,8 +69,11 @@ function selec(win, codigos, multi) {
 const crecidos = (win) => win.eval('ind.forEach(o=>{if(o.group)o.t=o.on?1:0});dirty=true');
 const boton = (win, code) => [...win.document.querySelectorAll('#list .ind button')].find((b) => b.querySelector('.code')?.textContent === code);
 
+/** nombres 3D de los índices: con uno solo ayudan; con dos se cruzan con los marcadores, se apagan */
+function nombres(win, on, rapido) { const p = { v: win.__nombres ?? 1 }; gsap.killTweensOf(win.__nomTw || {}); if (rapido) { win.__nombres = on ? 1 : 0; return; } win.__nomTw = p; gsap.to(p, { v: on ? 1 : 0, duration: 0.6, onUpdate: () => (win.__nombres = p.v) }); }
+
 /** desplaza el objetivo de la cámara (y su zoom) con suavidad; la órbita lenta del visor sigue */
-function mover(win, { x = 0, y = 0, zoom = 1, d = 3, rapido = false }) {
+function mover(win, { x = 0, y = 0, zoom = 1.18, d = 3, rapido = false }) {
   const c = win.eval('controls'), cam = win.eval('camera'), v = aEscena(win, x, y, 6);
   const p = { k: 0, x0: c.target.x, y0: c.target.y, z0: c.target.z, zm0: cam.zoom };
   const poner = (k) => {
@@ -135,11 +142,13 @@ registrar('picos', {
       const s = new T.Sprite(new T.SpriteMaterial({ map: new T.CanvasTexture(c), transparent: true, depthTest: false }));
       s.scale.set(190, 20.8, 1); return s;
     };
+    // el nombre 3D de SE ya se había construido al abrir el visor (con la letra original): se rehace
+    win.eval('ind').forEach((o) => { if (o.group && o.label) { const nl = win.label(o.d.name); nl.position.copy(o.label.position); o.group.remove(o.label); o.label.material.map?.dispose(); o.label.material.dispose(); o.group.add(nl); o.label = nl; } });
     // CCL y SE se construyen de antemano para que al aparecer solo crezcan (sin tirón)
     for (const c of ['CCL', 'SE']) win.eval(`(()=>{const i=ind.findIndex(o=>o.d.code==='${c}'&&!o.d.year);if(!ind[i].group)build(i);})()`);
     win.eval("planOn=false;controls.autoRotate=true;controls.autoRotateSpeed=0.35;selected=new Set();sync();ind.forEach(o=>{o.t=0});dirty=true");
     cursor(win);
-    const cora = pin(win, 'pin-cora', 'Corabastos', 'referencia'), sect = pin(win, 'pin-sector', 'CCL alto · SE bajo', 'sector donde coinciden', 'lima');
+    const cora = pin(win, 'pin-cora', 'Corabastos'), sect = pin(win, 'pin-sector', 'Donde coinciden', '', 'lima izq alto');
     // render solo cuando la página está a la vista (en segundo plano no gasta GPU) + marcadores que siguen al 3D
     const marco = win.frameElement?.parentElement, rf = win.renderFrame, v = new T.Vector3();
     const stage = doc.getElementById('stage'), cam = win.eval('camera');
@@ -151,6 +160,7 @@ registrar('picos', {
     const pCora = aEscena(win, CORA[0], CORA[1], 2), pSect = aEscena(win, SECTOR[0], SECTOR[1] + SECTOR_R * 0.55, 2);
     win.renderFrame = () => {
       if (marco && !marco.classList.contains('on')) return;
+      const nv = win.__nombres ?? 1; win.eval('ind').forEach((o) => { if (o.label) o.label.material.opacity = nv; });
       const A = win.__anillo; if (A) { A.r.material.opacity = A.a.a; A.relleno.material.opacity = A.a.a * 0.13; A.r.scale.setScalar(A.a.s); A.relleno.scale.setScalar(A.a.s); A.r.visible = A.relleno.visible = A.a.a > 0.001; }
       rf(); seguir(cora, pCora); seguir(sect, pSect);
     };
@@ -159,7 +169,7 @@ registrar('picos', {
   estados: {
     /** «actividades comerciales y logísticas… alrededor de Corabastos»: clic en CCL, la superficie crece; Corabastos como referencia */
     ccl: async (win, doc, o) => {
-      const t = nuevo(win); verAnillo(win, false, true); mostrar(doc.getElementById('pin-sector'), false, true);
+      const t = nuevo(win); nombres(win, true, true); verAnillo(win, false, true); mostrar(doc.getElementById('pin-sector'), false, true);
       const cora = doc.getElementById('pin-cora');
       if (o.rapido) { selec(win, ['CCL']); crecidos(win); mover(win, { rapido: true }); mostrar(cora, true, true); const p = centroDe(boton(win, 'CCL'), 0.4, 0.5); moverCursor(win, p.x, p.y, { rapido: true }); return; }
       selec(win, []); mostrar(cora, false, true); mover(win, { rapido: true });
@@ -173,7 +183,7 @@ registrar('picos', {
     },
     /** «el soporte ecológico…»: clic en SE (reemplaza a CCL) */
     se: async (win, doc, o) => {
-      const t = nuevo(win); verAnillo(win, false, true); mostrar(doc.getElementById('pin-sector'), false, true);
+      const t = nuevo(win); nombres(win, true, o.rapido); verAnillo(win, false, true); mostrar(doc.getElementById('pin-sector'), false, true);
       mostrar(doc.getElementById('pin-cora'), true, o.rapido); mover(win, { rapido: o.rapido, d: 2 });
       const p = centroDe(boton(win, 'SE'), 0.4, 0.5);
       if (o.rapido) { selec(win, ['SE']); crecidos(win); moverCursor(win, p.x, p.y, { rapido: true }); return; }
@@ -182,7 +192,7 @@ registrar('picos', {
     },
     /** «al cruzar estos índices»: activa «Ver varios a la vez» y suma CCL → CCL y SE sobre el mismo territorio */
     cruce: async (win, doc, o) => {
-      const t = nuevo(win); verAnillo(win, false, true); mostrar(doc.getElementById('pin-sector'), false, true);
+      const t = nuevo(win); nombres(win, false, o.rapido); verAnillo(win, false, true); mostrar(doc.getElementById('pin-sector'), false, true);
       mostrar(doc.getElementById('pin-cora'), true, o.rapido); mover(win, { rapido: o.rapido, d: 2 });
       const pc = centroDe(doc.getElementById('multi'), 0.5, 0.5), pb = centroDe(boton(win, 'CCL'), 0.4, 0.5);
       if (o.rapido) { selec(win, ['SE', 'CCL'], true); crecidos(win); moverCursor(win, pb.x, pb.y, { rapido: true }); return; }
@@ -194,20 +204,20 @@ registrar('picos', {
     },
     /** «sectores donde coinciden presiones»: la cámara se desplaza despacio al sector CCL alto · SE bajo y se marca */
     coinciden: async (win, doc, o) => {
-      const t = nuevo(win); selec(win, ['SE', 'CCL'], true); mostrar(doc.getElementById('pin-cora'), true, o.rapido);
-      if (o.rapido) { crecidos(win); mover(win, { x: SECTOR[0] * 0.6, y: SECTOR[1] * 0.6, zoom: 1.22, rapido: true }); verAnillo(win, true, true); mostrar(doc.getElementById('pin-sector'), true, true); ocultarCursor(win, true); return; }
+      const t = nuevo(win); nombres(win, false, true); selec(win, ['SE', 'CCL'], true); mostrar(doc.getElementById('pin-cora'), true, o.rapido);
+      if (o.rapido) { crecidos(win); mover(win, { x: SECTOR[0] * 0.6, y: SECTOR[1] * 0.6, zoom: 1.4, rapido: true }); verAnillo(win, true, true); mostrar(doc.getElementById('pin-sector'), true, true); ocultarCursor(win, true); return; }
       ocultarCursor(win);
-      mover(win, { x: SECTOR[0] * 0.6, y: SECTOR[1] * 0.6, zoom: 1.22, d: 3.2 });
+      mover(win, { x: SECTOR[0] * 0.6, y: SECTOR[1] * 0.6, zoom: 1.4, d: 3.2 });
       await esp(900); if (win.__tok !== t) return;
       verAnillo(win, true); await esp(500); if (win.__tok !== t) return;
       mostrar(doc.getElementById('pin-sector'), true); o.alSector?.();
     },
     /** «relaciones espaciales…»: vuelve la vista completa; quedan las dos referencias */
     relaciones: async (win, doc, o) => {
-      nuevo(win); selec(win, ['SE', 'CCL'], true); if (o.rapido) crecidos(win);
+      nuevo(win); nombres(win, false, true); selec(win, ['SE', 'CCL'], true); if (o.rapido) crecidos(win);
       ocultarCursor(win, o.rapido); verAnillo(win, true, true);
       mostrar(doc.getElementById('pin-cora'), true, true); mostrar(doc.getElementById('pin-sector'), true, true);
-      mover(win, { zoom: 0.92, rapido: o.rapido, d: 3.5 });
+      mover(win, { zoom: 1.12, rapido: o.rapido, d: 3.5 });
     },
   },
 });

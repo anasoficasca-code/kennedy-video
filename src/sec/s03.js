@@ -10,43 +10,43 @@ export default /* ==============================================================
     beats: [
       { t: 'Para comenzar a comprender Kennedy desde la complejidad,', a: (X) => {
         X.pagina('cruces', 'inicio', { entrada: 'barrido' });
-        X.ed.rotulo('Kennedy desde la *complejidad*', { kick: 'Para comenzar', lado: 'der', delay: 0.6 });
+        X.ed.rotulo('Comprender Kennedy desde la *complejidad*', { lado: 'der', delay: 0.6 });
       } },
       { t: 'se cruzaron dieciocho capas de información satelital,', a: (X) => {
         // el número cuenta al ritmo del cursor: cada rótulo que toca es una capa (01 → 18)
-        const c = X.ed.cifra({ v: 0, desde: 0, dur_conteo: 0.01, texto: 'capas de información', x: 50, y: 34 });
+        const c = X.ed.cifra({ v: 0, desde: 0, dur_conteo: 0.01, texto: 'capas de información satelital', x: 50, y: 34 });
         const b = c?.querySelector('.num b');
         X.pagina('cruces', 'capas', { paso: 150, alPaso: (k) => { if (b) b.textContent = k; } });
       } },
       { t: 'a partir de las cuales se construyeron nueve índices territoriales.', a: (X) => {
-        const c = X.ed.cifra({ v: 0, desde: 0, dur_conteo: 0.01, texto: 'índices territoriales', x: 71, y: 77, delay: 0.9 });
+        const c = X.ed.cifra({ v: 0, desde: 0, dur_conteo: 0.01, texto: 'índices territoriales', x: 71, y: 77, delay: 1.5 });
         const b = c?.querySelector('.num b');
         X.pagina('cruces', 'indices', { espera: 1300, paso: 110, alPaso: (k) => { if (b) b.textContent = k; } });
       } },
       { t: 'Entre ellos, el índice de concentración comercial y logística', a: (X) => {
-        X.pagina('cruces', 'ccl', { alClic: () => X.ed.senalar('cruces', nodo(X, 'CCL'), { texto: 'Concentración comercial y logística', lado: 'arriba', pad: 12 }) });
+        X.pagina('cruces', 'ccl', { alClic: () => X.ed.senalar('cruces', nodo(X, 'CCL'), { texto: 'Índice de concentración comercial y logística', lado: 'arriba', pad: 12 }) });
       } },
       { t: 'y el índice de soporte ecológico.', a: (X) => {
-        X.pagina('cruces', 'se', { alClic: () => X.ed.senalar('cruces', nodo(X, 'SE'), { texto: 'Soporte ecológico', lado: 'arriba', pad: 12 }) });
+        X.pagina('cruces', 'se', { alClic: () => X.ed.senalar('cruces', nodo(X, 'SE'), { texto: 'Índice de soporte ecológico', lado: 'arriba', pad: 12 }) });
       } },
       { t: 'Mientras las actividades comerciales y logísticas se intensificaban alrededor de Corabastos,', a: (X) => {
         X.pagina('picos', 'ccl', { entrada: 'barrido' });
-        X.ed.rotulo('Actividades comerciales y *logísticas*', { kick: 'CCL · altura y color = intensidad', lado: 'der', delay: 1.6 });
+        X.ed.rotulo('Actividades comerciales y *logísticas*', { lado: 'der', delay: 1.6 });
       } },
       { t: 'el soporte ecológico presentaba discontinuidades y fragmentación de la cobertura vegetal.', a: (X) => {
         X.pagina('picos', 'se');
-        X.ed.rotulo('*Discontinuidades* y *fragmentación* de la cobertura vegetal', { kick: 'SE · soporte ecológico', lado: 'der', delay: 1.2 });
+        X.ed.rotulo('*Discontinuidades* y *fragmentación* de la cobertura vegetal', { lado: 'der', delay: 1.2 });
       } },
       { t: 'Al cruzar estos índices', a: (X) => {
-        X.pagina('picos', 'cruce', { alClic: () => X.ed.pop({ kick: 'Cruce de índices', t: '*CCL* + *SE* sobre el mismo territorio', cls: 'oscuro', x: 66, y: 12, ancho: 26 }) });
+        X.pagina('picos', 'cruce', { alClic: () => X.ed.pop({ t: 'Al *cruzar* estos índices', cls: 'oscuro', x: 70, y: 12, ancho: 22 }) });
       } },
       { t: 'se pueden reconocer sectores donde coinciden diferentes presiones urbanas y ecológicas,', a: (X) => {
         X.pagina('picos', 'coinciden');
-        X.ed.lista({ titulo: 'Coinciden', items: ['Presión urbana · *CCL alto*', 'Presión ecológica · *SE bajo*'], x: 69, y: 12, ancho: 25, delay: 1.8, paso: 0.9 });
+        X.ed.lista({ titulo: 'Coinciden', items: ['Presiones *urbanas*', 'Presiones *ecológicas*'], x: 72, y: 12, ancho: 22, delay: 1.8, paso: 0.9 });
       } },
       { t: 'identificando relaciones espaciales que orientan el análisis de los problemas.', a: (X) => {
         X.pagina('picos', 'relaciones');
-        X.ed.rotulo('Relaciones espaciales que orientan el *análisis de los problemas*', { kick: 'Del índice al problema', lado: 'der', delay: 0.5 });
+        X.ed.rotulo('Relaciones espaciales que orientan el *análisis de los problemas*', { lado: 'der', delay: 0.5 });
       } },
     ],
   };

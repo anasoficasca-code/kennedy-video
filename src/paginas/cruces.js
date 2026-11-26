@@ -1,4 +1,4 @@
-﻿// Página «De 18 capas a 9 índices» (picos/cruces): pila de 18 láminas → filamentos → 9 índices.
+// Página «De 18 capas a 9 índices» (picos/cruces): pila de 18 láminas → filamentos → 9 índices.
 // Se usa como la usaría una persona: un cursor recorre los rótulos y los nodos (hover real de la página:
 // pasar(id)) y hace clic (fijo = id). Sin zoom: la página se ve entera, tal cual.
 // Estados ABSOLUTOS e idempotentes: inicio · capas · indices · ccl · se
@@ -54,8 +54,7 @@ const CSS = `
 /* colores del formato: tinta, papel, lima, grises (la página ya usa Barlow Condensed + Geist) */
 :root{--campo-0:#0b0d10;--tinta-1:#f3f4ee;--acento-1:#cfff5e}
 body{background:#0b0d10}
-.genealogia__cabeza h2{font-weight:400;color:#f3f4ee}
-.sintesis__titulo{color:#f3f4ee}
+.genealogia__cabeza h2,.sintesis__titulo{visibility:hidden}   /* sin títulos en pantalla: solo lo que dice la voz */
 /* las entradas sin desenfoque (más nítido y más liviano) */
 @keyframes surgir{0%{opacity:0;translate:-16px 0}}
 /* frases de las 18 capas: solo la pila; lo demás espera (animaciones pausadas) y entra cuando se quita la clase */

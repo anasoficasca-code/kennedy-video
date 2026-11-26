@@ -19,6 +19,11 @@ const CSS = `
     font-family: 'Barlow Condensed', 'Geist', sans-serif !important; letter-spacing: .04em !important; font-weight: 600 !important; }
   .brand-title span { font-size: 15px !important; }
   * { cursor: none !important; }
+  /* la barra de la página baja un poco para no chocar con el logo de la presentación */
+  .top-header { top: 54px !important; }
+  .side-drawer { top: 96px !important; max-height: calc(100vh - 170px) !important; }
+  .gephi-panel { top: 104px !important; }
+  .node-inspector { top: 108px !important; }
   .chat-widget-btn, #faqChatModal, #toastNotify, #relTip:empty { display: none !important; }
   :root { --accent: #cfff5e; --accent-glow: rgba(207,255,94,.35); --ink: #f3f4ee; --ink-dim: #a3a89f; --glass-bg: rgba(11,13,16,.92); }
   #hb-cur { position: fixed; left: 0; top: 0; width: 26px; height: 26px; z-index: 99999; pointer-events: none; transform: translate(-200px,-200px); }
