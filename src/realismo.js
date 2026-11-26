@@ -5,12 +5,14 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 /* Fotograma clave del simulador (cielo.js) entre la puesta (e = 0°) y la hora dorada (e = 5°) */
+// LOOK 2026-11-26: fuera el atardecer. Luz de día neutra y nítida; cielo sobrio en degradado tinta → pizarra fría
+// (combina con el formato: tinta #0b0d10, lima #cfff5e). Sin nubes, sin disco solar, sin niebla.
 export const HORA = {
-  top: new THREE.Color(0x1d3a72), mid: new THREE.Color(0x6a6fa8), bot: new THREE.Color(0xf09a5c), hor: new THREE.Color(0xff9a4e),
-  fog: new THREE.Color(0x5d5a78), hemi: new THREE.Color(0x8a93a8), suelo: new THREE.Color(0x3a322b), sol: new THREE.Color(0xffa45c),
+  top: new THREE.Color(0x07090c), mid: new THREE.Color(0x161d26), bot: new THREE.Color(0x2b3640), hor: new THREE.Color(0x4a5762),
+  fog: new THREE.Color(0x2b3640), hemi: new THREE.Color(0xdfe5ea), suelo: new THREE.Color(0x2a2d30), sol: new THREE.Color(0xfffaf2),
 };
-// sol al occidente (−x), 7° sobre el horizonte, un poco al sur
-export const SOL_DIR = new THREE.Vector3(-0.93, 0.2, 0.3).normalize(); // puesta: sol rasante al occidente
+// sol alto (mediodía), un poco al occidente y al sur: sombras cortas y limpias
+export const SOL_DIR = new THREE.Vector3(-0.42, 0.82, 0.38).normalize();
 const tl = new THREE.TextureLoader();
 const tex = (u, rep = true) => { const t = tl.load(u); t.colorSpace = THREE.SRGBColorSpace; if (rep) t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; return t; };
 
@@ -24,27 +26,24 @@ export function cieloYLuz(W) {
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
       float vn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f); return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y); }
       float fbm(vec2 p){ float v=0., a=.5; for(int i=0;i<5;i++){ v+=a*vn(p); p=p*2.03+vec2(1.7,9.2); a*=.5; } return v; }
-      void main(){ vec3 d = normalize(vP); float h = d.y; vec3 S = normalize(uSun);
-        vec3 c = h > .1 ? mix(mid, top, smoothstep(.1,.8,h)) : mix(bot, mid, smoothstep(-.06,.1,h));
-        vec2 dh = normalize(d.xz+1e-5), sh = normalize(S.xz+1e-5); float lado = .35 + .65*pow(max(dot(dh,sh)*.5+.5,0.),2.5);
-        c = mix(c, uHor, lado * exp(-max(h,0.)*7.) * smoothstep(-.12,.02,h));
-        float sa = max(dot(d,S),0.); c += vec3(1.,.75,.45) * (pow(sa,900.)*6. + pow(sa,12.)*.35);
-        c = mix(c, vec3(.13,.12,.13), smoothstep(-.01,-.09,h)); // bajo el horizonte: suelo oscuro, nunca cielo
-        if (h > 0.) { vec2 uv = d.xz/(h+.22)*.7 + uT*vec2(.006,.002); float n = fbm(uv), n2 = fbm(uv*2.3+4.);
-          float cov = smoothstep(.5,.78, n*.72+n2*.28) * smoothstep(0.,.16,h);
-          vec3 nub = mix(vec3(.55,.45,.52), vec3(1.,.78,.62), clamp(.4 + (fbm(uv - S.xz*.06)-n)*3.5 + lado*.4, 0., 1.));
-          c = mix(c, nub, cov*.85); }
+      void main(){ vec3 d = normalize(vP); float h = d.y;
+        // degradado sobrio: pizarra fría en el horizonte → tinta arriba; una línea de luz muy fina en el horizonte
+        vec3 c = h > .02 ? mix(mid, top, smoothstep(.02, .55, h)) : mix(bot, mid, smoothstep(-.04, .02, h));
+        c = mix(c, uHor, exp(-abs(h) * 22.) * .7);
+        c = mix(c, vec3(.045,.05,.058), smoothstep(-.01,-.09,h)); // bajo el horizonte: suelo oscuro, nunca cielo
+        c = pow(c, vec3(1./2.2)); // los colores de HORA se leen tal cual (sRGB)
+        c += (hash(gl_FragCoord.xy) - .5) / 255.; // tramado imperceptible: degradado sin bandas
         gl_FragColor = vec4(c, 1.); }`,
   }));
   cielo.frustumCulled = false; cielo.renderOrder = -1; W.scene.add(cielo); W.cielo = cielo; W.cieloU = U;
   W.scene.background = null;
-  W.scene.fog = new THREE.FogExp2(HORA.fog, 0.000022);
+  W.scene.fog = null; // sin bruma: la ciudad nítida hasta el horizonte
   // entorno de reflejos a partir del propio cielo (cromo, agua y vidrio reflejan el atardecer)
   const s = new THREE.Scene(); const cc = cielo.clone(); cc.scale.setScalar(0.001); s.add(cc); // dentro del alcance de la cámara cúbica
   const pm = new THREE.PMREMGenerator(W.r); W.scene.environment = pm.fromScene(s, 0.04).texture; pm.dispose();
   // luces
-  const hemi = new THREE.HemisphereLight(HORA.hemi, HORA.suelo, 1.05); W.scene.add(hemi);
-  const sol = new THREE.DirectionalLight(HORA.sol, 4.2); sol.castShadow = true;
+  const hemi = new THREE.HemisphereLight(HORA.hemi, HORA.suelo, 1.15); W.scene.add(hemi);
+  const sol = new THREE.DirectionalLight(HORA.sol, 3.4); sol.castShadow = true;
   sol.shadow.mapSize.set(4096, 4096); sol.shadow.bias = -0.0004; sol.shadow.normalBias = 1.5;
   Object.assign(sol.shadow.camera, { near: 100, far: 30000 }); W.scene.add(sol); W.scene.add(sol.target); W.sol = sol;
   W.r.shadowMap.enabled = true; W.r.shadowMap.type = THREE.PCFSoftShadowMap; W.r.toneMappingExposure = 0.95;

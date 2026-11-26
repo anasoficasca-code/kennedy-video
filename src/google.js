@@ -17,6 +17,7 @@ export function crearGoogle(W, U) {
   tiles.registerPlugin(new GoogleCloudAuthPlugin({ apiToken: GKEY, autoRefreshToken: true }));
   tiles.registerPlugin(new GLTFExtensionsPlugin({ dracoLoader: new DRACOLoader().setDecoderPath('./draco/') }));
   tiles.setCamera(W.cam); tiles.setResolutionFromRenderer(W.cam, W.r);
+  tiles.parseQueue.maxJobs = 4; // menos teselas procesadas a la vez (el plugin pone 10): carga un poco más lenta, sin tirones
   const MOVIL = innerWidth < 900 || /Android|iPhone|iPad/i.test(navigator.userAgent);
   tiles.errorTarget = MOVIL ? 40 : 40; G.meta = MOVIL ? 9 : 7;
   const frame = new THREE.Matrix4(); WGS84_ELLIPSOID.getEastNorthUpFrame(LAT0 * D2R, LNG0 * D2R, frame);
@@ -36,12 +37,24 @@ export function crearGoogle(W, U) {
       m.onBeforeCompile = (sh) => {
         Object.assign(sh.uniforms, U);
         sh.vertexShader = 'varying vec3 vWPg;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vWPg = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-        sh.fragmentShader = 'varying vec3 vWPg; uniform float uSube, uR, uFR, uGris, uLuz; uniform vec2 uOri, uFoco; uniform vec3 uFC;\n' + sh.fragmentShader.replace('#include <opaque_fragment>', `
+        sh.fragmentShader = 'varying vec3 vWPg; uniform float uSube, uR, uFR, uGris, uLuz, uScan, uScanW; uniform vec2 uOri, uFoco; uniform vec3 uFC;\n' + sh.fragmentShader.replace('#include <opaque_fragment>', `
           if (uSube < 0.999 && distance(vWPg.xz, uOri) > uSube * uR) discard; // la ciudad aparece en ola; terminada, se ve todo (cerros incluidos)
-          vec3 c = max(outgoingLight - vec3(0.025, 0.03, 0.04), 0.0) / 0.96;
+          // LOOK DE DÍA (sin atardecer): neutro, nítido, apenas desaturado y con contraste limpio
+          vec3 c = max(outgoingLight - vec3(0.006), 0.0);
           float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
-          c = max(mix(vec3(l), c, 1.14), 0.0);
-          c = pow(c, vec3(1.1)) * vec3(1.04, 0.93, 0.84) * uLuz;          // gradación de atardecer (como el simulador)
+          c = mix(vec3(l), c, 0.86);
+          c = pow(c, vec3(1.06)) * vec3(0.97, 1.0, 1.035) * uLuz * 1.12;
+          // lejanía: solo más allá de ~25 km se funde hacia el tono pizarra del horizonte (la ciudad queda nítida)
+          c = mix(c, vec3(0.024, 0.034, 0.05), smoothstep(22000.0, 62000.0, distance(vWPg, cameraPosition)));
+          // ESCANEO de la apertura: al este de uScan la ciudad es un esquema de datos (tinta + retícula); al oeste, la foto real
+          if (uScan < 5e5) {
+            float sd = vWPg.x - uScan;
+            vec2 q = vWPg.xz / 500.0, fw = fwidth(q); vec2 gq = abs(fract(q - 0.5) - 0.5) / max(fw, vec2(1e-4));
+            float ret = (1.0 - min(min(gq.x, gq.y), 1.0)) * (1.0 - smoothstep(0.04, 0.18, max(fw.x, fw.y)));
+            vec3 esq = vec3(l) * vec3(0.09, 0.11, 0.13) + vec3(0.0022, 0.0028, 0.0036) + vec3(0.62, 1.0, 0.11) * ret * 0.035;
+            c = mix(c, esq, smoothstep(-uScanW * 0.35, uScanW * 0.35, sd));
+            c += vec3(0.62, 1.0, 0.11) * (exp(-abs(sd) / (uScanW * 0.06)) * 0.9 + exp(-max(sd, 0.0) / (uScanW * 0.9)) * step(0.0, sd) * 0.05);
+          }
           float f = uFR > 0.0 ? 1.0 - smoothstep(uFR * 0.55, uFR, distance(vWPg.xz, uFoco)) : 0.0;
           float borde = smoothstep(0.0, 0.25, f) * (1.0 - smoothstep(0.25, 0.6, f));
           c = mix(c, c * 0.8 + uFC * 0.25, f * 0.45) + uFC * borde * 0.35;   // foco sutil: tinte leve + aro de luz
@@ -67,6 +80,7 @@ export function crearGoogle(W, U) {
     ed.children.forEach((m) => { if (m !== tiles.group) m.visible = !on; }); tiles.group.visible = true;
     ['arboles', 'parques', 'calles'].forEach((k) => { const o = W[k]?.grp || W[k]; if (o) o.visible = !on; });
     W.cerrosMallas?.forEach((m) => (m.visible = !on));
+    if (W.baseSuelo) W.baseSuelo.visible = !on; // sin el plano marrón de respaldo bajo la foto
     W.capas.losa.children.forEach((c) => { if (c.isMesh) c.visible = !on; });
     W.sol.castShadow = !on;
     ['pA', 'pB', 'pC', 'pD', 'pE', 'pF', 'agentes', 'flujos', 'iso', 'metro', 'vias-prin'].forEach((n) => W.capas[n]?.traverse((o) => { if (o.material) { o.material.depthTest = !on; o.renderOrder = on ? 5 : 0; } }));
@@ -95,7 +109,7 @@ export function crearGoogle(W, U) {
       const st = tiles.stats;
       G.reloj = (G.reloj || 0) + dt;
       // la foto entra en cuanto cubre la vista (no hace falta que termine de descargar el detalle)
-      if ((G.chequeo = (G.chequeo || 0) - dt) <= 0) { G.chequeo = 0.8; const c = cubre(); G.malas = c ? 0 : (G.malas || 0) + 1; if (c) usarFoto(true); } // una vez confirmada, la foto se queda (las teselas gruesas de Kennedy siguen en memoria)
+      if (!enFoto && (G.chequeo = (G.chequeo || 0) - dt) <= 0) { /* confirmada la foto ya no se lanzan rayos (eran tirones) */ G.chequeo = 0.8; const c = cubre(); G.malas = c ? 0 : (G.malas || 0) + 1; if (c) usarFoto(true); } // una vez confirmada, la foto se queda (las teselas gruesas de Kennedy siguen en memoria)
       const ind = document.getElementById('foto-estado');
       if (ind) ind.textContent = enFoto ? 'Foto real ✓' : 'Foto real: cargando ' + Math.min(99, Math.round(((G.cargadas || 0) / 60) * 100)) + ' %';
       if (tiles.errorTarget > G.meta && st.downloading === 0 && st.parsing === 0 && st.visible > 3) tiles.errorTarget = Math.max(G.meta, Math.round(tiles.errorTarget * 0.7));

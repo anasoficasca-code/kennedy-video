@@ -126,7 +126,7 @@ export async function crearMundo(canvas) {
   W.arco = { material: {} }; // (el arco de luz se reemplaza por el cielo real)
   const polvo = new THREE.BufferGeometry(); const pp = []; for (let i = 0; i < 900; i++) pp.push((Math.random() - .5) * 14000, 30 + Math.random() * 900, (Math.random() - .5) * 14000);
   polvo.setAttribute('position', new THREE.Float32BufferAttribute(pp, 3));
-  W.polvo = new THREE.Points(polvo, new THREE.PointsMaterial({ color: '#ffd9a8', size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0.45, depthWrite: false })); scene.add(W.polvo);
+  W.polvo = new THREE.Points(polvo, new THREE.PointsMaterial({ color: '#ffd9a8', size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0.45, depthWrite: false })); W.polvo.visible = false; scene.add(W.polvo); // sin polvo cálido flotando (look de día, limpio)
 
   const [lim, vias, agua, upz, lug, ctx, pot] = await Promise.all(['datos/limite.json', 'datos/vias.json', 'datos/agua.json', 'datos/upz.json', 'datos/lugares.json', 'datos/contexto.json', 'datos/pot.json'].map(j));
   W.datos = { lim, vias, agua, upz, lug, ctx, pot };
@@ -202,7 +202,8 @@ async function edificios() {
   const dv = new DataView(buf), n = dv.getUint32(4, true);
   const g = new THREE.BoxGeometry(1, 1, 1); g.translate(0, 0.5, 0);
   { const ix = Array.from(g.index.array); ix.splice(18, 6); g.setIndex(ix); g.clearGroups(); } // sin cara inferior (nunca se ve)
-  const U = { uSube: { value: 0 }, uOri: { value: new THREE.Vector2(-715, -168) }, uR: { value: 9000 }, uFoco: { value: new THREE.Vector2(-715, -168) }, uFR: { value: 0 }, uFC: { value: new THREE.Color(C.lima) }, uGris: { value: 0 }, uOp: { value: 1 } };
+  const U = { uSube: { value: 0 }, uOri: { value: new THREE.Vector2(-715, -168) }, uR: { value: 9000 }, uFoco: { value: new THREE.Vector2(-715, -168) }, uFR: { value: 0 }, uFC: { value: new THREE.Color(C.lima) }, uGris: { value: 0 }, uOp: { value: 1 },
+    uScan: { value: 1e6 }, uScanW: { value: 300 } }; // escaneo de la apertura: al este de uScan la foto se ve como esquema de datos
   const { mat, prof } = materialEdificios(U);
   // teselas de 1,2 km: cada una con su esfera envolvente → la GPU descarta lo que no está en cámara
   const T = 1200, tes = new Map();

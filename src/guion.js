@@ -16,7 +16,7 @@ export const CAPITULOS = [
   {
     n: '00', nombre: 'Kennedy', cine: true,
     base: (X) => { IN.armar(X); },
-    fin: (X, nuevo) => { IN.cortar(); if (!nuevo?.cine) IN.fin(X); },
+    fin: (X, nuevo) => { IN.cortar(); IN.finPortada(X); if (!nuevo?.cine) IN.fin(X); },
     beats: [
       { t: '[Portada] Kennedy: modelamiento dinámico y simulación.', a: (X) => IN.portada(X) },
     ],

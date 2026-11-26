@@ -243,6 +243,10 @@ function cuadro() {
   const ob = camT.o.clone();
   if (W.stop) { const k = rel.length() * 0.0009; W.cam.position.x += (Math.random() - .5) * k; W.cam.position.y += (Math.random() - .5) * k; ob.x += (Math.random() - .5) * k; }
   W.cam.lookAt(ob);
+  // cielo pegado a la cámara (fondo) y planos de recorte según la altura: desde la escala de Bogotá hasta la calle
+  if (W.cielo) W.cielo.position.copy(W.cam.position);
+  { const h = Math.max(50, W.cam.position.y), n = Math.min(1500, Math.max(5, h * 0.04)), f = Math.min(200000, Math.max(70000, h * 12));
+    if (Math.abs(W.cam.near - n) > n * 0.06 || Math.abs(W.cam.far - f) > f * 0.06) { W.cam.near = n; W.cam.far = f; W.cam.updateProjectionMatrix(); } }
   ['vias-prin', 'flujos', 'iso', 'metro', 'red-pot', 'agentes', 'pA', 'pB', 'pC', 'pD', 'pE', 'pF'].forEach((n) => { const u = uni(n); if (u?.uT) u.uT.value = t; });
   moverAgentes(dt); moverEspecies(t); moverBavaria(t); W.gfoto?.update(dt);
   W.estaciones?.forEach((g) => { g.userData.a.rotation.z = t * 0.8; g.userData.b.rotation.y = t * 1.3; });

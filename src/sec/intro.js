@@ -79,7 +79,7 @@ function precompilar(W) {
     capas.forEach((o, i) => (o.visible = antes[i])); ocultos.forEach((o) => (o.visible = false));
   } catch (e) { console.warn('precompilar intro', e); }
 }
-/** cámaras de precarga: la fotogrametría baja también el detalle de los encuadres que vienen (sin dibujarlos) */
+/** cámaras de precarga (NO se usan: con varias cámaras la fotogrametría carga y dibuja miles de teselas de más y cae a ~25 fps) */
 const precargas = [];
 export function precargarVistas(X, vistas) {
   const W = X.W, tiles = W.gfoto?.tiles; if (!tiles) return;
@@ -103,48 +103,75 @@ export function poner(X, v, d = 1.6, ease = 'power2.inOut', delay = 0) { gsap.ki
 /** anula lo pendiente de la portada (si se avanza antes de que termine) */
 export function cortar() { tok++; }
 /** al salir de la intro: todo apagado */
-export function fin(X) { if (X) soltarVistas(X); tok++; gsap.killTweensOf(S); Object.assign(S, { borde: 0, bordeOp: 1, agua: 0, arcos: 0, arcosOp: 1 }); if (G) G.grp.visible = false; }
+export function fin(X) { if (X) { soltarVistas(X); const u = X.W.capas.edif.userData.u; gsap.killTweensOf(u.uScan); u.uScan.value = 1e6; } tok++; gsap.killTweensOf(S); Object.assign(S, { borde: 0, bordeOp: 1, agua: 0, arcos: 0, arcosOp: 1 }); if (G) G.grp.visible = false; }
 
-/* ======================================================================= PORTADA (capítulo 00) */
-// sobrevuelo de apertura desde el suroccidente hacia los cerros; arranca cuando la foto real ya cubre la vista
+/* ======================================================================= PORTADA (capítulo 00) · «de dato a ciudad real» */
+// Apertura tipo título de documental: desde la escala de Bogotá (≈ 36 km de altura, vista cenital) la cámara desciende
+// en un solo movimiento continuo hasta Kennedy. Mientras baja, Kennedy se construye como dato: el límite real en lima,
+// las vías reales como líneas de luz que se trazan y los cuerpos de agua; la ciudad está en modo esquema (tinta + retícula)
+// y una línea de escaneo lima la barre de occidente a oriente revelando la fotogrametría real debajo.
+// Solo arranca cuando la foto ya cubre la vista y bajó el detalle de los encuadres del recorrido (sin borrones).
 export const PORTADA = [
-  { p: [-9800, 3900, 7600], o: [900, 0, -600] },
-  { p: [-7200, 2900, 5900], o: [900, 0, -500] },
-  { p: [-5200, 2350, 4700], o: [800, 0, -450] },
+  { p: [300, 36000, 3600], o: [0, 0, -200] },      // escala de Bogotá, casi cenital
+  { p: [250, 17000, 7600], o: [-100, 0, -300] },   // descenso
+  { p: [600, 5800, 7800], o: [-200, 0, -450] },    // Kennedy completa, en oblicuo
 ];
 const hh = (tag, cls, html) => { const e = document.createElement(tag); e.className = cls; e.innerHTML = html; return e; };
+const viasMat = (W) => W.capas.vias?.material;
+/** vías como líneas de luz (solo durante la apertura) */
+function viasLuz(W, on) {
+  const m = viasMat(W); if (!m) return;
+  if (on) { m.depthTest = false; m.blending = THREE.AdditiveBlending; m.uniforms.uC.value.set('#dbeab8'); m.uniforms.uBase.value = 0.2; W.capas.vias.renderOrder = 22; }
+  else { m.depthTest = true; m.blending = THREE.NormalBlending; m.uniforms.uC.value.set('#F5F3EB'); m.uniforms.uBase.value = 0.16; m.uniforms.uDib.value = 1; W.capas.vias.renderOrder = 0; }
+  m.needsUpdate = true;
+}
+const U = (W) => W.capas.edif.userData.u;
+/** termina el escaneo (si se avanza antes de que acabe) y deja la ciudad real */
+export function revelar(X, d = 0.9) {
+  const u = U(X.W); gsap.killTweensOf(u.uScan);
+  if (u.uScan.value > 5e5) return;
+  if (X.R.rapido || !d) { u.uScan.value = 1e6; return; }
+  gsap.to(u.uScan, { value: 40000, duration: d, ease: 'power2.in', onComplete: () => (u.uScan.value = 1e6) });
+}
 export function portada(X) {
-  const t = ++tok, ok = () => t === tok, W = X.W;
+  const t = ++tok, ok = () => t === tok, W = X.W, u = U(W);
   armar(X);
-  X.W.capas.edif.userData.u.uSube.value = 1;
-  if (X.R.rapido) { X.vuelo([PORTADA[2]], 0); S.borde = 1; S.bordeOp = 1; return; }
-  X.vuelo([PORTADA[0]], 0); S.borde = 0;
+  u.uSube.value = 1;
+  const fin = PORTADA[PORTADA.length - 1];
+  if (X.R.rapido) { X.vuelo([fin], 0); S.borde = 1; S.bordeOp = 1; u.uScan.value = 1e6; return; }
+  X.vuelo([PORTADA[0]], 0);
+  Object.assign(S, { borde: 0, bordeOp: 1, agua: 0 });
+  u.uScan.value = -60000; u.uScanW.value = 1500;          // todo en esquema
+  viasLuz(W, true); X.capa('vias', true, 0); viasMat(W).uniforms.uDib.value = 0; X.capa('vias', false, 0);
   const velo = X.ed.anexar(hh('div', 'ed-velo', '')); gsap.set(velo, { autoAlpha: 1 });
   const arrancar = () => {
     if (!ok()) return;
-    gsap.to(velo, { autoAlpha: 0, duration: 2.6, ease: 'sine.inOut', onComplete: () => velo.remove() });
-    X.vuelo([PORTADA[1], PORTADA[2]], 17, { ease: 'sine.inOut', deriva: 0.05, derivaD: 30 });
-    // mientras corre la portada se baja el detalle de los primeros encuadres de la introducción
-    gsap.delayedCall(2, () => ok() && precargarVistas(X, [
-      { p: [P.cora[0] + 1150, 1250, P.cora[1] + 1650], o: [P.cora[0], 0, P.cora[1]] },
-      { p: [P.cora[0] + 700, 1150, P.cora[1] + 1500], o: [P.cora[0] - 120, 0, P.cora[1] + 60] },
-      { p: [500, 4700, 4400], o: [-150, 0, -650] },
-    ]));
-    poner(X, { borde: 1 }, 6, 'power2.inOut', 3.4);
-    gsap.delayedCall(4.6, () => { if (ok()) titulo(X); });
+    gsap.to(velo, { autoAlpha: 0, duration: 1.8, ease: 'sine.inOut', onComplete: () => velo.remove() });
+    X.vuelo([PORTADA[1], fin], 19, { ease: 'sine.inOut', deriva: 0.06, derivaD: 30 });
+    poner(X, { borde: 1 }, 3.2, 'power2.inOut', 0.5);                                   // 1 · el límite real
+    gsap.delayedCall(1.3, () => { if (!ok()) return; X.capa('vias', true, 0.6); gsap.to(viasMat(W).uniforms.uDib, { value: 1, duration: 4.2, ease: 'power1.inOut' }); }); // 2 · las vías se trazan
+    poner(X, { agua: 0.9 }, 2.2, 'power2.out', 2.4);                                    // 3 · el agua
+    gsap.timeline({ delay: 5.0 }).fromTo(u.uScan, { value: -10000 }, { value: 12000, duration: 4.6, ease: 'power1.inOut', immediateRender: false }) // 4 · escaneo: de dato a ciudad real
+      .add(() => { u.uScan.value = 1e6; });
+    gsap.to(u.uScanW, { value: 700, duration: 6, delay: 5.2, ease: 'sine.inOut' });
+    gsap.delayedCall(9.2, () => { if (!ok()) return; X.capa('vias', false, 2.4); poner(X, { agua: 0 }, 2.4); });
+    gsap.delayedCall(10.2, () => { if (ok()) titulo(X); });
   };
-  // espera a que la fotogrametría cubra la vista y termine de bajar el detalle de este encuadre (máx. 25 s)
-  const t0 = performance.now(); let cubierta = 0;
+  // espera: foto activa + descargas quietas (máx. 22 s; si no hay foto, arranca igual sobre la ciudad modelada)
+  const t0 = performance.now(); let cubierta = 0, quietoDesde = 0;
   const esperar = () => {
     if (!ok()) return;
     const ms = performance.now() - t0, st = W.gfoto?.tiles?.stats || {};
     if (W.google && !cubierta) cubierta = ms;
     const quieto = cubierta && st.downloading === 0 && st.parsing === 0;
-    if ((cubierta && (quieto || ms - cubierta > 7000) && ms - cubierta > 900) || ms > 25000 || !W.gfoto) gsap.delayedCall(0.4, arrancar);
+    quietoDesde = quieto ? quietoDesde || ms : 0;
+    if ((cubierta && ((quietoDesde && ms - quietoDesde > 600) || ms - cubierta > 12000)) || ms > 22000 || !W.gfoto) gsap.delayedCall(0.2, arrancar);
     else setTimeout(esperar, 150);
   };
   esperar();
 }
+/** al salir de la portada: vías normales y ciudad real */
+export function finPortada(X) { const u = U(X.W); gsap.killTweensOf(u.uScan); gsap.killTweensOf(u.uScanW); gsap.killTweensOf(viasMat(X.W)?.uniforms.uDib); viasLuz(X.W, false); }
 function titulo(X) {
   const e = X.ed.anexar(hh('div', 'ed-portada', `<div class="l1">${X.ed.palabras('Kennedy')}</div><i class="linea"></i><div class="l2">${X.ed.palabras('modelamiento *dinámico* y simulación')}</div>`));
   const tl = gsap.timeline(); tl.set(e, { autoAlpha: 1 });

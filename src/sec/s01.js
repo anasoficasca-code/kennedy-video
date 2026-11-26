@@ -66,7 +66,7 @@ const L = {
 };
 /** puntos reales de los problemas (conectografía) que aparecen suaves */
 function puntos(X, ks, on = true, d = 2.2, paso = 0.25) {
-  ks.forEach((k, i) => { const u = X.W.capas[k]?.userData.u; if (!u) return; if (on && X.W.capas[k].visible && u.uAp.value > 0.99) return; if (on) { u.uS.value = (k === 'pF' ? 90 : k === 'pB' ? 10 : 22) * 2.2; X.capa(k, true, 0.4); if (X.R.rapido) u.uAp.value = 1; else X.gsap.fromTo(u.uAp, { value: 0 }, { value: 1, duration: d, ease: 'power2.out', delay: i * paso }); } else X.capa(k, false, 1.2); });
+  ks.forEach((k, i) => { const u = X.W.capas[k]?.userData.u; if (!u) return; if (on && X.W.capas[k].visible && u.uAp.value > 0.99) return; if (on) { u.uS.value = (k === 'pF' ? 90 : k === 'pB' ? 10 : 22) * 1.2; X.capa(k, true, 0.4); if (X.R.rapido) u.uAp.value = 1; else X.gsap.fromTo(u.uAp, { value: 0 }, { value: 1, duration: d, ease: 'power2.out', delay: i * paso }); } else X.capa(k, false, 1.2); });
 }
 /** precarga y decodifica las capturas del montaje (que no haya espera a mitad de frase) */
 let precargadas = false;
@@ -86,7 +86,7 @@ const CAM = {
 export default /* ===================================================================== 01 INTRODUCCIÓN */
   {
     n: '01', nombre: 'Introducción', cine: true, continuo: true, precarga: ['humedalburro'],
-    base: (X) => { IN.armar(X); IN.poner(X, { borde: 1 }, 1.5); precargarImgs(); },
+    base: (X) => { IN.armar(X); IN.revelar(X); IN.poner(X, { borde: 1 }, 1.5); IN.poner(X, { agua: 0 }, 1.2); precargarImgs(); },
     fin: (X, nuevo) => { if (!nuevo?.cine) IN.fin(X); },
     beats: conGuardia([
       // Corabastos: la cámara baja desde la portada; los flujos de carga reales convergen en la central
